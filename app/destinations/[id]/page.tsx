@@ -2,6 +2,8 @@ import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import BookingForm from "@/components/BookingForm";
+import { getSession } from "@/lib/session";
 
 // Generate static params (fetch IDs from DB)
 export async function generateStaticParams() {
@@ -29,11 +31,38 @@ export default async function DestinationDetail({
     notFound();
   }
 
+  const session = await getSession();
+
   // Parse JSON fields
-  const images = JSON.parse(destination.images as string);
-  const highlights = JSON.parse((destination.highlights as string) || "[]");
-  const itinerary = JSON.parse((destination.itinerary as string) || "[]");
-  const facilities = JSON.parse((destination.facilities as string) || "[]");
+  let images: string[] = [];
+  try {
+    images =
+      typeof destination.images === "string"
+        ? JSON.parse(destination.images)
+        : [];
+  } catch (e) {
+    images = [];
+  }
+
+  let highlights: any[] = [];
+  try {
+    highlights =
+      typeof destination.highlights === "string"
+        ? JSON.parse(destination.highlights)
+        : [];
+  } catch (e) {
+    highlights = [];
+  }
+
+  let itinerary: any[] = [];
+  try {
+    itinerary =
+      typeof destination.itinerary === "string"
+        ? JSON.parse(destination.itinerary)
+        : [];
+  } catch (e) {
+    itinerary = [];
+  }
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-text-main dark:text-white transition-colors duration-200 min-h-screen flex flex-col">
@@ -68,12 +97,21 @@ export default async function DestinationDetail({
               Contact
             </Link>
           </div>
-          <Link
-            href="/login"
-            className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-6 bg-primary hover:bg-emerald-600 transition-colors text-white text-sm font-bold shadow-sm shadow-primary/20"
-          >
-            Login
-          </Link>
+          {session ? (
+            <Link
+              href="/bookings"
+              className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-6 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors text-sm font-bold"
+            >
+              My Bookings
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-6 bg-primary hover:bg-emerald-600 transition-colors text-white text-sm font-bold shadow-sm shadow-primary/20"
+            >
+              Login
+            </Link>
+          )}
         </div>
       </header>
 
@@ -96,7 +134,7 @@ export default async function DestinationDetail({
           <div className="relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl group">
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
             <img
-              src={images[0]}
+              src={images[0] || ""}
               alt={destination.name}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
@@ -213,101 +251,13 @@ export default async function DestinationDetail({
               </div>
             </div>
 
-            {/* Right Column: Sticky Booking Card */}
+            {/* Right Column: Sticky Booking Card - Using Client Component */}
             <div className="lg:col-span-1">
-              <div className="sticky top-24 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col gap-6">
-                <div className="flex items-end justify-between border-b border-gray-100 dark:border-gray-700 pb-4">
-                  <div>
-                    <p className="text-sm text-gray-500 font-medium">
-                      Starting from
-                    </p>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-black text-primary">
-                        IDR {destination.price.toLocaleString("id-ID")}
-                      </span>
-                      <span className="text-sm text-gray-500">/ pax</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center text-primary text-sm font-bold bg-primary/10 px-2 py-1 rounded">
-                    <span className="material-symbols-outlined text-sm mr-1">
-                      bolt
-                    </span>{" "}
-                    Instant
-                  </div>
-                </div>
-
-                {/* Booking Form Simulation */}
-                <div className="flex flex-col gap-4">
-                  {/* Date Picker Mock */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-bold">Select Date</label>
-                    <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span className="material-symbols-outlined text-gray-400">
-                          calendar_month
-                        </span>
-                      </div>
-                      <input
-                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-text-main dark:text-white font-medium focus:ring-2 focus:ring-primary outline-none cursor-pointer"
-                        type="date"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Pax Counter */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-bold">Travelers</label>
-                    <div className="flex items-center justify-between p-1 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
-                      <button className="w-10 h-10 flex items-center justify-center rounded-md bg-white dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:text-primary shadow-sm">
-                        <span className="material-symbols-outlined text-sm">
-                          remove
-                        </span>
-                      </button>
-                      <span className="text-base font-bold">2 Pax</span>
-                      <button className="w-10 h-10 flex items-center justify-center rounded-md bg-white dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:text-primary shadow-sm">
-                        <span className="material-symbols-outlined text-sm">
-                          add
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Pricing Breakdown */}
-                <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl flex flex-col gap-2">
-                  <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                    <span>{`IDR ${destination.price.toLocaleString("id-ID")} x 2`}</span>
-                    <span>
-                      IDR {(destination.price * 2).toLocaleString("id-ID")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                    <span>Service Fee</span>
-                    <span className="text-primary font-medium">Free</span>
-                  </div>
-                  <div className="h-px bg-gray-200 dark:bg-gray-600 my-1"></div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold">Total Price</span>
-                    <span className="text-xl font-black text-primary">
-                      IDR {(destination.price * 2).toLocaleString("id-ID")}
-                    </span>
-                  </div>
-                </div>
-
-                {/* CTA Button */}
-                <Link
-                  href="/booking/payment"
-                  className="w-full py-4 rounded-xl bg-primary hover:bg-emerald-600 text-white font-bold text-lg shadow-lg shadow-primary/25 flex items-center justify-center gap-2 transition-transform transform active:scale-95"
-                >
-                  <span>Book Trip Now</span>
-                  <span className="material-symbols-outlined">
-                    arrow_forward
-                  </span>
-                </Link>
-                <p className="text-center text-xs text-gray-400">
-                  Free cancellation up to 24 hours before trip
-                </p>
-              </div>
+              <BookingForm
+                destinationId={destination.id}
+                pricePerPax={destination.price}
+                userId={session?.userId}
+              />
             </div>
           </div>
         </div>

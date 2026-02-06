@@ -1,12 +1,19 @@
+"use client";
+
 import Link from "next/link";
+import { useFormState } from "react-dom";
+import { signup } from "@/actions/auth";
 
 export default function SignupPage() {
+  const [state, action] = useFormState(signup, undefined);
+
   return (
     <div className="flex min-h-screen w-full flex-row">
       {/* Left Side: Form Section */}
       <div className="flex w-full lg:w-1/2 xl:w-[45%] flex-col px-6 py-8 sm:px-12 lg:px-16 xl:px-24 overflow-y-auto justify-center bg-background-light dark:bg-background-dark text-text-main dark:text-white">
         {/* Header / Logo */}
         <div className="flex items-center gap-3 mb-12">
+          {/* ... Logo SVG ... */}
           <div className="size-10 text-primary bg-surface-dark rounded-xl flex items-center justify-center">
             <svg
               className="w-6 h-6 text-primary"
@@ -43,7 +50,7 @@ export default function SignupPage() {
         </div>
 
         {/* Form */}
-        <form className="flex flex-col gap-5">
+        <form action={action} className="flex flex-col gap-5">
           {/* Full Name */}
           <div className="flex flex-col gap-2">
             <label
@@ -61,10 +68,14 @@ export default function SignupPage() {
               <input
                 className="w-full h-12 pl-14 pr-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-text-main dark:text-white placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base"
                 id="fullname"
+                name="name"
                 placeholder="Enter your full name"
                 type="text"
               />
             </div>
+            {state?.errors?.name && (
+              <p className="text-red-500 text-xs">{state.errors.name}</p>
+            )}
           </div>
 
           {/* Email */}
@@ -84,13 +95,17 @@ export default function SignupPage() {
               <input
                 className="w-full h-12 pl-14 pr-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-text-main dark:text-white placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base"
                 id="email"
+                name="email"
                 placeholder="name@example.com"
                 type="email"
               />
             </div>
+            {state?.errors?.email && (
+              <p className="text-red-500 text-xs">{state.errors.email}</p>
+            )}
           </div>
 
-          {/* Phone */}
+          {/* Phone (Optional for now in backend) */}
           <div className="flex flex-col gap-2">
             <label
               className="text-text-main dark:text-gray-200 text-sm font-semibold"
@@ -107,6 +122,7 @@ export default function SignupPage() {
               <input
                 className="w-full h-12 pl-14 pr-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-text-main dark:text-white placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base"
                 id="phone"
+                name="phone"
                 placeholder="+62 812 3456 7890"
                 type="tel"
               />
@@ -132,6 +148,7 @@ export default function SignupPage() {
                 <input
                   className="w-full h-12 pl-14 pr-10 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-text-main dark:text-white placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base"
                   id="password"
+                  name="password"
                   placeholder="••••••••"
                   type="password"
                 />
@@ -144,8 +161,11 @@ export default function SignupPage() {
                   </span>
                 </button>
               </div>
+              {state?.errors?.password && (
+                <p className="text-red-500 text-xs">{state.errors.password}</p>
+              )}
             </div>
-            {/* Confirm Password */}
+            {/* Confirm Password (UI only for now or strict validation later) */}
             <div className="flex flex-col gap-2">
               <label
                 className="text-text-main dark:text-gray-200 text-sm font-semibold"
@@ -206,18 +226,18 @@ export default function SignupPage() {
           {/* Submit Button */}
           <button
             className="mt-4 flex w-full items-center justify-center rounded-xl bg-primary h-12 px-6 text-sm font-bold leading-normal text-[#111814] tracking-wider uppercase shadow-sm hover:bg-primary-hover transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-background-dark"
-            type="button"
+            type="submit"
           >
             Create Account
           </button>
 
           {/* Divider */}
           <div className="relative flex items-center py-2">
-            <div className="flex-grow border-t border-border-light dark:border-border-dark"></div>
-            <span className="flex-shrink-0 mx-4 text-xs font-semibold text-text-muted uppercase tracking-wider">
+            <div className="grow border-t border-border-light dark:border-border-dark"></div>
+            <span className="shrink-0 mx-4 text-xs font-semibold text-text-muted uppercase tracking-wider">
               Or continue with
             </span>
-            <div className="flex-grow border-t border-border-light dark:border-border-dark"></div>
+            <div className="grow border-t border-border-light dark:border-border-dark"></div>
           </div>
 
           {/* Social Button */}

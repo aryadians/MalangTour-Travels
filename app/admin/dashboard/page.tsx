@@ -1,33 +1,59 @@
 import React from "react";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  // Fetch real data
+  const totalRevenue = await prisma.booking.aggregate({
+    _sum: { totalPrice: true },
+    where: { status: "CONFIRMED" },
+  });
+
+  const activeBookingsCount = await prisma.booking.count({
+    where: { status: { in: ["PENDING", "CONFIRMED"] } },
+  });
+
+  const newUsersCount = await prisma.user.count();
+
+  // Get recent bookings
+  const recentBookings = await prisma.booking.findMany({
+    take: 5,
+    orderBy: { createdAt: "desc" },
+    include: {
+      user: true,
+      destination: true,
+    },
+  });
+
   const stats = [
     {
       title: "Total Revenue",
-      value: "Rp 125.5M",
-      change: "+12.5%",
+      value: `Rp ${(totalRevenue._sum.totalPrice || 0).toLocaleString("id-ID")}`,
+      change: "+Today", // Dynamic diff would require more queries
       icon: "payments",
       color: "bg-emerald-500",
     },
     {
       title: "Active Bookings",
-      value: "84",
-      change: "+5.2%",
+      value: activeBookingsCount.toString(),
+      change: "Active",
       icon: "book_online",
       color: "bg-blue-500",
     },
     {
-      title: "New Users",
-      value: "1,240",
-      change: "+18.2%",
-      icon: "group_add",
+      title: "Total Users",
+      value: newUsersCount.toString(),
+      change: "All time",
+      icon: "group",
       color: "bg-purple-500",
     },
     {
-      title: "Pending Reviews",
-      value: "12",
-      change: "-2.5%",
-      icon: "reviews",
+      title: "Pending Status",
+      value: (
+        await prisma.booking.count({ where: { status: "PENDING" } })
+      ).toString(),
+      change: "Action needed",
+      icon: "pending_actions",
       color: "bg-orange-500",
     },
   ];
@@ -38,11 +64,6 @@ export default function AdminDashboard() {
         <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
           Dashboard Overview
         </h2>
-        <div className="flex gap-2">
-          <button className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 shadow-sm">
-            Export Report
-          </button>
-        </div>
       </div>
 
       {/* Stats Grid */}
@@ -57,7 +78,10 @@ export default function AdminDashboard() {
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                   {stat.title}
                 </p>
-                <h3 className="text-2xl font-black text-gray-800 dark:text-white">
+                <h3
+                  className="text-lg font-black text-gray-800 dark:text-white truncate max-w-[150px]"
+                  title={stat.value}
+                >
                   {stat.value}
                 </h3>
               </div>
@@ -68,116 +92,69 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="mt-4 flex items-center text-sm">
-              <span
-                className={`font-bold ${stat.change.startsWith("+") ? "text-emerald-500" : "text-red-500"}`}
-              >
-                {stat.change}
-              </span>
-              <span className="text-gray-400 ml-2">from last month</span>
+              <span className="font-bold text-emerald-500">{stat.change}</span>
             </div>
           </div>
         ))}
       </div>
 
       {/* Main Charts Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-96">
-        {/* Revenue Chart (Mock) */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-          <h3 className="font-bold text-gray-800 dark:text-white mb-6">
-            Revenue Analytics
-          </h3>
-          <div className="h-64 flex items-end justify-between gap-2 px-4">
-            {[40, 65, 45, 80, 55, 90, 75, 85, 60, 95, 80, 100].map((h, i) => (
-              <div
-                key={i}
-                className="w-full bg-emerald-100 dark:bg-emerald-900/30 rounded-t-lg relative group"
-              >
-                <div
-                  style={{ height: `${h}%` }}
-                  className="bg-emerald-500 absolute bottom-0 w-full rounded-t-lg group-hover:bg-emerald-400 transition-colors"
-                ></div>
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between mt-4 text-xs text-gray-400 font-medium">
-            <span>Jan</span>
-            <span>Fab</span>
-            <span>Mar</span>
-            <span>Apr</span>
-            <span>May</span>
-            <span>Jun</span>
-            <span>Jul</span>
-            <span>Aug</span>
-            <span>Sep</span>
-            <span>Oct</span>
-            <span>Nov</span>
-            <span>Dec</span>
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-          <h3 className="font-bold text-gray-800 dark:text-white mb-6">
-            Recent Bookings
-          </h3>
+        <div className="lg:col-span-3 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="font-bold text-gray-800 dark:text-white">
+              Recent Bookings
+            </h3>
+            <Link
+              href="/admin/bookings"
+              className="text-sm text-emerald-500 font-bold hover:underline"
+            >
+              View All
+            </Link>
+          </div>
+
           <div className="space-y-4">
-            {[
-              {
-                user: "Sarah J.",
-                dest: "Bromo Sunrise",
-                time: "2m ago",
-                status: "New",
-              },
-              {
-                user: "Budi Santoso",
-                dest: "Tumpak Sewu",
-                time: "15m ago",
-                status: "Confirmed",
-              },
-              {
-                user: "Michael Chen",
-                dest: "Ijen Crater",
-                time: "1h ago",
-                status: "Pending",
-              },
-              {
-                user: "Jessica W.",
-                dest: "Malang City",
-                time: "3h ago",
-                status: "Confirmed",
-              },
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-500">
-                    {item.user.charAt(0)}
+            {recentBookings.length === 0 ? (
+              <p className="text-gray-500 text-sm">No bookings yet.</p>
+            ) : (
+              recentBookings.map((booking) => (
+                <div
+                  key={booking.id}
+                  className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-500 uppercase">
+                      {booking.user?.name?.charAt(0) || "U"}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-800 dark:text-white">
+                        {booking.user?.name || "Unknown User"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {booking.destination.name}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-gray-800 dark:text-white">
-                      {item.user}
+                  <div className="text-right">
+                    <span
+                      className={`text-[10px] font-bold px-2 py-1 rounded-full ${
+                        booking.status === "PENDING"
+                          ? "bg-blue-100 text-blue-600"
+                          : booking.status === "CONFIRMED"
+                            ? "bg-emerald-100 text-emerald-600"
+                            : "bg-red-100 text-red-600"
+                      }`}
+                    >
+                      {booking.status}
+                    </span>
+                    <p className="text-[10px] text-gray-400 mt-1">
+                      {new Date(booking.createdAt).toLocaleDateString()}
                     </p>
-                    <p className="text-xs text-gray-500">{item.dest}</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span
-                    className={`text-[10px] font-bold px-2 py-1 rounded-full ${
-                      item.status === "New"
-                        ? "bg-blue-100 text-blue-600"
-                        : item.status === "Confirmed"
-                          ? "bg-emerald-100 text-emerald-600"
-                          : "bg-orange-100 text-orange-600"
-                    }`}
-                  >
-                    {item.status}
-                  </span>
-                  <p className="text-[10px] text-gray-400 mt-1">{item.time}</p>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

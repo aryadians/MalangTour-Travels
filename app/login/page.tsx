@@ -1,6 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { useFormState } from "react-dom";
+import { login } from "@/actions/auth";
 
 export default function LoginPage() {
+  const [state, action] = useFormState(login, undefined);
+
   return (
     <div className="flex min-h-screen w-full">
       {/* Left Side: Image Section */}
@@ -53,7 +59,7 @@ export default function LoginPage() {
           </div>
 
           {/* Form */}
-          <form className="space-y-6">
+          <form action={action} className="space-y-6">
             {/* Email Field */}
             <div className="space-y-2">
               <label
@@ -66,6 +72,7 @@ export default function LoginPage() {
                 <input
                   className="form-input block w-full rounded-xl border-gray-300 dark:border-border-dark bg-white dark:bg-surface-dark text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-text-muted focus:border-primary focus:ring-primary h-14 pl-12 sm:text-sm"
                   id="email"
+                  name="email"
                   placeholder="name@example.com"
                   type="email"
                 />
@@ -75,6 +82,9 @@ export default function LoginPage() {
                   </span>
                 </div>
               </div>
+              {state?.errors?.email && (
+                <p className="text-red-500 text-xs">{state.errors.email}</p>
+              )}
             </div>
 
             {/* Password Field */}
@@ -89,6 +99,7 @@ export default function LoginPage() {
                 <input
                   className="form-input block w-full rounded-xl border-gray-300 dark:border-border-dark bg-white dark:bg-surface-dark text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-text-muted focus:border-primary focus:ring-primary h-14 pl-12 pr-10 sm:text-sm"
                   id="password"
+                  name="password"
                   placeholder="••••••••"
                   type="password"
                 />
@@ -106,6 +117,14 @@ export default function LoginPage() {
                   </span>
                 </button>
               </div>
+              {state?.errors?.password && (
+                <p className="text-red-500 text-xs">{state.errors.password}</p>
+              )}
+              {state?.message && (
+                <p className="text-red-500 text-xs text-center">
+                  {state.message}
+                </p>
+              )}
             </div>
 
             {/* Remember Me & Forgot Password */}
@@ -127,7 +146,7 @@ export default function LoginPage() {
               <div className="text-sm">
                 <Link
                   className="font-medium text-primary hover:text-green-400 transition-colors"
-                  href="#"
+                  href="/forgot-password"
                 >
                   Forgot password?
                 </Link>
@@ -137,7 +156,7 @@ export default function LoginPage() {
             {/* Sign In Button */}
             <button
               className="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-background-dark bg-primary hover:bg-green-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 transform hover:-translate-y-0.5 shadow-lg shadow-primary/25"
-              type="button"
+              type="submit"
             >
               Sign In
             </button>

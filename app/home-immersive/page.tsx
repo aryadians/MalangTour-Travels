@@ -2,9 +2,12 @@ import HeroVideo from "@/components/HeroVideo";
 import PopularDestinations from "@/components/PopularDestinations";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
+import { logout } from "@/actions/auth";
 
 export default async function HomeImmersive() {
   const destinations = await prisma.destination.findMany();
+  const user = await getSession();
 
   return (
     <main className="bg-background-dark min-h-screen">
@@ -33,9 +36,30 @@ export default async function HomeImmersive() {
             Luxury
           </Link>
         </div>
-        <button className="hidden md:block">
-          <span className="material-symbols-outlined text-3xl">menu_open</span>
-        </button>
+        <div className="flex items-center gap-4">
+          {user ? (
+            <div className="hidden md:flex items-center gap-3">
+              <span className="font-bold">{user.name}</span>
+              <form action={logout}>
+                <button className="text-sm font-bold border border-white/30 px-4 py-2 rounded-full hover:bg-white/10 transition-colors">
+                  LOGOUT
+                </button>
+              </form>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="hidden md:block text-sm font-bold border border-white/30 px-4 py-2 rounded-full hover:bg-white/10 transition-colors"
+            >
+              LOGIN
+            </Link>
+          )}
+          <button className="md:hidden">
+            <span className="material-symbols-outlined text-3xl">
+              menu_open
+            </span>
+          </button>
+        </div>
       </nav>
 
       <HeroVideo />
@@ -48,7 +72,7 @@ export default async function HomeImmersive() {
           <h2 className="text-3xl md:text-5xl font-serif text-text-main dark:text-white mb-4">
             Cinematic Destinations
           </h2>
-          <div className="w-20 h-1 bg-gradient-to-r from-emerald-400 to-sky-400 mx-auto rounded-full"></div>
+          <div className="w-20 h-1 bg-linear-to-r from-emerald-400 to-sky-400 mx-auto rounded-full"></div>
         </div>
         <PopularDestinations destinations={destinations} />
       </div>
