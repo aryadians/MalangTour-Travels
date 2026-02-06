@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { destinations } from "@/data/destinations";
 import DestinationCard from "@/components/DestinationCard";
+import { prisma } from "@/lib/prisma";
 
-export default function HomeAdventure() {
+export default async function HomeAdventure() {
+  const destinations = await prisma.destination.findMany();
   const mountainDestinations = destinations.filter(
     (d) => d.category === "Gunung" || d.category === "Pantai",
   );

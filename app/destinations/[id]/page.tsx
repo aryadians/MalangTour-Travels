@@ -1,25 +1,39 @@
 import React from "react";
 import Link from "next/link";
-import { destinations } from "@/data/destinations";
 import { notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 
-// Generate static params for all destinations (optional but good for performance)
-export function generateStaticParams() {
+// Generate static params (fetch IDs from DB)
+export async function generateStaticParams() {
+  const destinations = await prisma.destination.findMany({
+    select: { id: true },
+  });
   return destinations.map((dest) => ({
     id: dest.id.toString(),
   }));
 }
 
-export default function DestinationDetail({
+export default async function DestinationDetail({
   params,
 }: {
   params: { id: string };
 }) {
-  const destination = destinations.find((d) => d.id.toString() === params.id);
+  const id = parseInt(params.id);
+  if (isNaN(id)) notFound();
+
+  const destination = await prisma.destination.findUnique({
+    where: { id },
+  });
 
   if (!destination) {
     notFound();
   }
+
+  // Parse JSON fields
+  const images = JSON.parse(destination.images as string);
+  const highlights = JSON.parse((destination.highlights as string) || "[]");
+  const itinerary = JSON.parse((destination.itinerary as string) || "[]");
+  const facilities = JSON.parse((destination.facilities as string) || "[]");
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-text-main dark:text-white transition-colors duration-200 min-h-screen flex flex-col">
@@ -82,7 +96,7 @@ export default function DestinationDetail({
           <div className="relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl group">
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
             <img
-              src={destination.images[0]}
+              src={images[0]}
               alt={destination.name}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
@@ -136,7 +150,7 @@ export default function DestinationDetail({
                 </p>
                 {/* Highlights Icons */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                  {destination.highlights.map((highlight, idx) => (
+                  {highlights.map((highlight: any, idx: number) => (
                     <div
                       key={idx}
                       className="flex flex-col gap-2 p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow"
@@ -163,7 +177,7 @@ export default function DestinationDetail({
                   Itinerary Highlight
                 </h3>
                 <div className="relative pl-4 space-y-8 before:absolute before:inset-0 before:ml-4 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-primary before:via-gray-200 before:to-gray-200 before:rounded-full">
-                  {destination.itinerary.map((item, idx) => (
+                  {itinerary.map((item: any, idx: number) => (
                     <div key={idx} className="relative flex items-start group">
                       <div className="absolute left-0 -ml-1.5 h-3 w-3 rounded-full border-2 border-white dark:border-background-dark bg-primary shadow"></div>
                       <div className="pl-8 w-full">
@@ -182,7 +196,7 @@ export default function DestinationDetail({
 
               {/* Image Gallery */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 h-48 md:h-64">
-                {destination.images.map((src, idx) => (
+                {images.map((src: string, idx: number) => (
                   <div
                     key={idx}
                     className={`rounded-xl overflow-hidden relative h-full bg-gray-100 dark:bg-gray-800 ${

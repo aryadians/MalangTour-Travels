@@ -1,8 +1,11 @@
 import HeroVideo from "@/components/HeroVideo";
 import PopularDestinations from "@/components/PopularDestinations";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
-export default function HomeImmersive() {
+export default async function HomeImmersive() {
+  const destinations = await prisma.destination.findMany();
+
   return (
     <main className="bg-background-dark min-h-screen">
       {/* Transparent Floating Navigate (Simplified for Immersive view) */}
@@ -47,7 +50,7 @@ export default function HomeImmersive() {
           </h2>
           <div className="w-20 h-1 bg-gradient-to-r from-emerald-400 to-sky-400 mx-auto rounded-full"></div>
         </div>
-        <PopularDestinations />
+        <PopularDestinations destinations={destinations} />
       </div>
     </main>
   );
