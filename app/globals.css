@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #10b77f;
-  --color-background-light: #f6f8f7;
+  --color-primary: #10b981; /* Emerald Green */
+  --color-secondary: #0ea5e9; /* Sky Blue */
+  --color-accent: #f59e0b; /* Golden Orange */
+  --color-background-light: #f9fafb; /* Very Light Gray */
   --color-background-dark: #10221c;
   --color-text-main: #111816;
   --color-text-muted: #61897c;
@@ -21,12 +23,24 @@
   --animate-scale-in: scale-in 0.4s ease-out forwards;
 
   @keyframes fade-in-up {
-    0% { opacity: 0; transform: translateY(10px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   @keyframes scale-in {
-    0% { transform: scale(0.8); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
 }
 

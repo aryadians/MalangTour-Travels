@@ -4,52 +4,99 @@ import DestinationCard from "./DestinationCard";
 const destinations = [
   {
     id: 1,
+    name: "Pantai Balekambang",
+    category: "Pantai",
+    location: "Bantur, Kab. Malang",
+    price: 50000,
+    rating: 4.8,
+    description:
+      "Tanah Lot-nya Malang. Memiliki Pura di atas pulau karang yang terhubung jembatan panjang. Sunset di sini sangat ikonik.",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCL8WFCFnCE04dyLtJe4zJ1FBPMarxb_UQYc2W4GEjvU9YS2KBi-E2QreXFxEQTOYWVMwSK09okNE9CPpNwK0IuqQK8hMQT7ap5ueYOmjpmkyFr7PowQIovczDgdztE23RuQUmDGPVtD22q3rsXR9HeHYjh28UZjBEyqQrCBrr6KHjjzQ9Cnb2ho_H74Cfcpa-9p7h1lvJyURS5yV0b6iUNIcikEBMUNnhlqFKNtEiH8M5yw3qIIVCxw6pHw8nWOGDHrlz-8HzNOg",
-    imageAlt: "Jeep driving on the sand sea of Mount Bromo",
-    price: "IDR 350k",
-    category: "Mountain",
-    title: "Mount Bromo",
-    location: "Probolinggo/Malang",
-    rating: 4.9,
-    label: "1 Day Trip",
+      "https://images.unsplash.com/photo-1602154663343-89fe0bf541ab?auto=format&fit=crop&q=80&w=800",
   },
   {
     id: 2,
+    name: "Gunung Bromo",
+    category: "Gunung",
+    location: "Taman Nasional BTS",
+    price: 350000,
+    rating: 5.0,
+    description:
+      "Saksikan matahari terbit terbaik di Jawa. Paket tour Jeep 4x4 menuju Penanjakan dan Kawah Bromo.",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCWIYG3iRxEwDqOuwFbjTL6x9S99K6XNsSqshrsrvtMZZzAhbH3RTvW_zyr8J7aE3M2wAKwfNLQI3bdzp-salVF7gCO3mJc2lh7BD4sYRgmTsvazZKoQkGlqOoZ9hL94xPLdz0VB4PdXwiHio5OqTLxTLzje6LUjLmI2uvSdgzt0mTjs-1jkS98YkE_XNN6mXm48jl7OBDRvPOROUoJpCtCWVVioLU3kbNIVcq6uMjsbsMEOhsvczb05cjIpnXvnJ3UI1o7SujrjQ",
-    imageAlt: "Temple on a rock formation in the ocean at Balekambang beach",
-    price: "IDR 50k",
-    category: "Beach",
-    title: "Balekambang Beach",
-    location: "Bantur, Malang",
-    rating: 4.7,
-    label: "Entry Ticket",
+      "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&q=80&w=800",
   },
   {
     id: 3,
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBL2lBFJU32MSHd452j18IrCtPwW8U54Zvy-yF1oW1yypBBIpcV5_l9TSE4c9um9awzla0AB2hko2luiCb-254i3VcSxxWfBwxnDNNXOFrQzljg6aqox7oDj_OrS-xMFyWULprr9KPeVylbfMIrTeKCftXkUGyj7RPR2bPDco_KbuGzZLnquKbL1laLXVz6Bf5687h5rtKzr2KUh2yy-eNz-U7qKcmwlOrpeAG3PryUl4iIsqMbHN8FEz3OdE1ADRWsAjuMMD3NNA",
-    imageAlt: "Colorful houses in Jodipan village Malang",
-    price: "IDR 15k",
-    category: "City",
-    title: "Kampung Warna Warni",
-    location: "Jodipan, Malang City",
+    name: "Kampung Warna Warni Jodipan",
+    category: "Kota",
+    location: "Kota Malang",
+    price: 15000,
     rating: 4.5,
-    label: "Walking Tour",
+    description:
+      "Desa wisata penuh warna di bantaran sungai Brantas. Spot foto instagramable di tengah kota.",
+    image:
+      "https://images.unsplash.com/photo-1596401057633-56565377f06d?auto=format&fit=crop&q=80&w=800",
   },
   {
     id: 4,
+    name: "Teluk Asmara",
+    category: "Pantai",
+    location: "Sumbermanjing Wetan",
+    price: 25000,
+    rating: 4.7,
+    description:
+      "Sering disebut sebagai Raja Ampat-nya Malang. Gugusan pulau karang kecil yang indah dengan ombak tenang.",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDvHJBBraWoVxbbZqPu9SFj1eDgR_R14vAbcDJuklSzF9RRz1sy4L_ZfAF4fUhnmuslvG0KnoGbJsMm742RMK_6r63z3c6DD-hIAjDmmI2V-lBlvvXl0ky4ft4W4I9-Nc82TbvaAtSuwVmEIqoi8As-Yu-sQwyIvhnvVU3NvojYjRds-xAOVlfKwaTW2ORznwySfA-ImPmXaKGxh_aTO2d3mm9MH7Pg97q8n86Tqy2UPRXRduq04rSYXaOHvxpc79W96jgnMBvRXw",
-    imageAlt:
-      "Aerial view of small islands in blue water, similar to Raja Ampat but in Malang",
-    price: "IDR 25k",
-    category: "Beach",
-    title: "Teluk Asmara",
-    location: "Southern Malang",
-    rating: 4.8,
-    label: "Entry Ticket",
+      "https://images.unsplash.com/photo-1510662145379-13537db782dc?auto=format&fit=crop&q=80&w=800",
+  },
+  {
+    id: 5,
+    name: "Kayutangan Heritage",
+    category: "Kota",
+    location: "Jl. Basuki Rahmat, Kota Malang",
+    price: 0,
+    rating: 4.6,
+    description:
+      "Kawasan kota tua dengan nuansa vintage 1930-an. Nikmati kopi lokal dan suasana malam yang syahdu.",
+    image:
+      "https://images.unsplash.com/photo-1533158674514-6330554c0e64?auto=format&fit=crop&q=80&w=800",
+  },
+  {
+    id: 6,
+    name: "Air Terjun Coban Rondo",
+    category: "Gunung",
+    location: "Pujon, Malang",
+    price: 40000,
+    rating: 4.6,
+    description:
+      "Air terjun legendaris dengan wahana Taman Labirin yang seru. Udara sejuk dan asri.",
+    image:
+      "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&q=80&w=800",
+  },
+  {
+    id: 7,
+    name: "Malang Night Paradise",
+    category: "Kota",
+    location: "Singosari, Malang",
+    price: 85000,
+    rating: 4.5,
+    description:
+      "Wisata malam dengan lampion cantik dan wahana air Magic Journey seperti di Venesia.",
+    image:
+      "https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?auto=format&fit=crop&q=80&w=800",
+  },
+  {
+    id: 8,
+    name: "Pantai Tiga Warna",
+    category: "Pantai",
+    location: "Clungup Mangrove Conservation",
+    price: 100000,
+    rating: 4.9,
+    description:
+      "Kawasan konservasi dengan gradasi air laut 3 warna. Wajib reservasi, cocok untuk snorkeling.",
+    image:
+      "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?auto=format&fit=crop&q=80&w=800",
   },
 ];
 

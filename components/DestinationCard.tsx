@@ -1,79 +1,83 @@
-import React from "react";
+import Link from "next/link";
 
 interface DestinationCardProps {
+  id: number;
   image: string;
-  imageAlt: string;
-  price: string;
+  name: string;
+  price: number;
   category: string;
-  title: string;
   location: string;
   rating: number;
-  label: string;
+  description: string;
 }
 
 export default function DestinationCard({
+  id,
   image,
-  imageAlt,
+  name,
   price,
   category,
-  title,
   location,
   rating,
-  label,
+  description,
 }: DestinationCardProps) {
   return (
-    <div className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-gray-200/50 dark:hover:shadow-black/50 transition-all duration-300 transform hover:-translate-y-1">
-      <div className="relative h-64 overflow-hidden">
-        <img
-          alt={imageAlt}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          data-alt={imageAlt}
-          src={image}
-        />
-        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm text-primary text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
-          {price}
+    <Link href={`/destinations/${id}`} className="block h-full">
+      <div className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-lg hover:shadow-2xl transition-all duration-300 h-full">
+        {/* Image Section */}
+        <div className="relative h-72 overflow-hidden">
+          <img
+            alt={name}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            src={image}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+
+          {/* Chips */}
+          <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm text-primary text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
+            IDR {price.toLocaleString("id-ID")}
+          </div>
+          <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-md text-white text-[10px] uppercase font-bold px-2 py-1 rounded-md">
+            {category}
+          </div>
         </div>
-        <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-md text-white text-[10px] uppercase font-bold px-2 py-1 rounded-md">
-          {category}
-        </div>
-      </div>
-      <div className="p-5">
-        <div className="flex items-start justify-between mb-2">
-          <div>
-            <h3 className="text-lg font-bold text-text-main dark:text-white leading-tight mb-1 group-hover:text-primary transition-colors">
-              {title}
+
+        {/* Content Section Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+          <div className="flex items-start justify-between mb-1">
+            <h3 className="text-xl font-bold text-white leading-tight mb-1">
+              {name}
             </h3>
-            <div className="flex items-center gap-1 text-text-muted dark:text-gray-400 text-xs">
-              <span className="material-symbols-outlined text-sm">
-                location_on
+            <div className="flex items-center text-accent text-xs bg-black/30 px-2 py-1 rounded-full backdrop-blur-sm">
+              <span
+                className="material-symbols-outlined"
+                style={{
+                  fontSize: "14px",
+                  fontVariationSettings: "'FILL' 1",
+                }}
+              >
+                star
               </span>
-              {location}
+              <span className="text-white font-bold ml-1">{rating}</span>
             </div>
           </div>
-          <div className="flex text-yellow-400 text-xs">
-            <span
-              className="material-symbols-outlined"
-              style={{
-                fontSize: "16px",
-                fontVariationSettings: "'FILL' 1",
-              }}
-            >
-              star
+
+          <div className="flex items-center gap-1 text-gray-300 text-xs mb-3">
+            <span className="material-symbols-outlined text-sm">
+              location_on
             </span>
-            <span className="text-text-main dark:text-white font-bold ml-1">
-              {rating}
-            </span>
+            {location}
           </div>
-        </div>
-        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-          <span className="text-xs text-text-muted dark:text-gray-500">
-            {label}
-          </span>
-          <button className="text-sm font-bold text-primary hover:text-emerald-700 transition-colors">
+
+          <p className="text-gray-300 text-xs line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100 mb-4">
+            {description}
+          </p>
+
+          <button className="w-full py-3 bg-primary hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-150">
             Book Now
           </button>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
