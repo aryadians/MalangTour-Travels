@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 import { TravelProvider } from "@/context/TravelContext";
+import { Toaster } from "react-hot-toast";
 
 export default async function RootLayout({
   children,
@@ -36,6 +37,7 @@ export default async function RootLayout({
           <Navbar user={user} />
           {children}
           <Footer />
+          <Toaster position="top-center" reverseOrder={false} />
         </TravelProvider>
       </body>
     </html>
