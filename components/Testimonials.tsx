@@ -5,7 +5,8 @@ export default function Testimonials() {
     {
       name: "Sarah Jenkins",
       role: "Travel Blogger",
-      image: "https://i.pravatar.cc/150?u=sarah",
+      image:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150",
       quote:
         "The Bromo sunrise tour was absolutely magical! The guide was knowledgeable and the service was top-notch.",
       rating: 5,
@@ -13,7 +14,8 @@ export default function Testimonials() {
     {
       name: "David Chen",
       role: "Photographer",
-      image: "https://i.pravatar.cc/150?u=david",
+      image:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150",
       quote:
         "I captured the best shots of my life at Tumpak Sewu. Malang Tour made the logistics seamless.",
       rating: 5,
@@ -21,7 +23,8 @@ export default function Testimonials() {
     {
       name: "Amanda Pratama",
       role: "Family Traveler",
-      image: "https://i.pravatar.cc/150?u=amanda",
+      image:
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150",
       quote:
         "Traveled with 2 kids and it was a breeze. They customized the itinerary to be kid-friendly. Highly recommended!",
       rating: 4,
@@ -29,7 +32,7 @@ export default function Testimonials() {
   ];
 
   return (
-    <section className="py-20 md:py-28 px-6 bg-background-light dark:bg-background-dark relative overflow-hidden">
+    <section className="py-20 md:py-28 px-6 bg-background-light dark:bg-background-dark relative z-0 overflow-hidden">
       {/* Background blobs */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-3xl -z-10 -translate-x-1/2 translate-y-1/2"></div>
@@ -45,10 +48,10 @@ export default function Testimonials() {
             </h2>
           </div>
           <div className="flex gap-2">
-            <button className="size-12 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg transition-all">
+            <button className="w-12 h-12 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg transition-all">
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
-            <button className="size-12 rounded-full bg-primary text-white border border-primary flex items-center justify-center hover:bg-primary-hover hover:shadow-lg shadow-primary/20 transition-all">
+            <button className="w-12 h-12 rounded-full bg-primary text-white border border-primary flex items-center justify-center hover:bg-primary-hover hover:shadow-lg shadow-primary/20 transition-all">
               <span className="material-symbols-outlined">arrow_forward</span>
             </button>
           </div>
@@ -74,11 +77,13 @@ export default function Testimonials() {
                 "{t.quote}"
               </p>
               <div className="flex items-center gap-4 mt-auto">
-                <img
-                  src={t.image}
-                  alt={t.name}
-                  className="size-12 rounded-full object-cover"
-                />
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 shrink-0">
+                  <img
+                    src={t.image}
+                    alt={t.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <div>
                   <h4 className="font-bold text-text-main dark:text-white leading-tight">
                     {t.name}

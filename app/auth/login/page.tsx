@@ -15,26 +15,37 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
 
+    const formData = new FormData(e.target as HTMLFormElement);
+    const email = formData.get("email") as string; // Get value from form
+
     // Simulate API Login
     setTimeout(() => {
+      const isAdmin = email === "admin@malangtour.com";
+
       setUser({
-        name: "Petualang Malang",
-        points: 2500,
-        referralCode: "MALANGTOP2024",
+        name: isAdmin ? "Super Admin" : "Petualang Malang",
+        points: isAdmin ? 99999 : 2500,
+        referralCode: isAdmin ? "ADMINOFFICIAL" : "MALANGTOP2024",
         isLoggedIn: true,
-        email: "user@example.com",
-        role: "USER",
+        email: email,
+        role: isAdmin ? "ADMIN" : "USER",
       });
-      toast.success("Welcome back!", {
-        icon: "👋",
+
+      toast.success(isAdmin ? "Welcome, Admin!" : "Welcome back!", {
+        icon: isAdmin ? "🛡️" : "👋",
       });
-      router.push("/dashboard");
+
+      if (isAdmin) {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/dashboard");
+      }
     }, 1500);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full bg-white rounded-[40px] shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 pt-28 pb-12">
+      <div className="max-w-6xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
         {/* Left Side - Form */}
         <div className="p-8 md:p-12 flex flex-col justify-center">
           <div className="mb-10">
@@ -61,12 +72,18 @@ export default function LoginPage() {
               <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
                 Email Address
               </label>
-              <input
-                type="email"
-                required
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
-                placeholder="you@example.com"
-              />
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
+                  mail
+                </span>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-gray-900 placeholder:text-gray-400"
+                  placeholder="you@example.com"
+                />
+              </div>
             </div>
             <div>
               <div className="flex justify-between mb-2">
@@ -80,12 +97,17 @@ export default function LoginPage() {
                   Forgot?
                 </a>
               </div>
-              <input
-                type="password"
-                required
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
+                  lock
+                </span>
+                <input
+                  type="password"
+                  required
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-gray-900 placeholder:text-gray-400"
+                  placeholder="••••••••"
+                />
+              </div>
             </div>
 
             <button
@@ -101,6 +123,52 @@ export default function LoginPage() {
                 "Sign In"
               )}
             </button>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500 font-medium">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() =>
+                  toast.success("Logged in with Google!", { icon: "🇬" })
+                }
+                className="flex items-center justify-center gap-2 py-3 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all group"
+              >
+                <img
+                  src="https://www.svgrepo.com/show/475656/google-color.svg"
+                  className="w-5 h-5 group-hover:scale-110 transition-transform"
+                  alt="Google"
+                />
+                <span className="font-bold text-gray-600 text-sm group-hover:text-gray-900">
+                  Google
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  toast.success("Logged in with Facebook!", { icon: "🇫" })
+                }
+                className="flex items-center justify-center gap-2 py-3 px-4 border border-gray-200 rounded-xl hover:bg-blue-50 hover:border-blue-200 transition-all group"
+              >
+                <img
+                  src="https://www.svgrepo.com/show/475647/facebook-color.svg"
+                  className="w-5 h-5 group-hover:scale-110 transition-transform"
+                  alt="Facebook"
+                />
+                <span className="font-bold text-gray-600 text-sm group-hover:text-blue-700">
+                  Facebook
+                </span>
+              </button>
+            </div>
           </form>
 
           <p className="mt-8 text-center text-sm text-gray-500">
@@ -121,7 +189,7 @@ export default function LoginPage() {
             className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay"
             alt="Malang Background"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/90 to-transparent flex flex-col justify-end p-12 text-white">
+          <div className="absolute inset-0 bg-gradient-to-t from-emerald-900 via-emerald-900/40 to-transparent flex flex-col justify-end p-12 text-white">
             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center mb-6">
               <span className="material-symbols-outlined text-2xl text-white">
                 format_quote

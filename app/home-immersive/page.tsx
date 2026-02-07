@@ -48,7 +48,7 @@ export default async function HomeImmersive() {
             </div>
           ) : (
             <Link
-              href="/login"
+              href="/auth/login"
               className="hidden md:block text-sm font-bold border border-white/30 px-4 py-2 rounded-full hover:bg-white/10 transition-colors"
             >
               LOGIN

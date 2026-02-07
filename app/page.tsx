@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTravel } from "@/context/TravelContext";
+import Testimonials from "@/components/Testimonials";
 
 export default function Home() {
   const { destinations, formatPrice } = useTravel();
@@ -423,6 +424,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* 5.5. TESTIMONIALS */}
+      <Testimonials />
 
       {/* 6. NEWSLETTER & CTA */}
       <section className="py-20 bg-gray-900 text-white relative overflow-hidden">

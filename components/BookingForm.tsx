@@ -132,7 +132,7 @@ export default function BookingForm({
           </button>
         ) : (
           <a
-            href="/login"
+            href="/auth/login"
             className="w-full py-4 rounded-xl bg-gray-500 hover:bg-gray-600 text-white font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-transform transform active:scale-95"
           >
             <span>Log in to Book</span>

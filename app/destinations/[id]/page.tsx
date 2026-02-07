@@ -118,7 +118,7 @@ export default async function DestinationDetail({
             </Link>
           ) : (
             <Link
-              href="/login"
+              href="/auth/login"
               className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-6 bg-primary hover:bg-emerald-600 transition-colors text-white text-sm font-bold shadow-sm shadow-primary/20"
             >
               Login

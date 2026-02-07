@@ -22,6 +22,7 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
 
   const pathname = usePathname();
   const isHome = pathname === "/";
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -38,7 +39,7 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
   // Dynamic styling based on route and scroll state
   const isTransparent = isHome && !isScrolled;
 
-  const navClasses = `fixed top-0 left-0 right-0 z-50 w-full px-6 py-4 transition-all duration-300 ${
+  const navClasses = `fixed top-0 left-0 right-0 z-[999] w-full px-6 py-4 transition-all duration-300 ${
     isTransparent
       ? "bg-transparent text-white"
       : "bg-white/90 backdrop-blur-md shadow-sm text-gray-900 dark:bg-gray-900/90 dark:text-white border-b border-gray-100 dark:border-gray-800"
@@ -213,7 +214,7 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
             </div>
           ) : (
             <Link
-              href="/login"
+              href="/auth/login"
               className={`hidden md:flex items-center justify-center px-5 py-2.5 rounded-xl border text-sm font-bold transition-all active:scale-95 ${
                 isTransparent
                   ? "bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20"
@@ -299,7 +300,7 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
           </>
         ) : (
           <Link
-            href="/login"
+            href="/auth/login"
             className="px-8 py-3 rounded-full bg-emerald-500 text-white text-lg font-bold shadow-lg shadow-emerald-500/20"
             onClick={() => setIsMobileMenuOpen(false)}
           >

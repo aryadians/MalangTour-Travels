@@ -37,7 +37,7 @@ export default async function HomeAdventure() {
             </div>
           ) : (
             <Link
-              href="/login"
+              href="/auth/login"
               className="font-bold text-sm text-white hover:text-orange-500 transition-colors uppercase mr-4"
             >
               Log In

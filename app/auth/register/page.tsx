@@ -23,8 +23,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full bg-white rounded-[40px] shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 pt-28 pb-12">
+      <div className="max-w-6xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
         {/* Left Side - Image */}
         <div className="hidden md:block relative bg-gray-900 order-2 md:order-1">
           <img
@@ -64,34 +64,49 @@ export default function RegisterPage() {
               <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
                 Full Name
               </label>
-              <input
-                type="text"
-                required
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
-                placeholder="John Doe"
-              />
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
+                  badge
+                </span>
+                <input
+                  type="text"
+                  required
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-gray-900 placeholder:text-gray-400"
+                  placeholder="John Doe"
+                />
+              </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
                 Email Address
               </label>
-              <input
-                type="email"
-                required
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
-                placeholder="you@example.com"
-              />
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
+                  mail
+                </span>
+                <input
+                  type="email"
+                  required
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-gray-900 placeholder:text-gray-400"
+                  placeholder="you@example.com"
+                />
+              </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
                 Password
               </label>
-              <input
-                type="password"
-                required
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
+                  lock
+                </span>
+                <input
+                  type="password"
+                  required
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-gray-900 placeholder:text-gray-400"
+                  placeholder="••••••••"
+                />
+              </div>
             </div>
 
             <button

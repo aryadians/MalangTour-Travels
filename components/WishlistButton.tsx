@@ -19,7 +19,7 @@ export default function WishlistButton({
 
   const handleToggle = () => {
     if (!isLoggedIn) {
-      router.push("/login"); // Redirect to login if not authenticated
+      router.push("/auth/login"); // Redirect to login if not authenticated
       return;
     }
 

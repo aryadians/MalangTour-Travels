@@ -23,7 +23,7 @@ export default function UserDashboard() {
           You need to be logged in to view your dashboard.
         </p>
         <Link
-          href="/login"
+          href="/auth/login"
           className="px-6 py-2 bg-emerald-500 text-white rounded-xl font-bold"
         >
           Login

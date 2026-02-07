@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
 
         <div className="mt-8 text-center">
           <Link
-            href="/login"
+            href="/auth/login"
             className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-emerald-500 transition-colors"
           >
             <span className="material-symbols-outlined text-lg">
