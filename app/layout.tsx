@@ -13,6 +13,8 @@ export const metadata: Metadata = {
     "Experience the majestic Bromo sunrise, the colorful villages, and the crystal clear southern beaches.",
 };
 
+import { TravelProvider } from "@/context/TravelContext";
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -29,11 +31,12 @@ export default async function RootLayout({
         />
       </head>
       <body className="font-display bg-background-light text-text-main dark:bg-background-dark dark:text-white antialiased overflow-x-hidden selection:bg-primary selection:text-white">
-        {/* Note: Navbar is absolute/transparent by default, fits Home page.
-            For other pages, we might need a wrapper or prop. */}
-        <Navbar user={user} />
-        {children}
-        <Footer />
+        <TravelProvider>
+          {/* Note: Navbar is handled inside pages or components now using Context if customized */}
+          <Navbar user={user} />
+          {children}
+          <Footer />
+        </TravelProvider>
       </body>
     </html>
   );
