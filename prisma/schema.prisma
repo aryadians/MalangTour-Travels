@@ -68,3 +68,15 @@ model Wishlist {
 
   @@unique([userId, destinationId])
 }
+
+model Offer {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  discount    String   // e.g. "20% OFF" or "IDR 100k OFF"
+  code        String   @unique
+  validUntil  DateTime
+  image       String   // JSON string or URL
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

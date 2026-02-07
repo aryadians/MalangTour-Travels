@@ -18,38 +18,18 @@ export default async function PackagesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark">
-      {/* Reusing existing Navbar structure/logic if needed, or simply importing it */}
-      {/* Assuming Navbar handles session internally or we need to pass it. 
-          The previous analysis showed Navbar fetches session in some contexts, 
-          but usually `page.tsx` fetches it.
-          Let's check Navbar.tsx usage in other pages. 
-          Actually, `app/layout.tsx` or specific pages use Navbar using session passed from server component.
-          Let's verify Navbar usage quickly. 
-          Wait, I can just fetch data here and pass it.
-      */}
-      <Navbar />
+    <main className="min-h-screen bg-background-light dark:bg-background-dark pb-20 pt-24">
+      <div className="container mx-auto px-6 mb-12 text-center">
+        <h1 className="text-4xl md:text-5xl font-black text-text-main dark:text-white mb-4">
+          Curated Tour Packages
+        </h1>
+        <p className="text-text-muted dark:text-gray-400 max-w-2xl mx-auto">
+          Explore our handpicked selection of premium experiences in Malang and
+          East Java.
+        </p>
+      </div>
 
-      <main className="flex flex-col">
-        {/* Simple Hero */}
-        <div className="relative bg-primary/10 dark:bg-primary/5 py-20 px-6 md:px-10 lg:px-20 flex flex-col items-center justify-center text-center gap-6">
-          <h1 className="text-4xl md:text-6xl font-black text-[#111816] dark:text-white tracking-tight">
-            Curated <span className="text-primary">Tour Packages</span>
-          </h1>
-          <p className="text-lg md:text-xl text-text-muted dark:text-gray-300 max-w-2xl">
-            Discover the best of Malang with our hand-picked itineraries
-            designed for every type of traveler.
-          </p>
-        </div>
-
-        <div className="w-full max-w-7xl mx-auto px-4 md:px-10 lg:px-20 py-12 md:py-20">
-          <PackagesGrid destinations={destinations as any} />
-          {/* Casting to any to avoid strict type checks on Date vs String serialization if needed, 
-               though Prisma types should match generally. images is string in DB. */}
-        </div>
-      </main>
-
-      <Footer />
-    </div>
+      <PackagesGrid destinations={destinations} />
+    </main>
   );
 }

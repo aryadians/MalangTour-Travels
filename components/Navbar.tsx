@@ -37,70 +37,41 @@ export default function Navbar({ user }: NavbarProps) {
         </Link>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-6">
           <Link
             href="/"
-            className="text-white/90 text-sm font-medium hover:text-white hover:underline decoration-primary decoration-2 underline-offset-8 transition-all drop-shadow-sm"
+            className="text-white/90 text-sm font-medium hover:text-white transition-all drop-shadow-sm"
           >
             Home
           </Link>
-
-          <div className="relative group">
-            <button className="flex items-center gap-1 text-white/90 text-sm font-medium hover:text-white transition-all drop-shadow-sm focus:outline-none">
-              Destinations
-              <span className="material-symbols-outlined text-lg transition-transform duration-200 group-hover:rotate-180">
-                expand_more
-              </span>
-            </button>
-
-            {/* Dropdown - Added invisible bridge and better positioning */}
-            <div className="absolute top-full left-0 pt-4 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-left z-50">
-              <div className="bg-white rounded-xl shadow-xl overflow-hidden ring-1 ring-black/5">
-                <div className="py-2 flex flex-col">
-                  <Link
-                    href="#"
-                    className="px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors flex items-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-lg">
-                      beach_access
-                    </span>{" "}
-                    Beaches
-                  </Link>
-                  <Link
-                    href="#"
-                    className="px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors flex items-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-lg">
-                      hiking
-                    </span>{" "}
-                    Mountains
-                  </Link>
-                  <Link
-                    href="#"
-                    className="px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors flex items-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-lg">
-                      location_city
-                    </span>{" "}
-                    City Tours
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <Link
-            href="#"
+            href="/packages"
             className="text-white/90 text-sm font-medium hover:text-white transition-all drop-shadow-sm"
           >
             Packages
           </Link>
           <Link
-            href="#"
+            href="/offers"
+            className="text-white/90 text-sm font-medium hover:text-white transition-all drop-shadow-sm flex items-center gap-1"
+          >
+            Offers
+            <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-pulse">
+              Hot
+            </span>
+          </Link>
+          <Link
+            href="/about"
             className="text-white/90 text-sm font-medium hover:text-white transition-all drop-shadow-sm"
           >
-            Contact
+            About
           </Link>
+          <Link
+            href="/help"
+            className="text-white/90 text-sm font-medium hover:text-white transition-all drop-shadow-sm"
+          >
+            Help
+          </Link>
+
           {user?.role === "ADMIN" && (
             <Link
               href="/admin/destinations"
@@ -192,10 +163,38 @@ export default function Navbar({ user }: NavbarProps) {
       >
         <Link
           href="/"
-          className="text-white text-2xl font-bold"
+          className="text-white text-xl font-bold"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           Home
+        </Link>
+        <Link
+          href="/packages"
+          className="text-white text-xl font-bold"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          Packages
+        </Link>
+        <Link
+          href="/offers"
+          className="text-white text-xl font-bold"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          Offers
+        </Link>
+        <Link
+          href="/about"
+          className="text-white text-xl font-bold"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          About
+        </Link>
+        <Link
+          href="/help"
+          className="text-white text-xl font-bold"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          Help
         </Link>
         {user ? (
           <>
