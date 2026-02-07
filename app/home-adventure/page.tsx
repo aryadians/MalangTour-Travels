@@ -6,9 +6,22 @@ import { logout } from "@/actions/auth";
 
 export default async function HomeAdventure() {
   const destinations = await prisma.destination.findMany();
-  const mountainDestinations = destinations.filter(
-    (d) => d.category === "Gunung" || d.category === "Pantai",
-  );
+  const mountainDestinations = destinations
+    .filter((d) => d.category === "Gunung" || d.category === "Pantai")
+    .map((d) => {
+      let image = "";
+      try {
+        const parsedImages = JSON.parse(d.images);
+        image =
+          Array.isArray(parsedImages) && parsedImages.length > 0
+            ? parsedImages[0]
+            : "";
+      } catch (e) {
+        // Fallback if images is not valid JSON
+        image = "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800";
+      }
+      return { ...d, image };
+    });
   const user = await getSession();
 
   return (
@@ -76,7 +89,7 @@ export default async function HomeAdventure() {
             </h1>
             <p className="text-slate-400 text-lg max-w-md mb-8">
               Extreme jeep tours, hidden waterfalls, and midnight trekking. This
-              isn't just a holiday, it's a challenge.
+              isn&apos;t just a holiday, it&apos;s a challenge.
             </p>
             <div className="flex gap-4">
               <button className="bg-white text-black font-black px-8 py-4 rounded-sm hover:translate-x-1 hover:-translate-y-1 transition-transform border-b-4 border-gray-400 active:border-b-0 active:translate-y-0">

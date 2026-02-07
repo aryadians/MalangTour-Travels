@@ -61,7 +61,7 @@ export default function AboutPage() {
                 <p>
                   We started as a small group of friends taking backpackers to
                   our favorite hidden waterfalls and warungs. Today, we are
-                  Malang's premier tour operator, but our mission remains the
+                  Malang&apos;s premier tour operator, but our mission remains the
                   same:
                   <strong className="text-text-main dark:text-white">
                     {" "}

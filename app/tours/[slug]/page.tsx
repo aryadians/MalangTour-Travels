@@ -16,19 +16,19 @@ export default function TourDetail() {
         <div className="hidden md:flex flex-1 justify-end gap-8">
           <div className="flex items-center gap-9">
             <Link
-              href="#"
+              href="/destinations"
               className="text-[#111816] dark:text-gray-200 text-sm font-medium hover:text-primary transition-colors"
             >
               Destinations
             </Link>
             <Link
-              href="#"
+              href="/packages"
               className="text-[#111816] dark:text-gray-200 text-sm font-medium hover:text-primary transition-colors"
             >
               Tours
             </Link>
             <Link
-              href="#"
+              href="/about"
               className="text-[#111816] dark:text-gray-200 text-sm font-medium hover:text-primary transition-colors"
             >
               About
@@ -118,7 +118,7 @@ export default function TourDetail() {
                   Experience the magic of East Java with our premium Gunung Bromo
                   Sunrise Tour. Your journey begins in the early hours with a
                   thrilling 4x4 Jeep ride through the sea of sand. Witness the
-                  world-famous "Golden Sunrise" from the Penanjakan View Point,
+                  world-famous &quot;Golden Sunrise&quot; from the Penanjakan View Point,
                   revealing the majestic volcanic landscape bathed in morning
                   light. Afterwards, trek across the caldera to peer directly into
                   the smoking crater of Mount Bromo.

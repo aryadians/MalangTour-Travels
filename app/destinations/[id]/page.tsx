@@ -103,7 +103,7 @@ export default async function DestinationDetail({
               Packages
             </Link>
             <Link
-              href="#"
+              href="/help"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               Contact

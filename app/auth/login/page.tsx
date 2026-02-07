@@ -91,7 +91,7 @@ export default function LoginPage() {
                   Password
                 </label>
                 <a
-                  href="#"
+                  href="/forgot-password"
                   className="text-xs font-bold text-emerald-600 hover:underline"
                 >
                   Forgot?
@@ -172,7 +172,7 @@ export default function LoginPage() {
           </form>
 
           <p className="mt-8 text-center text-sm text-gray-500">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/auth/register"
               className="text-emerald-600 font-bold hover:underline"
@@ -196,7 +196,7 @@ export default function LoginPage() {
               </span>
             </div>
             <h3 className="text-2xl font-bold leading-relaxed mb-2">
-              "The journey of a thousand miles begins with a single step."
+              &quot;The journey of a thousand miles begins with a single step.&quot;
             </h3>
             <p className="text-emerald-200">– Lao Tzu</p>
           </div>

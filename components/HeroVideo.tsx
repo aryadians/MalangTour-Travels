@@ -33,7 +33,7 @@ export default function HeroVideo() {
           The Hidden Magic
         </h1>
         <p className="text-lg md:text-2xl font-light max-w-2xl mb-10 opacity-90 leading-relaxed">
-          Embark on a journey beyond the ordinary. Experience Malang's
+          Embark on a journey beyond the ordinary. Experience Malang&apos;s
           breathtaking landscapes like never before.
         </p>
 

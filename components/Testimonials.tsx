@@ -74,7 +74,7 @@ export default function Testimonials() {
                 ))}
               </div>
               <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed italic">
-                "{t.quote}"
+                &quot;{t.quote}&quot;
               </p>
               <div className="flex items-center gap-4 mt-auto">
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 shrink-0">

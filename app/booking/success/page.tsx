@@ -17,10 +17,10 @@ export default function PaymentSuccessPage() {
         </div>
         <div className="flex items-center gap-6 lg:gap-8">
           <nav className="hidden md:flex items-center gap-6 lg:gap-9">
-            <Link href="#" className="text-[#111816] dark:text-gray-200 text-sm font-medium leading-normal hover:text-primary transition-colors">Destinations</Link>
-            <Link href="#" className="text-[#111816] dark:text-gray-200 text-sm font-medium leading-normal hover:text-primary transition-colors">Packages</Link>
-            <Link href="#" className="text-[#111816] dark:text-gray-200 text-sm font-medium leading-normal hover:text-primary transition-colors">About Us</Link>
-            <Link href="#" className="text-[#111816] dark:text-gray-200 text-sm font-medium leading-normal hover:text-primary transition-colors">Contact</Link>
+            <Link href="/destinations" className="text-[#111816] dark:text-gray-200 text-sm font-medium leading-normal hover:text-primary transition-colors">Destinations</Link>
+            <Link href="/packages" className="text-[#111816] dark:text-gray-200 text-sm font-medium leading-normal hover:text-primary transition-colors">Packages</Link>
+            <Link href="/about" className="text-[#111816] dark:text-gray-200 text-sm font-medium leading-normal hover:text-primary transition-colors">About Us</Link>
+            <Link href="/help" className="text-[#111816] dark:text-gray-200 text-sm font-medium leading-normal hover:text-primary transition-colors">Contact</Link>
           </nav>
           <div className="flex items-center gap-4">
             <button className="flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-white/10 md:hidden">

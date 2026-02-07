@@ -89,7 +89,7 @@ export default function AdminDashboard() {
             Dashboard Overview
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            Welcome back, Administrator. Here's what's happening today.
+            Welcome back, Administrator. Here&apos;s what&apos;s happening today.
           </p>
         </div>
         <button className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-xl font-bold text-sm hover:shadow-lg transition-all flex items-center gap-2">
@@ -242,7 +242,7 @@ export default function AdminDashboard() {
               Recent Activity
             </h3>
             <Link
-              href="#"
+              href="/admin/bookings"
               className="text-emerald-500 text-xs font-bold hover:underline"
             >
               See All

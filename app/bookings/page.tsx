@@ -66,7 +66,7 @@ export default async function BookingsPage() {
             </div>
             <h2 className="text-xl font-bold mb-2">No bookings found</h2>
             <p className="text-text-muted dark:text-gray-400 max-w-md mb-8">
-              You haven't booked any trips yet. Explore our destinations and
+              You haven&apos;t booked any trips yet. Explore our destinations and
               start your journey!
             </p>
             <Link

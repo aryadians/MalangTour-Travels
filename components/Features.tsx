@@ -40,7 +40,7 @@ export default function Features() {
             <span className="text-primary">Like Never Before</span>
           </h2>
           <p className="text-gray-500 text-lg">
-            We don't just sell tours; we craft unforgettable memories with a
+            We don&apos;t just sell tours; we craft unforgettable memories with a
             touch of local hospitality.
           </p>
         </div>

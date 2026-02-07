@@ -164,7 +164,7 @@ export default function UserDashboard() {
               </div>
             ) : (
               <div className="p-8 text-center text-gray-500">
-                You haven't made any bookings yet.
+                You haven&apos;t made any bookings yet.
               </div>
             )}
           </div>
@@ -184,7 +184,7 @@ export default function UserDashboard() {
                 .filter((d) => wishlist.includes(d.id))
                 .map((dest) => (
                   <Link
-                    href={`/destination/${dest.id}`}
+                    href={`/destinations/${dest.id}`}
                     key={dest.id}
                     className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all overflow-hidden"
                   >

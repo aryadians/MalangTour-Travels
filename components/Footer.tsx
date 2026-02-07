@@ -23,7 +23,7 @@ export default function Footer() {
             </Link>
             <p className="text-gray-400 leading-relaxed text-sm">
               Discover the beauty of East Java with premium comfort. From
-              Bromo's sunrise to hidden beaches, we craft unforgettable
+              Bromo&apos;s sunrise to hidden beaches, we craft unforgettable
               journeys.
             </p>
             <div className="flex gap-4 pt-2">

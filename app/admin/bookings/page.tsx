@@ -24,7 +24,7 @@ export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchBookings = async () => {
+  const fetchBookings = React.useCallback(async () => {
     setIsLoading(true);
     const result = await getAllBookings();
     if (result.success && result.bookings) {
@@ -33,11 +33,11 @@ export default function AdminBookingsPage() {
       toast.error("Failed to load bookings");
     }
     setIsLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     fetchBookings();
-  }, []);
+  }, [fetchBookings]);
 
   const handleStatusChange = async (
     id: string,
