@@ -33,6 +33,15 @@ interface Booking {
   totalPrice: number;
 }
 
+export interface BookingHistoryItem {
+  id: string;
+  destinationName: string;
+  date: string;
+  price: number;
+  status: "Completed" | "Upcoming" | "Cancelled";
+  image: string;
+}
+
 interface TravelContextType {
   destinations: Destination[];
   language: string;
@@ -44,6 +53,9 @@ interface TravelContextType {
   setUser: (user: User) => void;
   currentBooking: Booking;
   updateBooking: (data: Partial<Booking>) => void;
+  bookingHistory: BookingHistoryItem[];
+  wishlist: string[];
+  toggleWishlist: (id: string) => void;
 }
 
 const TravelContext = createContext<TravelContextType | undefined>(undefined);
@@ -141,11 +153,11 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 3. USER & BOOKING STATE
   const [user, setUser] = useState<User>({
-    name: "Petualang Malang",
-    points: 2500,
-    referralCode: "MALANGTOP2024",
-    isLoggedIn: true,
-    email: "user@example.com",
+    name: "",
+    points: 0,
+    referralCode: "",
+    isLoggedIn: false,
+    email: "",
     role: "USER",
   });
 
@@ -155,6 +167,48 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
     date: "",
     totalPrice: 0,
   });
+
+  // 3.5. BOOKING HISTORY & WISHLIST (MOCK)
+  const [bookingHistory] = useState<BookingHistoryItem[]>([
+    {
+      id: "BK-2024001",
+      destinationName: "Gunung Bromo Sunrise Tour",
+      date: "2024-01-15",
+      price: 350000,
+      status: "Completed",
+      image:
+        "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&q=80&w=200",
+    },
+    {
+      id: "BK-2024002",
+      destinationName: "Kampung Warna Warni",
+      date: "2024-02-10",
+      price: 15000,
+      status: "Completed",
+      image:
+        "https://images.unsplash.com/photo-1596401057633-56565377f06d?auto=format&fit=crop&q=80&w=200",
+    },
+    {
+      id: "BK-2024003",
+      destinationName: "Pantai Balekambang",
+      date: "2024-03-20",
+      price: 50000,
+      status: "Upcoming",
+      image:
+        "https://images.unsplash.com/photo-1602154663343-89fe0bf541ab?auto=format&fit=crop&q=80&w=200",
+    },
+  ]);
+
+  const [wishlist, setWishlist] = useState<string[]>([
+    "bromo-sunrise",
+    "teluk-asmara",
+  ]);
+
+  const toggleWishlist = (id: string) => {
+    setWishlist((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+  };
 
   // 4. HELPER FUNCTIONS
   const formatPrice = (amount: number) => {
@@ -188,6 +242,9 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
         setUser,
         currentBooking,
         updateBooking,
+        bookingHistory,
+        wishlist,
+        toggleWishlist,
       }}
     >
       {children}

@@ -6,7 +6,8 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 
 export default function UserDashboard() {
-  const { user } = useTravel();
+  const { user, bookingHistory, wishlist, destinations, formatPrice } =
+    useTravel();
 
   const handleCopyReferral = () => {
     if (user?.referralCode) {
@@ -15,7 +16,7 @@ export default function UserDashboard() {
     }
   };
 
-  if (!user) {
+  if (!user || !user.isLoggedIn) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-4">
         <h2 className="text-xl font-bold text-gray-900">Please Log In</h2>
@@ -105,6 +106,119 @@ export default function UserDashboard() {
             </p>
           </div>
         </div>
+
+        {/* MY BOOKINGS SECTION */}
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-emerald-500">
+              airplane_ticket
+            </span>
+            My Bookings
+          </h2>
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            {bookingHistory.length > 0 ? (
+              <div className="divide-y divide-gray-100">
+                {bookingHistory.map((booking) => (
+                  <div
+                    key={booking.id}
+                    className="p-4 md:p-6 flex flex-col md:flex-row items-center gap-4 md:gap-6 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="w-full md:w-24 h-16 rounded-xl overflow-hidden shrink-0">
+                      <img
+                        src={booking.image}
+                        alt={booking.destinationName}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 w-full text-center md:text-left">
+                      <h3 className="font-bold text-gray-900">
+                        {booking.destinationName}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {new Date(booking.date).toLocaleDateString("id-ID", {
+                          weekday: "long",
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                      <span className="font-bold text-gray-900">
+                        {formatPrice(booking.price)}
+                      </span>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          booking.status === "Completed"
+                            ? "bg-green-100 text-green-700"
+                            : booking.status === "Upcoming"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {booking.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-gray-500">
+                You haven't made any bookings yet.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* MY WISHLIST SECTION */}
+        {wishlist.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-red-500">
+                favorite
+              </span>
+              My Wishlist
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {destinations
+                .filter((d) => wishlist.includes(d.id))
+                .map((dest) => (
+                  <Link
+                    href={`/destination/${dest.id}`}
+                    key={dest.id}
+                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all overflow-hidden"
+                  >
+                    <div className="aspect-video relative overflow-hidden">
+                      <img
+                        src={dest.image}
+                        alt={dest.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-emerald-600 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-sm">
+                          star
+                        </span>
+                        {dest.rating}
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-bold text-gray-900 truncate">
+                        {dest.name}
+                      </h3>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-emerald-600 font-bold">
+                          {formatPrice(dest.price)}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {dest.reviews} reviews
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+            </div>
+          </div>
+        )}
 
         {/* REWARD CATALOG (Grid) */}
         <div>

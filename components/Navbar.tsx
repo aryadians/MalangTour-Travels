@@ -17,8 +17,12 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
   const { user, language, setLanguage, currency, setCurrency } = useTravel();
 
   // Merge session user with context user (Context user has points/loyalty data)
-  // If sessionUser exists, we use its name/email/role but overlay the context points
-  const activeUser = sessionUser ? { ...user, ...sessionUser } : null;
+  // Check if sessionUser exists OR if context user is logged in (client-side auth)
+  const activeUser = sessionUser
+    ? { ...user, ...sessionUser }
+    : user?.isLoggedIn
+      ? user
+      : null;
 
   const pathname = usePathname();
   const isHome = pathname === "/";

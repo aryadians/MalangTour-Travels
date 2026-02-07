@@ -1,6 +1,9 @@
 "use client";
 import React, { useState } from "react";
 import { Destination } from "@prisma/client";
+import Link from "next/link";
+import { deleteDestination } from "@/actions/destination";
+import toast from "react-hot-toast";
 
 interface DestinationTableProps {
   destinations: Destination[];
@@ -14,6 +17,13 @@ export default function DestinationTable({
   const filteredDestinations = destinations.filter((dest) =>
     dest.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  const handleDelete = async (id: number) => {
+    if (confirm("Are you sure you want to delete this destination?")) {
+      await deleteDestination(id);
+      toast.success("Destination deleted");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -39,10 +49,13 @@ export default function DestinationTable({
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <button className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors">
+          <Link
+            href="/admin/destinations/new"
+            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors"
+          >
             <span className="material-symbols-outlined text-lg">add</span>
             Add New
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -119,12 +132,18 @@ export default function DestinationTable({
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button className="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors">
+                        <Link
+                          href={`/admin/destinations/${dest.id}`}
+                          className="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors"
+                        >
                           <span className="material-symbols-outlined text-lg">
                             edit
                           </span>
-                        </button>
-                        <button className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(dest.id)}
+                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
                           <span className="material-symbols-outlined text-lg">
                             delete
                           </span>
