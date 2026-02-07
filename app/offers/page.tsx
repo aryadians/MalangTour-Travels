@@ -1,93 +1,127 @@
+"use client";
+
 import React from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import OfferCard from "@/components/OfferCard";
-import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+import { motion } from "framer-motion";
 
-export const metadata = {
-  title: "Special Offers - Malang Travel",
-  description: "Exclusive deals and promo codes for your next trip to Malang.",
-};
+export default function OffersPage() {
+  const offers = [
+    {
+      id: "bromo-summer",
+      title: "Bromo Summer Sale",
+      description:
+        "Get 30% OFF for sunrise jeep tour packages during the dry season. Best view guaranteed!",
+      discount: "30% OFF",
+      code: "BROMO30",
+      valid: "Valid until 30 June 2024",
+      color: "bg-orange-500",
+      image:
+        "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&q=80&w=800",
+    },
+    {
+      id: "honeymoon-batu",
+      title: "Romantic Batu Escape",
+      description:
+        "Special honeymoon package including 5-star hotel, romantic dinner, and private transport.",
+      discount: "Free Upgrade",
+      code: "LOVEBATU",
+      valid: "Valid until 31 Dec 2024",
+      color: "bg-pink-500",
+      image:
+        "https://images.unsplash.com/photo-1596423736783-cd55ce852c02?auto=format&fit=crop&q=80&w=800",
+    },
+    {
+      id: "group-fun",
+      title: "Group Adventure",
+      description:
+        "Book for 5 people or more and get 1 pax for FREE. Perfect for friends and family.",
+      discount: "Pay 5 Get 6",
+      code: "SQUADGOALS",
+      valid: "Valid always on weekdays",
+      color: "bg-blue-500",
+      image:
+        "https://images.unsplash.com/photo-1510662145379-13537db782dc?auto=format&fit=crop&q=80&w=800",
+    },
+  ];
 
-export default async function OffersPage() {
-  // Fetch offers from DB
-  // Since we might not have run 'prisma db push' successfully yet,
-  // we'll handle the potential empty state or error gracefully or Mock data if needed for initial display.
-  // Ideally we use Prisma.
-
-  let offers = [];
-  try {
-    offers = await prisma.offer.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-  } catch (e) {
-    console.warn("Failed to fetch offers, likely due to migration pending.");
-    // Fallback mock data for display purposes if DB isn't ready
-    offers = [
-      {
-        id: "mock-1",
-        title: "Early Bird Summer Sale",
-        description:
-          "Book 30 days in advance and get a massive discount on all Bromo packages.",
-        discount: "20% OFF",
-        code: "SUMMER20",
-        validUntil: new Date("2026-06-30"),
-        image:
-          "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&q=80&w=1000",
-      },
-      {
-        id: "mock-2",
-        title: "Family Bundle",
-        description:
-          "Kids travel free! Valid for families of 4 or more on selected customized tours.",
-        discount: "Kids Free",
-        code: "FAMILYFUN",
-        validUntil: new Date("2026-12-31"),
-        image:
-          "https://images.unsplash.com/photo-1596423736783-cd55ce852c02?auto=format&fit=crop&q=80&w=1000",
-      },
-      {
-        id: "mock-3",
-        title: "Honeymoon Special",
-        description:
-          "Additional romantic dinner included for Batu honeymoon packages.",
-        discount: "Free Dinner",
-        code: "HONEYMOON",
-        validUntil: new Date("2026-08-31"),
-        image:
-          "https://images.unsplash.com/photo-1510414842594-a61c69b5ae9e?auto=format&fit=crop&q=80&w=1000",
-      },
-    ];
-  }
+  const handleCopy = (code: string) => {
+    navigator.clipboard.writeText(code);
+    // In a real app we'd show a toast here, but for simplicity
+    alert(`Copied: ${code}`);
+  };
 
   return (
-    <div className="bg-background-light dark:bg-background-dark min-h-screen flex flex-col pt-20">
-      <main className="flex-1">
-        {/* Header */}
-        <div className="bg-primary/5 py-16 md:py-24 text-center px-4">
-          <h1 className="text-4xl md:text-6xl font-black text-text-main dark:text-white mb-4 tracking-tight">
-            Exclusive <span className="text-primary">Deals</span>
+    <div className="min-h-screen bg-gray-50 pt-28 pb-20 px-4 md:px-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <span className="inline-block bg-red-100 text-red-600 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+            Limited Time Deals
+          </span>
+          <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
+            Special Offers
           </h1>
-          <p className="text-lg text-text-muted dark:text-gray-400 max-w-2xl mx-auto">
-            Save big on your next adventure with our limited-time promotions.
+          <p className="text-gray-500 max-w-2xl mx-auto">
+            Save big on your next adventure with our exclusive promo codes.
           </p>
         </div>
 
-        {/* Offers Grid */}
-        <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {offers.map((offer) => (
-              <OfferCard key={offer.id} {...offer} />
-            ))}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {offers.map((offer, idx) => (
+            <motion.div
+              key={offer.id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: idx * 0.1 }}
+              className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all border border-gray-100 flex flex-col"
+            >
+              <div className="h-48 relative overflow-hidden">
+                <img
+                  src={offer.image}
+                  alt={offer.title}
+                  className="w-full h-full object-cover"
+                />
+                <div
+                  className={`absolute top-4 right-4 ${offer.color} text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg`}
+                >
+                  {offer.discount}
+                </div>
+              </div>
+              <div className="p-6 flex flex-col flex-grow">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  {offer.title}
+                </h3>
+                <p className="text-gray-500 text-sm mb-6 flex-grow">
+                  {offer.description}
+                </p>
 
-          {offers.length === 0 && (
-            <div className="text-center py-20 text-gray-500">
-              <p>No active offers at the moment. Check back soon!</p>
-            </div>
-          )}
+                <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs text-gray-400 font-bold uppercase">
+                      Promo Code
+                    </span>
+                    <span className="text-[10px] text-gray-400">
+                      {offer.valid}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 font-mono font-bold text-gray-800 text-center tracking-widest">
+                      {offer.code}
+                    </div>
+                    <button
+                      onClick={() => handleCopy(offer.code)}
+                      className="px-3 rounded-lg bg-gray-900 text-white hover:bg-emerald-500 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-sm">
+                        content_copy
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
