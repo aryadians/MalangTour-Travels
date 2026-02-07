@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth";
+import { useTravel } from "@/context/TravelContext";
 
 interface NavbarProps {
   user?: {
@@ -12,7 +13,13 @@ interface NavbarProps {
   } | null;
 }
 
-export default function Navbar({ user }: NavbarProps) {
+export default function Navbar({ user: sessionUser }: NavbarProps) {
+  const { user, language, setLanguage, currency, setCurrency } = useTravel();
+
+  // Merge session user with context user (Context user has points/loyalty data)
+  // If sessionUser exists, we use its name/email/role but overlay the context points
+  const activeUser = sessionUser ? { ...user, ...sessionUser } : null;
+
   const pathname = usePathname();
   const isHome = pathname === "/";
   const [isScrolled, setIsScrolled] = useState(false);
@@ -29,14 +36,12 @@ export default function Navbar({ user }: NavbarProps) {
   }, []);
 
   // Dynamic styling based on route and scroll state
-  // On Home: Transparent initially, becomes White/Solid on scroll.
-  // On Others: Always White/Solid.
   const isTransparent = isHome && !isScrolled;
 
   const navClasses = `fixed top-0 left-0 right-0 z-50 w-full px-6 py-4 transition-all duration-300 ${
     isTransparent
       ? "bg-transparent text-white"
-      : "bg-white/80 backdrop-blur-md shadow-sm text-gray-900 dark:bg-gray-900/90 dark:text-white dark:border-b dark:border-gray-800"
+      : "bg-white/90 backdrop-blur-md shadow-sm text-gray-900 dark:bg-gray-900/90 dark:text-white border-b border-gray-100 dark:border-gray-800"
   }`;
 
   const linkClasses = `text-sm font-medium transition-all ${
@@ -98,7 +103,7 @@ export default function Navbar({ user }: NavbarProps) {
             Help
           </Link>
 
-          {user?.role === "ADMIN" && (
+          {activeUser?.role === "ADMIN" && (
             <Link
               href="/admin/destinations"
               className="text-emerald-500 text-sm font-bold hover:text-emerald-600 transition-all"
@@ -110,7 +115,34 @@ export default function Navbar({ user }: NavbarProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-4">
-          {user ? (
+          {/* Currency & Language Switcher (Desktop) */}
+          <div className="hidden md:flex items-center gap-2 mr-2">
+            <button
+              onClick={() => setLanguage(language === "ID" ? "EN" : "ID")}
+              className={`text-xs font-bold px-2 py-1 rounded-md transition-all ${
+                isTransparent
+                  ? "text-white hover:bg-white/10"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              {language}
+            </button>
+            <div
+              className={`h-4 w-[1px] ${isTransparent ? "bg-white/30" : "bg-gray-300"}`}
+            ></div>
+            <button
+              onClick={() => setCurrency(currency === "IDR" ? "USD" : "IDR")}
+              className={`text-xs font-bold px-2 py-1 rounded-md transition-all ${
+                isTransparent
+                  ? "text-white hover:bg-white/10"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              {currency}
+            </button>
+          </div>
+
+          {activeUser ? (
             <div className="relative hidden md:block">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -121,31 +153,48 @@ export default function Navbar({ user }: NavbarProps) {
                 }`}
               >
                 <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-xs ring-2 ring-white/30">
-                  {user.name?.charAt(0).toUpperCase() || "U"}
+                  {activeUser.name?.charAt(0).toUpperCase() || "U"}
                 </div>
-                <span className="text-sm font-medium pr-2 max-w-[100px] truncate">
-                  {user.name?.split(" ")[0]}
-                </span>
+                <div className="flex flex-col items-start leading-none pr-2">
+                  <span className="text-xs font-medium max-w-[80px] truncate">
+                    {activeUser.name?.split(" ")[0]}
+                  </span>
+                  <span className="text-[10px] opacity-80 font-bold text-yellow-500 flex items-center gap-0.5">
+                    <span className="material-symbols-outlined text-[10px]">
+                      stars
+                    </span>
+                    {user.points} Pts
+                  </span>
+                </div>
                 <span className="material-symbols-outlined text-sm">
                   expand_more
                 </span>
               </button>
 
               {isProfileOpen && (
-                <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-xl shadow-xl overflow-hidden py-1 z-50 animate-in fade-in zoom-in-95 duration-200 border border-gray-100 dark:border-gray-800">
-                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+                <div className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-xl shadow-xl overflow-hidden py-1 z-50 animate-in fade-in zoom-in-95 duration-200 border border-gray-100 dark:border-gray-800">
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
                     <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                      {user.name}
+                      {activeUser.name}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {user.email}
+                      {activeUser.email}
                     </p>
+                    <div className="mt-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md inline-block">
+                      {user.points} Travel Points
+                    </div>
                   </div>
                   <Link
                     href="/dashboard"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
                   >
                     Dashboard
+                  </Link>
+                  <Link
+                    href="/rewards"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                  >
+                    Reward Catalog
                   </Link>
                   <Link
                     href="/profile"
@@ -232,14 +281,14 @@ export default function Navbar({ user }: NavbarProps) {
         >
           Help
         </Link>
-        {user ? (
+        {activeUser ? (
           <>
             <Link
               href="/dashboard"
               className="text-gray-900 dark:text-white text-xl font-bold"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Dashboard
+              Dashboard ({user.points} Pts)
             </Link>
             <button
               onClick={() => logout()}
