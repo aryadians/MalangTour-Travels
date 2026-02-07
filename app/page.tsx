@@ -304,7 +304,7 @@ export default function Home() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                 >
-                  <Link href={`/destination/${dest.id}`} className="group">
+                  <Link href={`/destinations/${dest.id}`} className="group">
                     <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all h-[320px] relative">
                       <div className="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm">
                         <span className="material-symbols-outlined text-yellow-500 text-sm">

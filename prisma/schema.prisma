@@ -11,15 +11,17 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  password  String
-  role      String   @default("USER") // USER, ADMIN
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  bookings  Booking[]
-  wishlists Wishlist[]
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String?
+  password     String
+  role         String   @default("USER") // USER, ADMIN
+  points       Int      @default(0)
+  referralCode String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  bookings     Booking[]
+  wishlists    Wishlist[]
 }
 
 model Destination {

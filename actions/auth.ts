@@ -59,6 +59,7 @@ export async function signup(prevState: any, formData: FormData) {
       name,
       email,
       password: hashedPassword,
+      referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
     },
   });
 
@@ -118,4 +119,28 @@ export async function login(prevState: any, formData: FormData) {
 export async function logout() {
   await deleteSession();
   redirect("/auth/login");
+}
+
+export async function getMe() {
+  const session = await getSession();
+  if (!session || !session.userId) {
+    return null;
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        points: true,
+        referralCode: true,
+      },
+    });
+    return user;
+  } catch (error) {
+    return null;
+  }
 }

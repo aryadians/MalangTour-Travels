@@ -56,7 +56,7 @@ export default function DestinationsPage() {
               transition={{ delay: idx * 0.1 }}
             >
               <Link
-                href={`/destination/${dest.id}`}
+                href={`/destinations/${dest.id}`}
                 className="group block h-full"
               >
                 <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100 h-full flex flex-col group-hover:-translate-y-2">

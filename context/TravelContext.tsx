@@ -1,20 +1,24 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { getDestinations } from "@/actions/destination";
+import { getMe } from "@/actions/auth";
 
 // Define Types
-interface Destination {
-  id: string;
+export interface Destination {
+  id: string | number;
   name: string;
   category: string;
   location: string;
   price: number;
   rating: number;
-  reviews: number;
+  reviews?: number;
   image: string;
+  images?: string[];
   description: string;
-  features: string[];
-  itinerary: { time: string; activity: string }[];
+  features?: string[];
+  highlights?: any[];
+  itinerary: any[];
 }
 
 interface User {
@@ -54,8 +58,8 @@ interface TravelContextType {
   currentBooking: Booking;
   updateBooking: (data: Partial<Booking>) => void;
   bookingHistory: BookingHistoryItem[];
-  wishlist: string[];
-  toggleWishlist: (id: string) => void;
+  wishlist: (string | number)[];
+  toggleWishlist: (id: string | number) => void;
 }
 
 const TravelContext = createContext<TravelContextType | undefined>(undefined);
@@ -66,90 +70,40 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
   const [currency, setCurrency] = useState("IDR"); // IDR or USD
   const [exchangeRate] = useState(15500); // Simple mock rate for USD
 
-  // 2. DUMMY DESTINATIONS DATA (Data Inti Malang - Matched with Prompt)
-  const [destinations] = useState<Destination[]>([
-    {
-      id: "bromo-sunrise",
-      name: "Gunung Bromo Sunrise Tour",
-      category: "Gunung",
-      location: "Taman Nasional Bromo Tengger Semeru",
-      price: 350000,
-      rating: 5.0,
-      reviews: 124,
-      image:
-        "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&q=80&w=1200",
-      description:
-        "Saksikan matahari terbit terbaik di Jawa dengan paket tour Jeep 4x4. Pengalaman magis melintasi lautan pasir menuju kawah aktif.",
-      features: ["Jeep 4x4", "Local Guide", "Sunrise View", "Trekking"],
-      itinerary: [
-        { time: "03:00", activity: "Penjemputan & Menuju Penanjakan" },
-        { time: "04:30", activity: "Menikmati Sunrise di Bromo" },
-        { time: "06:00", activity: "Eksplorasi Kawah & Pasir Berbisik" },
-      ],
-    },
-    {
-      id: "balekambang-beach",
-      name: "Pantai Balekambang",
-      category: "Pantai",
-      location: "Bantur, Kab. Malang",
-      price: 50000,
-      rating: 4.8,
-      reviews: 89,
-      image:
-        "https://images.unsplash.com/photo-1602154663343-89fe0bf541ab?auto=format&fit=crop&q=80&w=1200",
-      description:
-        "Dikenal sebagai Tanah Lot-nya Malang. Terdapat pura di atas pulau karang yang dihubungkan dengan jembatan panjang yang ikonik.",
-      features: [
-        "Pura Ismoyo",
-        "Sunset View",
-        "Camping Area",
-        "Kuliner Seafood",
-      ],
-      itinerary: [
-        { time: "09:00", activity: "Perjalanan menuju Pantai Balekambang" },
-        { time: "11:00", activity: "Tiba dan Eksplorasi Pura Ismoyo" },
-        { time: "13:00", activity: "Makan Siang Seafood & Santai di Pantai" },
-      ],
-    },
-    {
-      id: "jodipan-colorful",
-      name: "Kampung Warna Warni Jodipan",
-      category: "Kota",
-      location: "Kota Malang",
-      price: 15000,
-      rating: 4.5,
-      reviews: 210,
-      image:
-        "https://images.unsplash.com/photo-1596401057633-56565377f06d?auto=format&fit=crop&q=80&w=1200",
-      description:
-        "Destinasi hits penuh warna di bantaran sungai Brantas. Spot foto instagramable paling populer di tengah kota Malang.",
-      features: ["Jembatan Kaca", "Street Art", "Souvenir Lokal"],
-      itinerary: [
-        { time: "08:00", activity: "Berkumpul di Stasiun Malang Kota Baru" },
-        { time: "08:30", activity: "Jalan kaki menuju Kampung Warna Warni" },
-        { time: "10:00", activity: "Foto-foto di Jembatan Kaca & Mural" },
-      ],
-    },
-    {
-      id: "teluk-asmara",
-      name: "Pantai Teluk Asmara",
-      category: "Pantai",
-      location: "Sumbermanjing Wetan",
-      price: 25000,
-      rating: 4.7,
-      reviews: 56,
-      image:
-        "https://images.unsplash.com/photo-1510662145379-13537db782dc?auto=format&fit=crop&q=80&w=1200",
-      description:
-        "Raja Ampat-nya Malang. Gugusan pulau karang kecil dengan air jernih dan ombak yang sangat tenang.",
-      features: ["Snorkeling", "Island Hopping", "Pantai Bersih"],
-      itinerary: [
-        { time: "07:00", activity: "Perjalanan menuju Malang Selatan" },
-        { time: "10:00", activity: "Snorkeling & Island Hopping" },
-        { time: "12:00", activity: "Makan siang & santai di pinggir pantai" },
-      ],
-    },
-  ]);
+  // 2. DESTINATIONS STATE (Fetched from DB)
+  const [destinations, setDestinations] = useState<Destination[]>([]);
+
+  useEffect(() => {
+    const fetchDestinations = async () => {
+      const data = await getDestinations();
+      const mappedDestinations: Destination[] = data.map((d: any) => {
+        let images = [];
+        try {
+          images = typeof d.images === "string" ? JSON.parse(d.images) : d.images;
+        } catch (e) {
+          images = [];
+        }
+
+        let itinerary = [];
+        try {
+          itinerary = typeof d.itinerary === "string" ? JSON.parse(d.itinerary) : d.itinerary;
+        } catch (e) {
+          itinerary = [];
+        }
+
+        return {
+          ...d,
+          image: images[0] || "",
+          images: images,
+          itinerary: itinerary,
+          reviews: Math.floor(Math.random() * 200) + 50, // Mock reviews since not in DB
+        };
+      });
+      setDestinations(mappedDestinations);
+    };
+
+    fetchDestinations();
+  }, []);
 
   // 3. USER & BOOKING STATE
   const [user, setUser] = useState<User>({
@@ -161,6 +115,23 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
     role: "USER",
   });
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userData = await getMe();
+      if (userData) {
+        setUser({
+          name: userData.name || "",
+          points: userData.points || 0,
+          referralCode: userData.referralCode || "",
+          isLoggedIn: true,
+          email: userData.email,
+          role: userData.role,
+        });
+      }
+    };
+    fetchUser();
+  }, []);
+
   const [currentBooking, setCurrentBooking] = useState<Booking>({
     destinationId: null,
     pax: 1,
@@ -169,42 +140,11 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   // 3.5. BOOKING HISTORY & WISHLIST (MOCK)
-  const [bookingHistory] = useState<BookingHistoryItem[]>([
-    {
-      id: "BK-2024001",
-      destinationName: "Gunung Bromo Sunrise Tour",
-      date: "2024-01-15",
-      price: 350000,
-      status: "Completed",
-      image:
-        "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&q=80&w=200",
-    },
-    {
-      id: "BK-2024002",
-      destinationName: "Kampung Warna Warni",
-      date: "2024-02-10",
-      price: 15000,
-      status: "Completed",
-      image:
-        "https://images.unsplash.com/photo-1596401057633-56565377f06d?auto=format&fit=crop&q=80&w=200",
-    },
-    {
-      id: "BK-2024003",
-      destinationName: "Pantai Balekambang",
-      date: "2024-03-20",
-      price: 50000,
-      status: "Upcoming",
-      image:
-        "https://images.unsplash.com/photo-1602154663343-89fe0bf541ab?auto=format&fit=crop&q=80&w=200",
-    },
-  ]);
+  const [bookingHistory] = useState<BookingHistoryItem[]>([]);
 
-  const [wishlist, setWishlist] = useState<string[]>([
-    "bromo-sunrise",
-    "teluk-asmara",
-  ]);
+  const [wishlist, setWishlist] = useState<(string | number)[]>([]);
 
-  const toggleWishlist = (id: string) => {
+  const toggleWishlist = (id: string | number) => {
     setWishlist((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );

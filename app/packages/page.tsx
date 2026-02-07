@@ -103,7 +103,7 @@ export default function PackagesPage() {
                       </p>
                     </div>
                     <Link
-                      href={`/destination/${pkg.id}`}
+                      href={`/destinations/${pkg.id}`}
                       className="px-8 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-emerald-500 transition-colors shadow-lg active:scale-95"
                     >
                       View Details

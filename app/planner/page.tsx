@@ -2,15 +2,16 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { destinations } from "@/data/destinations";
+import { useTravel } from "@/context/TravelContext";
 
 export default function PlannerPage() {
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const { destinations } = useTravel();
+  const [selectedItems, setSelectedItems] = useState<(number | string)[]>([]);
   const [days, setDays] = useState(1);
   const [pax, setPax] = useState(2);
 
   // Toggle selection
-  const toggleDestination = (id: number) => {
+  const toggleDestination = (id: number | string) => {
     if (selectedItems.includes(id)) {
       setSelectedItems(selectedItems.filter((item) => item !== id));
     } else {

@@ -153,3 +153,27 @@ export async function deleteDestination(id: number) {
     return { message: "Database Error: Failed to Delete Destination." };
   }
 }
+
+export async function getDestinations() {
+  try {
+    const destinations = await prisma.destination.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+    return destinations;
+  } catch (error) {
+    console.error("Database Error:", error);
+    return [];
+  }
+}
+
+export async function getDestinationById(id: number) {
+  try {
+    const destination = await prisma.destination.findUnique({
+      where: { id },
+    });
+    return destination;
+  } catch (error) {
+    console.error("Database Error:", error);
+    return null;
+  }
+}
