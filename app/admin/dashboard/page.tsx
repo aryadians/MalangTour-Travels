@@ -1,161 +1,241 @@
+"use client";
+
 import React from "react";
-import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
-export default async function AdminDashboard() {
-  // Fetch real data
-  const totalRevenue = await prisma.booking.aggregate({
-    _sum: { totalPrice: true },
-    where: { status: "CONFIRMED" },
-  });
-
-  const activeBookingsCount = await prisma.booking.count({
-    where: { status: { in: ["PENDING", "CONFIRMED"] } },
-  });
-
-  const newUsersCount = await prisma.user.count();
-
-  // Get recent bookings
-  const recentBookings = await prisma.booking.findMany({
-    take: 5,
-    orderBy: { createdAt: "desc" },
-    include: {
-      user: true,
-      destination: true,
-    },
-  });
-
+export default function AdminDashboard() {
+  // Mock Data for Premium Feel
   const stats = [
     {
       title: "Total Revenue",
-      value: `Rp ${(totalRevenue._sum.totalPrice || 0).toLocaleString("id-ID")}`,
-      change: "+Today", // Dynamic diff would require more queries
+      value: "Rp 156.450.000",
+      change: "+12.5% vs last month",
       icon: "payments",
-      color: "bg-emerald-500",
+      color: "from-emerald-400 to-emerald-600",
     },
     {
       title: "Active Bookings",
-      value: activeBookingsCount.toString(),
-      change: "Active",
+      value: "24",
+      change: "+4 new today",
       icon: "book_online",
-      color: "bg-blue-500",
+      color: "from-blue-400 to-blue-600",
     },
     {
-      title: "Total Users",
-      value: newUsersCount.toString(),
-      change: "All time",
-      icon: "group",
-      color: "bg-purple-500",
+      title: "Total Travelers",
+      value: "1,240",
+      change: "+18% vs last month",
+      icon: "groups",
+      color: "from-purple-400 to-purple-600",
     },
     {
-      title: "Pending Status",
-      value: (
-        await prisma.booking.count({ where: { status: "PENDING" } })
-      ).toString(),
-      change: "Action needed",
-      icon: "pending_actions",
-      color: "bg-orange-500",
+      title: "Avg. Rating",
+      value: "4.9/5.0",
+      change: "Top Rated Agency",
+      icon: "star",
+      color: "from-yellow-400 to-orange-500",
+    },
+  ];
+
+  const recentBookings = [
+    {
+      id: 1,
+      user: "Sarah Wijaya",
+      destination: "Bromo Sunrise",
+      date: "2 mins ago",
+      status: "PENDING",
+      price: "Rp 350.000",
+    },
+    {
+      id: 2,
+      user: "Budi Santoso",
+      destination: "Malang Night Paradise",
+      date: "1 hour ago",
+      status: "CONFIRMED",
+      price: "Rp 150.000",
+    },
+    {
+      id: 3,
+      user: "John Doe",
+      destination: "Tumpak Sewu Waterfall",
+      date: "3 hours ago",
+      status: "CONFIRMED",
+      price: "Rp 600.000",
+    },
+    {
+      id: 4,
+      user: "Linda Kusuma",
+      destination: "Batu Secret Zoo",
+      date: "5 hours ago",
+      status: "CANCELLED",
+      price: "Rp 120.000",
+    },
+    {
+      id: 5,
+      user: "Ahmad Rizky",
+      destination: "Semeru Trekking",
+      date: "1 day ago",
+      status: "CONFIRMED",
+      price: "Rp 1.250.000",
     },
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-          Dashboard Overview
-        </h2>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 dark:text-white">
+            Dashboard Overview
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Welcome back, Administrator. Here's what's happening today.
+          </p>
+        </div>
+        <button className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-xl font-bold text-sm hover:shadow-lg transition-all flex items-center gap-2">
+          <span className="material-symbols-outlined text-sm">download</span>
+          Download Report
+        </button>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow"
+        {stats.map((stat, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1 }}
+            className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group"
           >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                  {stat.title}
-                </p>
-                <h3
-                  className="text-lg font-black text-gray-800 dark:text-white truncate max-w-[150px]"
-                  title={stat.value}
-                >
-                  {stat.value}
-                </h3>
-              </div>
+            <div className="relative z-10">
               <div
-                className={`p-3 rounded-lg ${stat.color} text-white shadow-lg shadow-gray-200 dark:shadow-none`}
+                className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white shadow-lg mb-4`}
               >
                 <span className="material-symbols-outlined">{stat.icon}</span>
               </div>
+              <p className="text-sm font-medium text-gray-400">{stat.title}</p>
+              <h3 className="text-2xl font-black text-gray-900 dark:text-white mt-1">
+                {stat.value}
+              </h3>
+              <p className="text-xs font-bold text-emerald-500 mt-2 flex items-center gap-1">
+                <span className="material-symbols-outlined text-sm">
+                  trending_up
+                </span>
+                {stat.change}
+              </p>
             </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="font-bold text-emerald-500">{stat.change}</span>
-            </div>
-          </div>
+            {/* Decoration */}
+            <div
+              className={`absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br ${stat.color} opacity-10 rounded-full blur-2xl group-hover:opacity-20 transition-opacity`}
+            ></div>
+          </motion.div>
         ))}
       </div>
 
-      {/* Main Charts Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activity */}
-        <div className="lg:col-span-3 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Chart Section (Simulated) */}
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-gray-800 dark:text-white">
-              Recent Bookings
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              Revenue Analytics
+            </h3>
+            <select className="bg-gray-50 border-none rounded-lg text-xs font-bold text-gray-500 outline-none p-2">
+              <option>This Week</option>
+              <option>This Month</option>
+              <option>This Year</option>
+            </select>
+          </div>
+
+          {/* Simple CSS Chart Mockup */}
+          <div className="h-64 flex items-end justify-between gap-2 md:gap-4 pt-10 border-b border-gray-100 dark:border-gray-700 relative">
+            <div className="absolute inset-x-0 bottom-0 h-full flex flex-col justify-between text-xs text-gray-300 pointer-events-none">
+              <span>Rp 500k</span>
+              <span>Rp 250k</span>
+              <span>0</span>
+            </div>
+            {[40, 65, 30, 80, 55, 90, 70].map((h, i) => (
+              <div
+                key={i}
+                className="w-full bg-emerald-100 dark:bg-emerald-900/30 rounded-t-xl relative group z-10 transition-all hover:bg-emerald-200 dark:hover:bg-emerald-900/50"
+                style={{ height: `${h}%` }}
+              >
+                <div
+                  className="absolute bottom-0 w-full bg-emerald-500 rounded-t-xl transition-all duration-1000"
+                  style={{ height: `${h * 0.7}%` }}
+                ></div>
+                <div className="opacity-0 group-hover:opacity-100 absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded shadow-lg transition-opacity whitespace-nowrap">
+                  Rp {h * 10}.000
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-between mt-4 text-xs font-bold text-gray-400 uppercase">
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+            <span>Sun</span>
+          </div>
+        </div>
+
+        {/* Recent Bookings List */}
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              Recent Activity
             </h3>
             <Link
-              href="/admin/bookings"
-              className="text-sm text-emerald-500 font-bold hover:underline"
+              href="#"
+              className="text-emerald-500 text-xs font-bold hover:underline"
             >
-              View All
+              See All
             </Link>
           </div>
 
-          <div className="space-y-4">
-            {recentBookings.length === 0 ? (
-              <p className="text-gray-500 text-sm">No bookings yet.</p>
-            ) : (
-              recentBookings.map((booking) => (
+          <div className="space-y-6">
+            {recentBookings.map((booking) => (
+              <div key={booking.id} className="flex items-center gap-4">
                 <div
-                  key={booking.id}
-                  className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0"
+                  className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold bg-gray-100 text-gray-600`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-500 uppercase">
-                      {booking.user?.name?.charAt(0) || "U"}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-gray-800 dark:text-white">
-                        {booking.user?.name || "Unknown User"}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {booking.destination.name}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span
-                      className={`text-[10px] font-bold px-2 py-1 rounded-full ${
-                        booking.status === "PENDING"
-                          ? "bg-blue-100 text-blue-600"
-                          : booking.status === "CONFIRMED"
-                            ? "bg-emerald-100 text-emerald-600"
-                            : "bg-red-100 text-red-600"
-                      }`}
-                    >
-                      {booking.status}
-                    </span>
-                    <p className="text-[10px] text-gray-400 mt-1">
-                      {new Date(booking.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
+                  {booking.user.charAt(0)}
                 </div>
-              ))
-            )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                    {booking.user}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    booked{" "}
+                    <span className="text-emerald-600">
+                      {booking.destination}
+                    </span>
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold text-gray-900 dark:text-white">
+                    {booking.price}
+                  </p>
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                      booking.status === "CONFIRMED"
+                        ? "bg-emerald-100 text-emerald-600"
+                        : booking.status === "PENDING"
+                          ? "bg-blue-100 text-blue-600"
+                          : "bg-red-100 text-red-600"
+                    }`}
+                  >
+                    {booking.status}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
+          <button className="w-full mt-8 py-3 bg-gray-50 dark:bg-gray-700 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 transition-colors">
+            Load More
+          </button>
         </div>
       </div>
     </div>
