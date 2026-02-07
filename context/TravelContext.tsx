@@ -93,6 +93,11 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
         "Camping Area",
         "Kuliner Seafood",
       ],
+      itinerary: [
+        { time: "09:00", activity: "Perjalanan menuju Pantai Balekambang" },
+        { time: "11:00", activity: "Tiba dan Eksplorasi Pura Ismoyo" },
+        { time: "13:00", activity: "Makan Siang Seafood & Santai di Pantai" },
+      ],
     },
     {
       id: "jodipan-colorful",
@@ -107,6 +112,11 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
       description:
         "Destinasi hits penuh warna di bantaran sungai Brantas. Spot foto instagramable paling populer di tengah kota Malang.",
       features: ["Jembatan Kaca", "Street Art", "Souvenir Lokal"],
+      itinerary: [
+        { time: "08:00", activity: "Berkumpul di Stasiun Malang Kota Baru" },
+        { time: "08:30", activity: "Jalan kaki menuju Kampung Warna Warni" },
+        { time: "10:00", activity: "Foto-foto di Jembatan Kaca & Mural" },
+      ],
     },
     {
       id: "teluk-asmara",
@@ -121,6 +131,11 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
       description:
         "Raja Ampat-nya Malang. Gugusan pulau karang kecil dengan air jernih dan ombak yang sangat tenang.",
       features: ["Snorkeling", "Island Hopping", "Pantai Bersih"],
+      itinerary: [
+        { time: "07:00", activity: "Perjalanan menuju Malang Selatan" },
+        { time: "10:00", activity: "Snorkeling & Island Hopping" },
+        { time: "12:00", activity: "Makan siang & santai di pinggir pantai" },
+      ],
     },
   ]);
 

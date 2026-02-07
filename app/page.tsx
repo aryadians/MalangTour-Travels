@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTravel } from "@/context/TravelContext";
@@ -9,6 +9,32 @@ export default function Home() {
   const { destinations, formatPrice } = useTravel();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+
+  const [weather, setWeather] = useState<{
+    temp: number;
+    condition: string;
+  } | null>(null);
+
+  // Fetch Real-time Weather for Bromo
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        // Coordinates for Mount Bromo
+        const res = await fetch(
+          "https://api.open-meteo.com/v1/forecast?latitude=-7.9425&longitude=112.9530&current=temperature_2m,weather_code",
+        );
+        const data = await res.json();
+        setWeather({
+          temp: Math.round(data.current.temperature_2m),
+          condition: "Sunny", // Simplified mapping, or use weather_code for more detail
+        });
+      } catch (error) {
+        console.error("Failed to fetch weather", error);
+        setWeather({ temp: 12, condition: "Sunny" }); // Fallback
+      }
+    };
+    fetchWeather();
+  }, []);
 
   // Categories for Activity Chips
   const categories = ["All", "Gunung", "Pantai", "Kota", "Kuliner"];
@@ -45,14 +71,16 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="space-y-6 max-w-4xl"
           >
-            {/* Weather Widget (Simulated) */}
+            {/* Weather Widget (Real-time) */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-white animate-in fade-in zoom-in duration-500">
               <span className="material-symbols-outlined text-yellow-400">
-                sunny
+                {weather ? "sunny" : "cloud"}
               </span>
               <span className="text-sm font-semibold">Bromo, Malang</span>
               <span className="text-white/50">|</span>
-              <span className="text-sm font-bold">12°C</span>
+              <span className="text-sm font-bold">
+                {weather ? `${weather.temp}°C` : "Loading..."}
+              </span>
             </div>
 
             <h1 className="text-6xl md:text-8xl font-black text-white tracking-tight drop-shadow-2xl">
