@@ -74,6 +74,7 @@ export async function createDestination(prevState: any, formData: FormData) {
 
   revalidatePath("/admin/destinations");
   revalidatePath("/destinations");
+  revalidatePath("/");
   redirect("/admin/destinations");
 }
 

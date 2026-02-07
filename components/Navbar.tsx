@@ -14,7 +14,22 @@ interface NavbarProps {
 }
 
 export default function Navbar({ user: sessionUser }: NavbarProps) {
-  const { user, language, setLanguage, currency, setCurrency } = useTravel();
+  const { user, setUser, language, setLanguage, currency, setCurrency } =
+    useTravel();
+
+  const handleLogout = async () => {
+    // 1. Clear Client State
+    setUser({
+      name: "",
+      points: 0,
+      referralCode: "",
+      isLoggedIn: false,
+      email: "",
+      role: "USER",
+    });
+    // 2. Call Server Action
+    await logout();
+  };
 
   // Merge session user with context user (Context user has points/loyalty data)
   // Check if sessionUser exists OR if context user is logged in (client-side auth)
@@ -107,15 +122,6 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
           <Link href="/help" className={linkClasses}>
             Help
           </Link>
-
-          {activeUser?.role === "ADMIN" && (
-            <Link
-              href="/admin/destinations"
-              className="text-emerald-500 text-sm font-bold hover:text-emerald-600 transition-all"
-            >
-              Admin Dashboard
-            </Link>
-          )}
         </div>
 
         {/* Actions */}
@@ -195,6 +201,14 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
                   >
                     Dashboard
                   </Link>
+                  {activeUser.role === "ADMIN" && (
+                    <Link
+                      href="/admin/dashboard"
+                      className="block px-4 py-2 text-sm font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
                   <Link
                     href="/rewards"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -208,7 +222,7 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
                     My Profile
                   </Link>
                   <button
-                    onClick={() => logout()}
+                    onClick={handleLogout}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10"
                   >
                     Sign Out
@@ -296,7 +310,7 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
               Dashboard ({user.points} Pts)
             </Link>
             <button
-              onClick={() => logout()}
+              onClick={handleLogout}
               className="text-red-500 text-xl font-bold"
             >
               Sign Out

@@ -97,7 +97,61 @@ export default function AdminDashboard() {
           Download Report
         </button>
       </div>
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Link
+          href="/admin/destinations"
+          className="bg-emerald-500 hover:bg-emerald-600 transition-colors p-6 rounded-3xl text-white shadow-lg shadow-emerald-500/20 group"
+        >
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-3 bg-white/20 rounded-xl">
+              <span className="material-symbols-outlined text-2xl">map</span>
+            </div>
+            <span className="material-symbols-outlined opacity-50 group-hover:translate-x-1 transition-transform">
+              arrow_forward
+            </span>
+          </div>
+          <h3 className="text-lg font-bold">Manage Destinations</h3>
+          <p className="text-emerald-100 text-sm mt-1">
+            Add, edit, or remove tour packages.
+          </p>
+        </Link>
 
+        <Link
+          href="/admin/bookings"
+          className="bg-blue-500 hover:bg-blue-600 transition-colors p-6 rounded-3xl text-white shadow-lg shadow-blue-500/20 group"
+        >
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-3 bg-white/20 rounded-xl">
+              <span className="material-symbols-outlined text-2xl">
+                book_online
+              </span>
+            </div>
+            <span className="material-symbols-outlined opacity-50 group-hover:translate-x-1 transition-transform">
+              arrow_forward
+            </span>
+          </div>
+          <h3 className="text-lg font-bold">Manage Bookings</h3>
+          <p className="text-blue-100 text-sm mt-1">
+            View and update customer reservations.
+          </p>
+        </Link>
+
+        <div className="bg-purple-500 hover:bg-purple-600 transition-colors p-6 rounded-3xl text-white shadow-lg shadow-purple-500/20 group cursor-pointer">
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-3 bg-white/20 rounded-xl">
+              <span className="material-symbols-outlined text-2xl">group</span>
+            </div>
+            <span className="material-symbols-outlined opacity-50 group-hover:translate-x-1 transition-transform">
+              arrow_forward
+            </span>
+          </div>
+          <h3 className="text-lg font-bold">User Management</h3>
+          <p className="text-purple-100 text-sm mt-1">
+            Manage registered users (Coming Soon).
+          </p>
+        </div>
+      </div>
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (

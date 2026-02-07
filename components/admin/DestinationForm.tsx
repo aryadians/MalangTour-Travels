@@ -14,19 +14,26 @@ interface DestinationFormProps {
 export default function DestinationForm({ destination }: DestinationFormProps) {
   const isEdit = !!destination;
 
-  // Parse JSON fields safely
-  const initialImages = destination?.images
-    ? JSON.parse(destination.images)
-    : [""];
-  const initialFacilities = destination?.facilities
-    ? JSON.parse(destination.facilities)
-    : [""];
-  const initialHighlights = destination?.highlights
-    ? JSON.parse(destination.highlights)
-    : [""];
-  const initialItinerary = destination?.itinerary
-    ? JSON.parse(destination.itinerary)
-    : [{ time: "", activity: "" }];
+  // Parse JSON fields safely with helper
+  const safelyParse = (
+    jsonString: string | null | undefined,
+    fallback: any,
+  ) => {
+    if (!jsonString) return fallback;
+    try {
+      return JSON.parse(jsonString);
+    } catch (e) {
+      console.error("Failed to parse JSON:", e);
+      return fallback;
+    }
+  };
+
+  const initialImages = safelyParse(destination?.images, [""]);
+  const initialFacilities = safelyParse(destination?.facilities, [""]);
+  const initialHighlights = safelyParse(destination?.highlights, [""]);
+  const initialItinerary = safelyParse(destination?.itinerary, [
+    { time: "", activity: "" },
+  ]);
 
   // Helper to handle dynamic inputs
   const [images, setImages] = useState<string[]>(initialImages);
