@@ -101,11 +101,21 @@ export default function DestinationDetailClient({
 
     setIsBooking(true);
 
-    // Simulation
+    // Prepare query params for payment page
+    const params = new URLSearchParams({
+      destinationId: destination.id.toString(),
+      destinationName: destination.name,
+      paxCount: paxCount.toString(),
+      date: selectedDate,
+      price: pricePerPax.toString(),
+      image: images[0] || "",
+    });
+
+    // Simulate short delay then push to payment
     setTimeout(() => {
       setIsBooking(false);
-      setShowSuccessModal(true);
-    }, 1000);
+      router.push(`/booking/payment?${params.toString()}`);
+    }, 500);
   };
 
   // Features (Icon Mapping)
