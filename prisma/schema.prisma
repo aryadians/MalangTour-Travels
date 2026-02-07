@@ -19,6 +19,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   bookings  Booking[]
+  wishlists Wishlist[]
 }
 
 model Destination {
@@ -38,6 +39,7 @@ model Destination {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   bookings    Booking[]
+  wishlists   Wishlist[]
 }
 
 model Booking {
@@ -53,4 +55,16 @@ model Booking {
 
   user        User        @relation(fields: [userId], references: [id])
   destination Destination @relation(fields: [destinationId], references: [id])
+}
+
+model Wishlist {
+  id            String      @id @default(uuid())
+  userId        String
+  destinationId Int
+  createdAt     DateTime    @default(now())
+
+  user        User        @relation(fields: [userId], references: [id])
+  destination Destination @relation(fields: [destinationId], references: [id])
+
+  @@unique([userId, destinationId])
 }

@@ -50,23 +50,23 @@ export default function SignupPage() {
         </div>
 
         {/* Form */}
-        <form action={action} className="flex flex-col gap-5">
+        <form action={action} className="flex flex-col gap-6">
           {/* Full Name */}
           <div className="flex flex-col gap-2">
             <label
-              className="text-text-main dark:text-gray-200 text-sm font-semibold"
+              className="text-text-main dark:text-gray-200 text-sm font-bold"
               htmlFor="fullname"
             >
               Full Name
             </label>
             <div className="relative group">
-              <span className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                <span className="material-symbols-outlined text-text-muted group-focus-within:text-primary transition-colors">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                <span className="material-symbols-outlined text-text-muted group-focus-within:text-primary transition-colors text-[22px]">
                   person
                 </span>
-              </span>
+              </div>
               <input
-                className="w-full h-12 pl-14 pr-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-text-main dark:text-white placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base"
+                className="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-text-main dark:text-white placeholder:text-text-muted/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm font-medium"
                 id="fullname"
                 name="name"
                 placeholder="Enter your full name"
@@ -74,26 +74,28 @@ export default function SignupPage() {
               />
             </div>
             {state?.errors?.name && (
-              <p className="text-red-500 text-xs">{state.errors.name}</p>
+              <p className="text-red-500 text-xs font-semibold ml-1">
+                {state.errors.name}
+              </p>
             )}
           </div>
 
           {/* Email */}
           <div className="flex flex-col gap-2">
             <label
-              className="text-text-main dark:text-gray-200 text-sm font-semibold"
+              className="text-text-main dark:text-gray-200 text-sm font-bold"
               htmlFor="email"
             >
               Email Address
             </label>
             <div className="relative group">
-              <span className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                <span className="material-symbols-outlined text-text-muted group-focus-within:text-primary transition-colors">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                <span className="material-symbols-outlined text-text-muted group-focus-within:text-primary transition-colors text-[22px]">
                   mail
                 </span>
-              </span>
+              </div>
               <input
-                className="w-full h-12 pl-14 pr-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-text-main dark:text-white placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base"
+                className="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-text-main dark:text-white placeholder:text-text-muted/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm font-medium"
                 id="email"
                 name="email"
                 placeholder="name@example.com"
@@ -101,26 +103,28 @@ export default function SignupPage() {
               />
             </div>
             {state?.errors?.email && (
-              <p className="text-red-500 text-xs">{state.errors.email}</p>
+              <p className="text-red-500 text-xs font-semibold ml-1">
+                {state.errors.email}
+              </p>
             )}
           </div>
 
-          {/* Phone (Optional for now in backend) */}
+          {/* Phone (Optional) */}
           <div className="flex flex-col gap-2">
             <label
-              className="text-text-main dark:text-gray-200 text-sm font-semibold"
+              className="text-text-main dark:text-gray-200 text-sm font-bold"
               htmlFor="phone"
             >
               Phone Number
             </label>
             <div className="relative group">
-              <span className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                <span className="material-symbols-outlined text-text-muted group-focus-within:text-primary transition-colors">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                <span className="material-symbols-outlined text-text-muted group-focus-within:text-primary transition-colors text-[22px]">
                   call
                 </span>
-              </span>
+              </div>
               <input
-                className="w-full h-12 pl-14 pr-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-text-main dark:text-white placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base"
+                className="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-text-main dark:text-white placeholder:text-text-muted/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm font-medium"
                 id="phone"
                 name="phone"
                 placeholder="+62 812 3456 7890"
@@ -130,23 +134,23 @@ export default function SignupPage() {
           </div>
 
           {/* Passwords Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Password */}
             <div className="flex flex-col gap-2">
               <label
-                className="text-text-main dark:text-gray-200 text-sm font-semibold"
+                className="text-text-main dark:text-gray-200 text-sm font-bold"
                 htmlFor="password"
               >
                 Password
               </label>
               <div className="relative group">
-                <span className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-text-muted group-focus-within:text-primary transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                  <span className="material-symbols-outlined text-text-muted group-focus-within:text-primary transition-colors text-[22px]">
                     lock
                   </span>
-                </span>
+                </div>
                 <input
-                  className="w-full h-12 pl-14 pr-10 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-text-main dark:text-white placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base"
+                  className="w-full h-12 pl-12 pr-10 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-text-main dark:text-white placeholder:text-text-muted/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm font-medium"
                   id="password"
                   name="password"
                   placeholder="••••••••"
@@ -162,25 +166,27 @@ export default function SignupPage() {
                 </button>
               </div>
               {state?.errors?.password && (
-                <p className="text-red-500 text-xs">{state.errors.password}</p>
+                <p className="text-red-500 text-xs font-semibold ml-1">
+                  {state.errors.password}
+                </p>
               )}
             </div>
-            {/* Confirm Password (UI only for now or strict validation later) */}
+            {/* Confirm Password */}
             <div className="flex flex-col gap-2">
               <label
-                className="text-text-main dark:text-gray-200 text-sm font-semibold"
+                className="text-text-main dark:text-gray-200 text-sm font-bold"
                 htmlFor="confirm-password"
               >
                 Confirm Password
               </label>
               <div className="relative group">
-                <span className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-text-muted group-focus-within:text-primary transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                  <span className="material-symbols-outlined text-text-muted group-focus-within:text-primary transition-colors text-[22px]">
                     lock_reset
                   </span>
-                </span>
+                </div>
                 <input
-                  className="w-full h-12 pl-14 pr-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-text-main dark:text-white placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base"
+                  className="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-text-main dark:text-white placeholder:text-text-muted/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm font-medium"
                   id="confirm-password"
                   placeholder="••••••••"
                   type="password"
@@ -190,10 +196,10 @@ export default function SignupPage() {
           </div>
 
           {/* Terms Checkbox */}
-          <div className="flex items-start gap-3 mt-2">
+          <div className="flex items-start gap-3 mt-1">
             <div className="flex h-6 items-center">
               <input
-                className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary"
                 id="terms"
                 name="terms"
                 type="checkbox"
@@ -201,7 +207,7 @@ export default function SignupPage() {
             </div>
             <div className="text-sm leading-6">
               <label
-                className="font-medium text-text-main dark:text-gray-300"
+                className="font-medium text-text-muted dark:text-gray-400"
                 htmlFor="terms"
               >
                 I agree to the{" "}
@@ -225,24 +231,24 @@ export default function SignupPage() {
 
           {/* Submit Button */}
           <button
-            className="mt-4 flex w-full items-center justify-center rounded-xl bg-primary h-12 px-6 text-sm font-bold leading-normal text-[#111814] tracking-wider uppercase shadow-sm hover:bg-primary-hover transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-background-dark"
+            className="mt-2 flex w-full items-center justify-center rounded-xl bg-primary h-12 px-6 text-sm font-bold leading-normal text-[#111814] tracking-wider uppercase shadow-lg shadow-primary/25 hover:bg-primary-hover hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-background-dark"
             type="submit"
           >
             Create Account
           </button>
 
           {/* Divider */}
-          <div className="relative flex items-center py-2">
-            <div className="grow border-t border-border-light dark:border-border-dark"></div>
-            <span className="shrink-0 mx-4 text-xs font-semibold text-text-muted uppercase tracking-wider">
+          <div className="relative flex items-center py-1">
+            <div className="grow border-t border-gray-200 dark:border-gray-700"></div>
+            <span className="shrink-0 mx-4 text-[10px] font-bold text-text-muted uppercase tracking-wider">
               Or continue with
             </span>
-            <div className="grow border-t border-border-light dark:border-border-dark"></div>
+            <div className="grow border-t border-gray-200 dark:border-gray-700"></div>
           </div>
 
           {/* Social Button */}
           <button
-            className="flex w-full items-center justify-center gap-3 rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark h-12 px-6 text-sm font-bold text-text-main dark:text-white hover:bg-gray-50 dark:hover:bg-[#22362c] transition-colors"
+            className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 h-12 px-6 text-sm font-bold text-text-main dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
             type="button"
           >
             <img
@@ -255,7 +261,7 @@ export default function SignupPage() {
           </button>
 
           {/* Login Link */}
-          <p className="mt-4 text-center text-base text-text-muted dark:text-gray-400">
+          <p className="mt-2 text-center text-sm text-text-muted dark:text-gray-400">
             Already have an account?
             <Link
               className="font-bold text-primary hover:text-primary-hover hover:underline transition-colors ml-1"

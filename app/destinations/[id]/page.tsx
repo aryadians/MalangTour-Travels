@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import BookingForm from "@/components/BookingForm";
 import { getSession } from "@/lib/session";
+import WishlistButton from "@/components/WishlistButton";
 
 // Generate static params (fetch IDs from DB)
 export async function generateStaticParams() {
@@ -32,6 +33,17 @@ export default async function DestinationDetail({
   }
 
   const session = await getSession();
+
+  let isWishlisted = false;
+  if (session && session.userId) {
+    const wishlistEntry = await prisma.wishlist.findFirst({
+      where: {
+        userId: session.userId,
+        destinationId: id,
+      },
+    });
+    isWishlisted = !!wishlistEntry;
+  }
 
   // Parse JSON fields
   let images: string[] = [];
@@ -85,7 +97,7 @@ export default async function DestinationDetail({
               Destinations
             </Link>
             <Link
-              href="#"
+              href="/packages"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               Packages
@@ -161,17 +173,24 @@ export default async function DestinationDetail({
                   <span>{destination.location}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
-                <span
-                  className="material-symbols-outlined text-accent"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  star
-                </span>
-                <span className="text-white font-bold text-lg">
-                  {destination.rating}
-                </span>
-                <span className="text-white/70 text-sm">(Verified)</span>
+              <div className="flex items-center gap-3">
+                <WishlistButton
+                  destinationId={destination.id}
+                  initialIsWishlisted={isWishlisted}
+                  isLoggedIn={!!session?.userId}
+                />
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
+                  <span
+                    className="material-symbols-outlined text-accent"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    star
+                  </span>
+                  <span className="text-white font-bold text-lg">
+                    {destination.rating}
+                  </span>
+                  <span className="text-white/70 text-sm">(Verified)</span>
+                </div>
               </div>
             </div>
           </div>
