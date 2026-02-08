@@ -56,7 +56,7 @@ export default function DestinationsPage() {
               transition={{ delay: idx * 0.1 }}
             >
               <Link
-                href={`/destinations/${dest.id}`}
+                href={`/destinations/${dest.slug}`}
                 className="group block h-full"
               >
                 <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100 h-full flex flex-col group-hover:-translate-y-2">
@@ -85,18 +85,23 @@ export default function DestinationsPage() {
                     <p className="text-gray-500 text-sm mb-6 line-clamp-2">
                       {dest.description}
                     </p>
-                    <div className="mt-auto flex items-end justify-between border-t border-gray-50 pt-4">
-                      <div>
-                        <p className="text-xs text-gray-400">Start from</p>
-                        <p className="text-lg font-black text-gray-900">
-                          {formatPrice(dest.price)}
-                        </p>
-                      </div>
-                      <span className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                        <span className="material-symbols-outlined">
-                          arrow_forward
+                    <div className="mt-auto pt-6 border-t border-gray-50 flex flex-col gap-4">
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <p className="text-xs text-gray-400">Start from</p>
+                          <p className="text-lg font-black text-gray-900">
+                            {formatPrice(dest.price)}
+                          </p>
+                        </div>
+                        <span className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                          <span className="material-symbols-outlined">
+                            arrow_forward
+                          </span>
                         </span>
-                      </span>
+                      </div>
+                      <button className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95">
+                        Book Now
+                      </button>
                     </div>
                   </div>
                 </div>

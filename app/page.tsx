@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   motion,
@@ -10,22 +10,23 @@ import {
 } from "framer-motion";
 import { useTravel } from "@/context/TravelContext";
 import Testimonials from "@/components/Testimonials";
+import Partners from "@/components/Partners";
 
 export default function Home() {
   const { destinations, formatPrice } = useTravel();
-  const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const { scrollY } = useScroll();
-  const backgroundY = useTransform(scrollY, [0, 500], [0, 150]);
-  const textOpacity = useTransform(scrollY, [0, 300], [1, 0]);
+  const backgroundY = useTransform(scrollY, [0, 500], [0, 200]);
+  const heroOpacity = useTransform(scrollY, [0, 400], [1, 0]);
 
   const [weather, setWeather] = useState<{
     temp: number;
     condition: string;
   } | null>(null);
 
-  // Fetch Real-time Weather for Bromo
   useEffect(() => {
     const fetchWeather = async () => {
       try {
@@ -35,289 +36,193 @@ export default function Home() {
         const data = await res.json();
         setWeather({
           temp: Math.round(data.current.temperature_2m),
-          condition: "Sunny",
+          condition: "Clear Sky",
         });
       } catch (error) {
-        console.error("Failed to fetch weather", error);
-        setWeather({ temp: 12, condition: "Sunny" });
+        setWeather({ temp: 18, condition: "Sunny" });
       }
     };
     fetchWeather();
   }, []);
 
-  // EXTENDED CATEGORIES (Service Menu)
-  const services = [
-    {
-      icon: "landscape",
-      name: "Open Trip",
-      color: "bg-blue-100 text-blue-600",
-    },
-    {
-      icon: "family_restroom",
-      name: "Family",
-      color: "bg-orange-100 text-orange-600",
-    },
-    { icon: "favorite", name: "Honeymoon", color: "bg-pink-100 text-pink-600" },
-    {
-      icon: "groups",
-      name: "Corporate",
-      color: "bg-purple-100 text-purple-600",
-    },
-    {
-      icon: "directions_car",
-      name: "Car Rental",
-      color: "bg-emerald-100 text-emerald-600",
-    },
-    { icon: "hotel", name: "Staycation", color: "bg-cyan-100 text-cyan-600" },
+  const featuredPreviews = [
+    { name: "Bromo Sunrise", img: "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?w=400&q=80", tag: "Most Popular" },
+    { name: "Ijen Blue Fire", img: "https://images.unsplash.com/photo-1626245914933-9f0940cc0603?w=400&q=80", tag: "Exclusive" },
+    { name: "Hidden Waterfalls", img: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=400&q=80", tag: "Hidden Gem" },
   ];
 
-  const promos = [
-    {
-      title: "Gajian Sale",
-      desc: "Diskon up to 50% ke Bromo",
-      code: "GAJIAN50",
-      bg: "bg-gradient-to-r from-emerald-500 to-teal-500",
-      image:
-        "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&q=80&w=400",
-    },
-    {
-      title: "Pantai Seru",
-      desc: "Hemat 20% explore Malang Selatan",
-      code: "PANTAI20",
-      bg: "bg-gradient-to-r from-blue-500 to-indigo-500",
-      image:
-        "https://images.unsplash.com/photo-1510662145379-13537db782dc?auto=format&fit=crop&q=80&w=400",
-    },
-    {
-      title: "Staycation",
-      desc: "Free Breakfast + Late Checkout",
-      code: "SANTUY",
-      bg: "bg-gradient-to-r from-orange-500 to-red-500",
-      image:
-        "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=400",
-    },
+  const quickMenu = [
+    { icon: "landscape", name: "Bromo Tour", desc: "Sunrise & Milky Way", color: "bg-blue-500" },
+    { icon: "hotel", name: "Resorts", desc: "Handpicked Luxury", color: "bg-emerald-500" },
+    { icon: "directions_car", name: "Premium Car", desc: "Alphard & Hiace", color: "bg-orange-500" },
+    { icon: "restaurant", name: "Fine Dining", desc: "Local Authentic", color: "bg-rose-500" },
+    { icon: "confirmation_number", name: "Attractions", desc: "Skip the line", color: "bg-indigo-500" },
+    { icon: "more_horiz", name: "Custom Trip", desc: "Tailored for you", color: "bg-slate-500" },
   ];
 
-  // Filter Logic
   const categories = ["All", "Gunung", "Pantai", "Kota", "Kuliner"];
+  
   const filteredDestinations = destinations.filter((dest) => {
-    const matchesSearch = dest.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      activeCategory === "All" || dest.category === activeCategory;
-    return matchesSearch && matchesCategory;
+    const matchesCategory = activeCategory === "All" || dest.category === activeCategory;
+    return matchesCategory;
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-display selection:bg-emerald-500 selection:text-white">
+      
       {/* 1. HERO SECTION */}
-      <section className="relative h-[90vh] w-full overflow-hidden">
-        {/* Parallax Background Image */}
-        <motion.div className="absolute inset-0" style={{ y: backgroundY }}>
-          <img
-            src="https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&q=80&w=2000"
-            alt="Mount Bromo"
-            className="w-full h-full object-cover scale-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-gray-50/90"></div>
-        </motion.div>
+      <section className="relative h-screen min-h-[800px] w-full flex flex-col items-center justify-center z-10 overflow-visible">
+        {/* Parallax Background */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <motion.div style={{ y: backgroundY }} className="w-full h-full">
+            <img
+              src="https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&q=80&w=2000"
+              alt="Bromo"
+              className="w-full h-full object-cover brightness-[0.4] scale-105"
+            />
+          </motion.div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-transparent to-[#f8fafc] dark:to-slate-950"></div>
+        </div>
 
-        {/* Hero Content */}
-        <div className="relative h-full flex flex-col justify-center items-center text-center px-4 md:px-6 pt-10">
-          <motion.div
-            style={{ opacity: textOpacity }}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="space-y-8 max-w-5xl w-full"
-          >
-            {/* Weather Widget (Floating) */}
-            <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-5 py-2 rounded-full border border-white/20 text-white shadow-lg"
+        {/* Content Container - Use flex-grow to push content to center but leave room for header/footer */}
+        <div className="relative z-10 container mx-auto px-6 flex flex-col items-center justify-center flex-1">
+          <motion.div style={{ opacity: heroOpacity }} className="text-center">
+            {/* Weather Pill */}
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-[11px] font-black tracking-[0.2em] uppercase mb-8 shadow-2xl"
             >
-              <span className="material-symbols-outlined text-yellow-400 animate-spin-slow">
-                {weather ? "sunny" : "cloud"}
-              </span>
-              <div className="text-left leading-none">
-                <span className="block text-[10px] font-bold opacity-80 uppercase tracking-widest">
-                  Live Weather
-                </span>
-                <span className="text-sm font-bold">
-                  Bromo, {weather ? `${weather.temp}°C` : "--°C"}
-                </span>
-              </div>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              {weather ? `MALANG LIVE: ${weather.temp}°C` : "Premium Escapes"}
             </motion.div>
 
-            <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter drop-shadow-2xl leading-[0.9]">
-              EXPLORE <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-cyan-400">
-                EAST JAVA
+            <h1 className="text-6xl md:text-[9rem] font-black text-white tracking-tighter mb-8 leading-[0.8] drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)] uppercase">
+              REDEFINE <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-300 italic font-serif pr-4 text-7xl md:text-[10rem]">
+                Travel.
               </span>
             </h1>
 
-            <p className="text-white/90 text-lg md:text-2xl font-medium max-w-2xl mx-auto leading-relaxed drop-shadow-md">
-              Discover the hidden gems of Malang and Bromo with the #1 Premium
-              Travel Agent.
+            <p className="text-white/70 text-lg md:text-2xl font-medium max-w-2xl mx-auto tracking-wide mb-4 leading-relaxed drop-shadow-lg">
+              High-fidelity journeys through the most majestic landscapes of East Java.
             </p>
-
-            {/* BIG SEARCH BAR */}
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="bg-white p-2 pl-4 rounded-full shadow-2xl max-w-3xl mx-auto flex items-center gap-2 transform translate-y-8 border border-gray-100/50 backdrop-blur-xl"
-            >
-              <div className="flex-1 flex items-center px-4 gap-4 border-r border-gray-100">
-                <span className="material-symbols-outlined text-emerald-500 text-3xl">
-                  location_on
-                </span>
-                <div className="text-left w-full py-2">
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                    Where to?
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Search destinations..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-transparent outline-none font-bold text-gray-900 placeholder:text-gray-300 text-lg"
-                  />
-                </div>
-              </div>
-              <div className="hidden md:flex flex-1 items-center px-4 gap-4">
-                <span className="material-symbols-outlined text-emerald-500 text-3xl">
-                  calendar_month
-                </span>
-                <div className="text-left py-2">
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                    When?
-                  </label>
-                  <span className="block font-bold text-gray-500 text-lg">
-                    Any Date
-                  </span>
-                </div>
-              </div>
-              <button className="bg-gray-900 hover:bg-emerald-600 text-white rounded-full w-14 h-14 flex items-center justify-center font-bold shadow-lg transition-all group">
-                <span className="material-symbols-outlined group-hover:scale-110 transition-transform">
-                  search
-                </span>
-              </button>
-            </motion.div>
           </motion.div>
         </div>
-      </section>
 
-      {/* 2. SERVICE MENU (The "Popular App" look) */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 -mt-10 relative z-10 mb-20">
-        <div className="bg-white rounded-3xl shadow-xl p-8 grid grid-cols-3 md:grid-cols-6 gap-6 justify-items-center">
-          {services.map((item, idx) => (
-            <motion.div
-              key={idx}
-              whileHover={{ y: -5 }}
-              className="flex flex-col items-center gap-3 cursor-pointer group"
-            >
-              <div
-                className={`w-14 h-14 ${item.color} rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-all`}
+        {/* 2. FLOATING FEATURED CARDS - Positioned precisely at the bottom of hero */}
+        <div className="absolute bottom-0 left-0 right-0 z-[100] container mx-auto px-4 translate-y-1/2">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            {featuredPreviews.map((p, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + (i * 0.1), duration: 0.8 }}
+                whileHover={{ y: -15, transition: { duration: 0.3 } }}
+                className="group relative h-56 md:h-72 rounded-[3rem] overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.25)] border-4 border-white dark:border-slate-800 cursor-pointer bg-white dark:bg-slate-900"
               >
-                <span className="material-symbols-outlined text-2xl">
-                  {item.icon}
-                </span>
-              </div>
-              <span className="text-xs font-bold text-gray-600 group-hover:text-emerald-600 text-center">
-                {item.name}
-              </span>
-            </motion.div>
-          ))}
+                <img src={p.img} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={p.name} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                <div className="relative z-10 p-8 h-full flex flex-col justify-end">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 mb-2">{p.tag}</span>
+                  <h4 className="text-2xl font-black text-white tracking-tight">{p.name}</h4>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* 3. PROMO CAROUSEL */}
-      <section className="mb-20 px-4 md:px-6 max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-            <span className="material-symbols-outlined text-red-500">
-              local_fire_department
-            </span>
-            Hot Deals
-          </h2>
-          <a
-            href="/offers"
-            className="text-emerald-600 font-bold text-sm hover:underline"
-          >
-            See All Promos
-          </a>
+      {/* 3. QUICK ACCESS PREMIUM CARDS */}
+      <section className="pt-48 md:pt-64 pb-24 container mx-auto px-6 relative z-10">
+        <div className="flex flex-col items-center text-center mb-16">
+           <span className="text-emerald-500 font-black text-[10px] uppercase tracking-[0.4em] mb-4">Our Specialities</span>
+           <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight text-center">Full-Service Luxury.</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {promos.map((promo, idx) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          {quickMenu.map((item, idx) => (
             <motion.div
               key={idx}
-              whileHover={{ scale: 1.02 }}
-              className={`relative rounded-3xl overflow-hidden shadow-lg h-48 flex items-center cursor-pointer group`}
+              whileHover={{ y: -10 }}
+              className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-50 dark:border-slate-800 group cursor-pointer flex flex-col items-center text-center transition-all duration-500"
             >
-              <img
-                src={promo.image}
-                className="absolute inset-0 w-full h-full object-cover"
-                alt={promo.title}
-              />
-              <div
-                className={`absolute inset-0 ${promo.bg} opacity-90 mix-blend-multiply`}
-              ></div>
-              <div className="relative z-10 p-6 text-white w-full">
-                <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold mb-3 inline-block border border-white/30">
-                  Limited Offer
-                </span>
-                <h3 className="text-2xl font-black mb-1">{promo.title}</h3>
-                <p className="text-white/90 text-sm font-medium mb-4">
-                  {promo.desc}
-                </p>
-                <div className="flex justify-between items-center bg-white/10 p-2 rounded-xl border border-dashed border-white/30">
-                  <span className="font-mono text-sm font-bold tracking-widest">
-                    {promo.code}
-                  </span>
-                  <span className="material-symbols-outlined text-sm">
-                    content_copy
-                  </span>
-                </div>
+              <div className={`w-16 h-16 ${item.color} rounded-3xl flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
+                <span className="material-symbols-outlined text-3xl font-icon">{item.icon}</span>
               </div>
+              <h4 className="font-black text-slate-900 dark:text-white text-sm mb-2">{item.name}</h4>
+              <p className="text-[10px] text-slate-400 font-medium leading-tight">{item.desc}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* 4. DESTINATIONS GRID */}
-      <section className="py-12 bg-white rounded-[3rem] mb-20 shadow-sm border border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-black text-gray-900">
-              Popular Destinations
-            </h2>
-            <p className="text-gray-500 mt-2">Curated by our local experts</p>
+      {/* 4. WHY CHOOSE US */}
+      <section className="py-32 container mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
+          <div className="space-y-10">
+            <div>
+              <span className="text-emerald-500 font-black text-xs tracking-[0.2em] uppercase mb-4 block">Our Philosophy</span>
+              <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white leading-[1.1] tracking-tighter text-left">We Don't Just Travel, <br /> We Craft Stories.</h2>
+            </div>
+            <p className="text-slate-500 dark:text-slate-400 text-lg font-medium leading-relaxed text-left">
+              Discover East Java through the eyes of locals. We provide exclusive access to hidden spots, premium logistics, and certified guides to ensure your journey is flawless.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              {[
+                { title: "24/7 Concierge", desc: "Always available for you", icon: "support_agent" },
+                { title: "Premium Fleet", desc: "Travel in maximum comfort", icon: "verified" }
+              ].map((feat, i) => (
+                <div key={i} className="flex gap-4 items-start">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 shrink-0">
+                    <span className="material-symbols-outlined font-icon">{feat.icon}</span>
+                  </div>
+                  <div className="text-left">
+                    <h5 className="font-black text-slate-900 dark:text-white mb-1">{feat.title}</h5>
+                    <p className="text-xs text-slate-400 font-medium">{feat.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="relative">
+            <div className="absolute -inset-10 bg-emerald-500/10 rounded-[4rem] blur-3xl"></div>
+            <div className="grid grid-cols-2 gap-4 relative z-10">
+              <img src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&q=80&w=600" className="rounded-3xl shadow-2xl translate-y-10" alt="" />
+              <img src="https://images.unsplash.com/photo-1510662145379-13537db782dc?auto=format&fit=crop&q=80&w=600" className="rounded-3xl shadow-2xl" alt="" />
+            </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Category Filters Center */}
-            <div className="flex flex-wrap justify-center gap-2 mt-6">
-              {categories.map((cat) => (
+      {/* 5. POPULAR DESTINATIONS */}
+      <section ref={resultsRef} className="py-32 bg-slate-900 rounded-[4rem] mx-4 md:mx-10 my-20 shadow-2xl overflow-hidden relative border border-white/5">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none translate-x-1/3 -translate-y-1/3"></div>
+        
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-20">
+            <span className="text-emerald-400 font-black text-xs tracking-[0.3em] uppercase mb-4 block text-center">The Collection</span>
+            <h2 className="text-4xl md:text-7xl font-black text-white mb-12 tracking-tighter leading-none text-center">Curated <br /> Hotspots.</h2>
+            
+            <div className="flex flex-wrap justify-center gap-3">
+              {categories.map((c) => (
                 <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-5 py-2 rounded-full font-bold text-sm transition-all ${
-                    activeCategory === cat
-                      ? "bg-gray-900 text-white"
-                      : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                  key={c}
+                  onClick={() => setActiveCategory(c)}
+                  className={`px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-500 ${
+                    activeCategory === c 
+                      ? "bg-emerald-500 text-slate-900 shadow-xl scale-110" 
+                      : "bg-white/5 text-white/40 hover:bg-white/10"
                   }`}
                 >
-                  {cat}
+                  {c}
                 </button>
               ))}
             </div>
           </div>
 
-          <motion.div
-            layout
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-          >
-            <AnimatePresence>
+          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+            <AnimatePresence mode="popLayout">
               {filteredDestinations.map((dest) => (
                 <motion.div
                   key={dest.id}
@@ -325,43 +230,35 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.4 }}
                 >
-                  <Link href={`/destinations/${dest.id}`} className="group">
-                    <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all h-[320px] relative">
-                      <div className="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm">
-                        <span className="material-symbols-outlined text-yellow-500 text-sm">
-                          star
-                        </span>
-                        {dest.rating}
-                      </div>
-                      <img
-                        src={dest.image}
-                        className="w-full h-1/2 object-cover"
-                        alt={dest.name}
-                      />
-                      <div className="p-4 flex flex-col justify-between h-1/2">
-                        <div>
-                          <span className="text-xs font-bold text-emerald-600">
-                            {dest.category}
-                          </span>
-                          <h3 className="font-bold text-gray-900 line-clamp-2 leading-tight mt-1">
-                            {dest.name}
-                          </h3>
+                  <Link href={`/destinations/${dest.slug}`} className="group block h-full">
+                    <div className="bg-slate-800/50 backdrop-blur-md rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-emerald-500/30 transition-all duration-500 h-full flex flex-col shadow-2xl">
+                      <div className="relative h-64 overflow-hidden">
+                        <img src={dest.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 brightness-75 group-hover:brightness-100" alt="" />
+                        <div className="absolute top-6 right-6 bg-black/40 backdrop-blur-md px-4 py-2 rounded-2xl text-[10px] font-black flex items-center gap-2 text-white shadow-xl">
+                          <span className="material-symbols-outlined text-yellow-400 text-sm filled font-icon">star</span>
+                          {dest.rating}
                         </div>
-                        <div>
-                          <p className="text-xs text-gray-400 mb-1">
-                            Start from
-                          </p>
-                          <div className="flex items-center justify-between">
-                            <p className="text-lg font-black text-emerald-600">
-                              {formatPrice(dest.price)}
-                            </p>
-                            <span className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                              <span className="material-symbols-outlined text-sm">
-                                arrow_forward
-                              </span>
-                            </span>
-                          </div>
+                      </div>
+                      <div className="p-8 flex-1 flex flex-col justify-between">
+                        <div className="text-left">
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 block text-left">{dest.category}</span>
+                          <h3 className="text-xl font-black text-white mt-2 leading-tight group-hover:text-emerald-400 transition-colors text-left">{dest.name}</h3>
+                        </div>
+                        <div className="mt-8 pt-6 border-t border-white/5 flex flex-col gap-4">
+                           <div className="flex items-center justify-between">
+                              <div className="text-left">
+                                 <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1 text-left">Starting from</p>
+                                 <p className="text-2xl font-black text-white text-left">{formatPrice(dest.price)}</p>
+                              </div>
+                              <div className="w-12 h-12 rounded-full bg-emerald-500 text-slate-900 flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-4 transition-all duration-500">
+                                 <span className="material-symbols-outlined font-icon">arrow_forward</span>
+                              </div>
+                           </div>
+                           <button className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95">
+                             Book Now
+                           </button>
                         </div>
                       </div>
                     </div>
@@ -370,108 +267,54 @@ export default function Home() {
               ))}
             </AnimatePresence>
           </motion.div>
-
-          <div className="text-center mt-12">
-            <Link
-              href="/destinations"
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-full border-2 border-gray-200 font-bold text-gray-600 hover:border-emerald-500 hover:text-emerald-600 transition-all"
-            >
-              View All Destinations
-              <span className="material-symbols-outlined">arrow_forward</span>
-            </Link>
-          </div>
         </div>
       </section>
 
-      {/* 5. WHY CHOOSE US */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 mb-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div className="order-2 md:order-1 relative">
-            <div className="absolute -inset-4 bg-emerald-100 rounded-[3rem] -rotate-3"></div>
-            <img
-              src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&q=80&w=800"
-              className="relative rounded-[2.5rem] shadow-2xl rotate-2 hover:rotate-0 transition-all duration-500"
-              alt="Happy Traveler"
-            />
+      {/* 6. EXPERT TRAVEL GUIDE */}
+      <section className="py-32 container mx-auto px-6">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+          <div className="max-w-xl text-left">
+            <span className="text-emerald-500 font-black text-xs tracking-[0.2em] uppercase mb-4 block text-left">Travel Insights</span>
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter text-left">Experts Guidance.</h2>
           </div>
-          <div className="order-1 md:order-2 space-y-8">
-            <span className="text-emerald-600 font-bold tracking-wider uppercase text-sm bg-emerald-50 px-3 py-1 rounded-full">
-              Why Choose Us
-            </span>
-            <h2 className="text-4xl font-black text-gray-900 leading-tight">
-              We Make Your Trip <br />{" "}
-              <span className="text-emerald-500">Fun & Worry-Free</span>
-            </h2>
-            <p className="text-gray-500 text-lg">
-              We are an official partner of Pesona Indonesia with 10+ years of
-              experience in managing premium tours in East Java.
-            </p>
-
-            <div className="grid grid-cols-1 gap-6">
-              {[
-                {
-                  title: "Best Price Guarantee",
-                  desc: "Found cheaper? We match it.",
-                  icon: "sell",
-                },
-                {
-                  title: "Professional Local Guide",
-                  desc: "Certified and English speaking guides.",
-                  icon: "person_pin_circle",
-                },
-                {
-                  title: "24/7 Support",
-                  desc: "We are here for you, anytime.",
-                  icon: "support_agent",
-                },
-              ].map((feat, i) => (
-                <div
-                  key={i}
-                  className="flex gap-4 items-start p-4 hover:bg-white hover:shadow-lg rounded-2xl transition-all cursor-default group"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-900 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                    <span className="material-symbols-outlined">
-                      {feat.icon}
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 text-lg">
-                      {feat.title}
-                    </h4>
-                    <p className="text-gray-500">{feat.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <Link href="/blog" className="text-slate-400 font-black text-[10px] uppercase tracking-widest hover:text-emerald-500 transition-colors border-b border-slate-200 dark:border-slate-800 pb-2">Read All Guides</Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          {[
+            { title: "Bromo Survival Guide", date: "Aug 24, 2023", img: "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&q=80&w=600" },
+            { title: "Hidden Waterfall Map", date: "Sep 02, 2023", img: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&q=80&w=600" },
+            { title: "Culinary Hotspots", date: "Oct 12, 2023", img: "https://images.unsplash.com/photo-1510662145379-13537db782dc?auto=format&fit=crop&q=80&w=600" }
+          ].map((blog, i) => (
+            <motion.div key={i} whileHover={{ y: -10 }} className="group cursor-pointer">
+              <div className="h-80 rounded-[2.5rem] overflow-hidden mb-6 shadow-xl shadow-slate-200/50 dark:shadow-none">
+                <img src={blog.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
+              </div>
+              <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 text-left">{blog.date}</p>
+              <h4 className="text-2xl font-black text-slate-900 dark:text-white leading-tight text-left">{blog.title}</h4>
+            </motion.div>
+          ))}
         </div>
       </section>
 
-      {/* 5.5. TESTIMONIALS */}
       <Testimonials />
+      <Partners />
 
-      {/* 6. NEWSLETTER & CTA */}
-      <section className="py-20 bg-gray-900 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-600 rounded-full blur-[150px] opacity-20 translate-x-1/3 -translate-y-1/3"></div>
-        <div className="max-w-4xl mx-auto px-6 text-center relative z-10 w-full">
-          <h2 className="text-4xl md:text-5xl font-black mb-6">
-            Ready for your next adventure?
-          </h2>
-          <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
-            Get exclusive offers and travel tips directly to your inbox. Join
-            over 10,000+ happy travelers in our community.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto w-full">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="px-6 py-4 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-emerald-500 outline-none w-full backdrop-blur-sm"
-            />
-            <button className="px-8 py-4 rounded-xl bg-emerald-500 text-white font-bold hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-900/50 whitespace-nowrap">
-              Subscribe
-            </button>
-          </div>
-        </div>
+      {/* 8. IMMERSIVE CTA */}
+      <section className="py-60 bg-slate-950 text-white relative overflow-hidden text-center px-6 rounded-t-[5rem] -mt-10 shadow-[0_-40px_100px_rgba(0,0,0,0.5)] border-t border-white/5">
+         <div className="absolute inset-0 opacity-20 pointer-events-none">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] bg-emerald-500/20 rounded-full blur-[150px]"></div>
+         </div>
+         <div className="container mx-auto relative z-10 text-center">
+            <h2 className="text-7xl md:text-[12rem] font-black tracking-tighter leading-[0.8] mb-20 uppercase text-center">UNFOLD YOUR <br /> <span className="text-white/10 italic font-serif">Destiny.</span></h2>
+            <div className="flex flex-col sm:flex-row justify-center gap-8 items-center">
+               <Link href="/destinations" className="px-16 py-8 bg-emerald-500 text-slate-950 rounded-full font-black uppercase tracking-[0.3em] text-sm hover:bg-white transition-all hover:scale-105 shadow-2xl shadow-emerald-500/40">
+                  Plan Your Trip
+               </Link>
+               <Link href="/help" className="px-16 py-8 border-2 border-white/10 text-white rounded-full font-black uppercase tracking-[0.3em] text-sm hover:bg-white/5 transition-all">
+                  Consult Expert
+               </Link>
+            </div>
+         </div>
       </section>
     </div>
   );

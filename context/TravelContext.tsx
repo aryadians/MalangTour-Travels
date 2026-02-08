@@ -8,6 +8,7 @@ import { getMe } from "@/actions/auth";
 export interface Destination {
   id: string | number;
   name: string;
+  slug: string;
   category: string;
   location: string;
   price: number;
@@ -65,6 +66,12 @@ interface TravelContextType {
 const TravelContext = createContext<TravelContextType | undefined>(undefined);
 
 export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // 1. GLOBAL SETTINGS STATE
   const [language, setLanguage] = useState("ID"); // ID or EN
   const [currency, setCurrency] = useState("IDR"); // IDR or USD
@@ -79,14 +86,18 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
       const mappedDestinations: Destination[] = data.map((d: any) => {
         let images = [];
         try {
-          images = typeof d.images === "string" ? JSON.parse(d.images) : d.images;
+          images =
+            typeof d.images === "string" ? JSON.parse(d.images) : d.images;
         } catch (e) {
           images = [];
         }
 
         let itinerary = [];
         try {
-          itinerary = typeof d.itinerary === "string" ? JSON.parse(d.itinerary) : d.itinerary;
+          itinerary =
+            typeof d.itinerary === "string"
+              ? JSON.parse(d.itinerary)
+              : d.itinerary;
         } catch (e) {
           itinerary = [];
         }
@@ -168,6 +179,8 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
   const updateBooking = (data: Partial<Booking>) => {
     setCurrentBooking((prev) => ({ ...prev, ...data }));
   };
+
+  if (!isMounted) return null;
 
   return (
     <TravelContext.Provider

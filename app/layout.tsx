@@ -21,7 +21,13 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getSession();
+  // Try to get session but handle potential errors or mismatches
+  let user = null;
+  try {
+    user = await getSession();
+  } catch (e) {
+    console.error("Session fetch failed in layout", e);
+  }
 
   return (
     <html lang="en" className={`${inter.variable} light`}>
@@ -35,7 +41,9 @@ export default async function RootLayout({
         <TravelProvider>
           {/* Note: Navbar is handled inside pages or components now using Context if customized */}
           <Navbar user={user} />
-          {children}
+          <main>
+            {children}
+          </main>
           <Footer />
           <Toaster position="top-center" reverseOrder={false} />
         </TravelProvider>

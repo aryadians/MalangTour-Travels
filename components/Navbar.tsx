@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth";
@@ -31,56 +31,23 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
     await logout();
   };
 
-  // Merge session user with context user (Context user has points/loyalty data)
-  // Logic: Session takes precedence for auth state.
-  // If session exists, user is logged in.
-  // If no session, check if context has explicit isLoggedIn=true (for client-side only flows if any)
   const activeUser = sessionUser
     ? { ...user, ...sessionUser }
-    : user?.isLoggedIn && user?.email // Ensure we have at least an email if relying on context
+    : user?.isLoggedIn && user?.email 
       ? user
       : null;
 
   const pathname = usePathname();
-
-  // Hide Navbar on Dashboard and Admin pages (they have their own layouts)
+  const isHome = pathname === "/";
+  
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin")) {
     return null;
   }
 
-  const isHome = pathname === "/";
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-
-  // Handle scroll effect
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Dynamic styling based on route and scroll state
-  const isTransparent =
-    pathname === "/" && !isScrolled && !pathname.includes("/auth");
-
-  const navClasses = `fixed top-0 left-0 right-0 z-[999] w-full px-6 py-4 ${
-    isTransparent
-      ? "bg-transparent text-white"
-      : "bg-[#ffffff] shadow-md text-[#000000] border-b border-gray-200"
-  }`;
-
-  const linkClasses = `text-sm font-medium ${
-    isTransparent
-      ? "text-white/90 hover:text-white drop-shadow-sm"
-      : "text-[#000000] hover:text-emerald-600"
-  }`;
-
-  const logoTextClasses = `text-xl font-bold tracking-tight ${
-    isTransparent ? "text-white" : "text-[#047857]"
-  }`;
+  const profileRef = useRef<HTMLDivElement>(null);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -90,7 +57,13 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
     { name: "Help", href: "/help" },
   ];
 
-  const profileRef = React.useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -107,95 +80,61 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
     };
   }, []);
 
+  const isTransparent = isHome && !isScrolled && !isMobileMenuOpen;
+
   return (
     <nav
-      className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled || isMobileMenuOpen
-          ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm py-4"
-          : "bg-transparent py-6"
+      className={`fixed w-full z-[1000] transition-all duration-500 ${
+        isTransparent
+          ? "bg-transparent py-6"
+          : "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-lg py-4 border-b border-slate-200/50 dark:border-slate-800/50"
       }`}
     >
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex justify-between items-center">
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform">
-              <span className="material-symbols-outlined text-white text-2xl">
+            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform shadow-lg shadow-emerald-500/20">
+              <span className="material-symbols-outlined text-white text-2xl font-icon">
                 landscape
               </span>
             </div>
             <span
-              className={`text-xl font-bold ${
-                isScrolled || isMobileMenuOpen
-                  ? "text-gray-900 dark:text-white"
-                  : "text-white"
+              className={`text-xl font-black tracking-tighter transition-colors duration-300 ${
+                isTransparent
+                  ? "text-white"
+                  : "text-slate-900 dark:text-white"
               }`}
             >
               MalangTravel
             </span>
           </Link>
 
-          {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`text-sm font-medium transition-colors hover:text-emerald-500 relative group ${
-                  isScrolled
-                    ? "text-gray-600 dark:text-gray-300"
-                    : "text-gray-200"
+                className={`text-sm font-bold transition-all hover:text-emerald-500 relative group ${
+                  isTransparent
+                    ? "text-white/90"
+                    : "text-slate-600 dark:text-slate-300"
                 }`}
               >
                 {link.name}
-                {link.badge && (
-                  <span className="absolute -top-3 -right-6 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full animate-bounce">
-                    {link.badge}
-                  </span>
-                )}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-500 transition-all group-hover:w-full"></span>
               </Link>
             ))}
           </div>
 
-          {/* Desktop Auth / Profile */}
           <div className="hidden md:flex items-center gap-4">
-            <div className="flex items-center gap-2 mr-4 border-r border-gray-200/20 pr-4">
-              <button
-                onClick={() => setLanguage(language === "ID" ? "EN" : "ID")}
-                className={`text-xs font-bold ${
-                  isScrolled
-                    ? "text-gray-600 dark:text-gray-300"
-                    : "text-gray-200"
-                } hover:text-emerald-500 transition-colors w-6`}
-              >
-                {language}
-              </button>
-              <div
-                className={`w-px h-3 ${
-                  isScrolled ? "bg-gray-300 dark:bg-gray-700" : "bg-white/20"
-                }`}
-              ></div>
-              <button
-                onClick={() => setCurrency(currency === "IDR" ? "USD" : "IDR")}
-                className={`text-xs font-bold ${
-                  isScrolled
-                    ? "text-gray-600 dark:text-gray-300"
-                    : "text-gray-200"
-                } hover:text-emerald-500 transition-colors w-8`}
-              >
-                {currency}
-              </button>
-            </div>
-
             {activeUser ? (
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className={`flex items-center gap-3 pl-2 pr-1 py-1 rounded-full border transition-all ${
-                    isScrolled
-                      ? "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white hover:border-emerald-500"
-                      : "bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  className={`flex items-center gap-3 pl-2 pr-1 py-1 rounded-full border transition-all duration-300 ${
+                    isTransparent
+                      ? "bg-white/10 border-white/20 text-white hover:bg-white/20"
+                      : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white hover:border-emerald-500"
                   }`}
                 >
                   <div className="w-8 h-8 rounded-full bg-linear-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
@@ -245,9 +184,6 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
                         My Dashboard
                       </Link>
                     )}
-                    <div className="px-4 py-1 text-[10px] text-gray-400 font-mono uppercase border-t border-gray-50 dark:border-gray-800 mt-1">
-                      Role: {activeUser.role}
-                    </div>
                     <Link
                       href="/profile"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -276,7 +212,6 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
               </Link>
             )}
 
-            {/* Mobile Menu Button */}
             <button
               className={`md:hidden relative z-50 p-2 ${
                 isTransparent ? "text-white" : "text-gray-900 dark:text-white"
@@ -291,7 +226,6 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
       <div
         className={`fixed inset-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl z-40 flex flex-col items-center justify-center gap-8 transition-all duration-300 md:hidden ${
           isMobileMenuOpen

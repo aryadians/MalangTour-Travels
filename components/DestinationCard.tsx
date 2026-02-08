@@ -2,6 +2,7 @@ import Link from "next/link";
 
 interface DestinationCardProps {
   id: number;
+  slug: string;
   image: string;
   name: string;
   price: number;
@@ -13,6 +14,7 @@ interface DestinationCardProps {
 
 export default function DestinationCard({
   id,
+  slug,
   image,
   name,
   price,
@@ -22,7 +24,7 @@ export default function DestinationCard({
   description,
 }: DestinationCardProps) {
   return (
-    <Link href={`/destinations/${id}`} className="block h-full">
+    <Link href={`/destinations/${slug}`} className="block h-full">
       <div className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-lg hover:shadow-2xl transition-all duration-300 h-full">
         {/* Image Section */}
         <div className="relative h-72 overflow-hidden">
