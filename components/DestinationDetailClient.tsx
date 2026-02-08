@@ -80,11 +80,19 @@ export default function DestinationDetailClient({
       toast.error("Please select a travel date.");
       return;
     }
+    
     setIsBooking(true);
-    setTimeout(() => {
-      setIsBooking(false);
-      setShowSuccessModal(true);
-    }, 1500);
+    
+    const params = new URLSearchParams({
+      destinationId: destination.id.toString(),
+      destinationName: destination.name,
+      paxCount: paxCount.toString(),
+      date: selectedDate,
+      price: pricePerPax.toString(),
+      image: Array.isArray(images) ? images[0] : "",
+    });
+
+    router.push(`/booking/payment?${params.toString()}`);
   };
 
   if (!isMounted) return null;

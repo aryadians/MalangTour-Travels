@@ -250,36 +250,44 @@ export default function DashboardPage() {
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                       {bookings.length > 0 ? (
-                        bookings.slice(0, 5).map((booking) => (
-                          <tr key={booking.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
-                            <td className="py-4 px-6">
-                              <div className="flex items-center gap-3">
-                                <div
-                                  className="w-12 h-12 rounded-xl bg-cover bg-center shrink-0 shadow-sm"
-                                  style={{ backgroundImage: `url('${booking.destination.imageUrl || 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=1000'}')` }}
-                                ></div>
-                                <span className="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">
-                                  {booking.destination.name}
+                        bookings.slice(0, 5).map((booking) => {
+                          let displayImage = "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=1000";
+                          try {
+                            const parsed = typeof booking.destination.images === 'string' ? JSON.parse(booking.destination.images) : booking.destination.images;
+                            if (Array.isArray(parsed) && parsed.length > 0) displayImage = parsed[0];
+                          } catch (e) {}
+
+                          return (
+                            <tr key={booking.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+                              <td className="py-4 px-6">
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className="w-12 h-12 rounded-xl bg-cover bg-center shrink-0 shadow-sm"
+                                    style={{ backgroundImage: `url('${displayImage}')` }}
+                                  ></div>
+                                  <span className="font-bold text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors">
+                                    {booking.destination.name}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-4 px-6 text-sm text-slate-600 dark:text-slate-300 font-medium">
+                                {new Date(booking.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </td>
+                              <td className="py-4 px-6 text-sm text-slate-900 dark:text-white font-bold">
+                                Rp {booking.totalPrice.toLocaleString('id-ID')}
+                              </td>
+                              <td className="py-4 px-6">
+                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
+                                  booking.status === 'CONFIRMED' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                  booking.status === 'PENDING' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                                  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                }`}>
+                                  {booking.status}
                                 </span>
-                              </div>
-                            </td>
-                            <td className="py-4 px-6 text-sm text-slate-600 dark:text-slate-300 font-medium">
-                              {new Date(booking.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                            </td>
-                            <td className="py-4 px-6 text-sm text-slate-900 dark:text-white font-bold">
-                              ${booking.totalPrice.toLocaleString()}
-                            </td>
-                            <td className="py-4 px-6">
-                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
-                                booking.status === 'CONFIRMED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                                booking.status === 'PENDING' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                                'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                              }`}>
-                                {booking.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))
+                              </td>
+                            </tr>
+                          );
+                        })
                       ) : (
                         <tr>
                           <td colSpan={4} className="py-12 text-center text-slate-500 dark:text-slate-400">
@@ -300,58 +308,68 @@ export default function DashboardPage() {
             {/* Next Trip Card (Right 1/3) */}
             <motion.div variants={itemVariants} className="space-y-6">
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Next Trip</h2>
-              {bookings.find(b => new Date(b.date) > new Date()) ? (
-                (() => {
-                  const nextTrip = bookings.find(b => new Date(b.date) > new Date());
+              {(() => {
+                const nextTrip = bookings.filter(b => new Date(b.date) >= new Date()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
+                
+                if (nextTrip) {
                   const daysLeft = Math.ceil((new Date(nextTrip.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                  
+                  let displayImage = "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=1000";
+                  try {
+                    const parsed = typeof nextTrip.destination.images === 'string' ? JSON.parse(nextTrip.destination.images) : nextTrip.destination.images;
+                    if (Array.isArray(parsed) && parsed.length > 0) displayImage = parsed[0];
+                  } catch (e) {}
+
                   return (
                     <div className="bg-white dark:bg-[#1a2c26] rounded-3xl border border-white dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden p-6 relative group">
-                      <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <span className="material-symbols-outlined text-9xl text-primary font-icon">flight_takeoff</span>
+                      <div className="absolute inset-0 z-0">
+                        <img src={displayImage} className="w-full h-full object-cover opacity-10 group-hover:scale-110 transition-transform duration-700" alt="" />
                       </div>
-                      <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-xs font-black rounded-full mb-4 uppercase tracking-wider">
-                        In {daysLeft} Days
-                      </span>
-                      <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 leading-tight">
-                        {nextTrip.destination.name}
-                      </h3>
-                      <div className="space-y-4 my-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
-                            <span className="material-symbols-outlined text-slate-400 text-sm">calendar_today</span>
+                      <div className="relative z-10">
+                        <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-xs font-black rounded-full mb-4 uppercase tracking-wider">
+                          {daysLeft <= 0 ? "Today" : `In ${daysLeft} Days`}
+                        </span>
+                        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 leading-tight">
+                          {nextTrip.destination.name}
+                        </h3>
+                        <div className="space-y-4 my-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+                              <span className="material-symbols-outlined text-slate-400 text-sm">calendar_today</span>
+                            </div>
+                            <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                              {new Date(nextTrip.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            </span>
                           </div>
-                          <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                            {new Date(nextTrip.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
-                            <span className="material-symbols-outlined text-slate-400 text-sm">group</span>
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+                              <span className="material-symbols-outlined text-slate-400 text-sm">group</span>
+                            </div>
+                            <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{nextTrip.pax} Person(s)</span>
                           </div>
-                          <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{nextTrip.pax} Person(s)</span>
                         </div>
-                      </div>
-                      <div className="flex gap-3 relative z-10">
-                        <Link href="/bookings" className="flex-1 bg-primary hover:bg-primary/90 text-white py-3.5 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-primary/20 text-center">
-                          View Ticket
-                        </Link>
-                        <button className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 py-3.5 rounded-2xl font-bold text-sm transition-all text-center">
-                          Details
-                        </button>
+                        <div className="flex gap-3">
+                          <Link href="/bookings" className="flex-1 bg-primary hover:bg-primary/90 text-white py-3.5 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-primary/20 text-center">
+                            View Ticket
+                          </Link>
+                          <Link href={`/destinations/${nextTrip.destination.slug}`} className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 py-3.5 rounded-2xl font-bold text-sm transition-all text-center">
+                            Details
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   );
-                })()
-              ) : (
-                <div className="bg-white dark:bg-[#1a2c26] rounded-3xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center">
-                  <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 mb-2">event_busy</span>
-                  <p className="text-slate-500 dark:text-slate-400 font-medium mb-4">No upcoming trips planned.</p>
-                  <Link href="/destinations" className="inline-block bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-6 py-2 rounded-xl font-bold text-sm">
-                    Book a Trip
-                  </Link>
-                </div>
-              )}
+                }
+
+                return (
+                  <div className="bg-white dark:bg-[#1a2c26] rounded-3xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center">
+                    <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 mb-2">event_busy</span>
+                    <p className="text-slate-500 dark:text-slate-400 font-medium mb-4">No upcoming trips planned.</p>
+                    <Link href="/destinations" className="inline-block bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-6 py-2 rounded-xl font-bold text-sm">
+                      Book a Trip
+                    </Link>
+                  </div>
+                );
+              })()}
 
               {/* Referral Card */}
               <div className="bg-gradient-to-br from-primary to-emerald-600 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl shadow-primary/20">

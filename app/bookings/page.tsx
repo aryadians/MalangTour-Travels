@@ -2,13 +2,12 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import Navbar from "@/components/Navbar";
 
 export default async function BookingsPage() {
   const session = await getSession();
 
   if (!session || !session.userId) {
-    redirect("/login");
+    redirect("/auth/login");
   }
 
   const bookings = await prisma.booking.findMany({
@@ -23,55 +22,99 @@ export default async function BookingsPage() {
     },
   });
 
-  // Calculate stats
-  const totalSpent = bookings.reduce((acc, b) => acc + b.totalPrice, 0);
-  const totalTrips = bookings.length;
-
   return (
-    <div className="bg-background-light dark:bg-background-dark min-h-screen text-text-main dark:text-white pb-20">
-      <Navbar user={session} />
+    <div className="bg-[#f0f4f3] dark:bg-slate-950 font-display text-slate-900 dark:text-white min-h-screen flex">
+      {/* Sidebar Navigation (Could be a shared component, but copying structure for now for speed) */}
+      <aside className="hidden lg:flex w-64 bg-white dark:bg-[#1a2c26] border-r border-slate-200 dark:border-slate-700 flex-col h-screen sticky top-0">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-emerald-500 text-3xl font-icon">
+              landscape
+            </span>
+            <h2 className="text-[#111816] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">
+              Malang Premium
+            </h2>
+          </Link>
+        </div>
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          <div className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Menu
+          </div>
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
+          >
+            <span className="material-symbols-outlined">dashboard</span>
+            Dashboard
+          </Link>
+          <Link
+            href="/bookings"
+            className="flex items-center gap-3 px-4 py-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl font-medium transition-colors"
+          >
+            <span className="material-symbols-outlined">airplane_ticket</span>
+            My Trips
+          </Link>
+          <Link
+            href="/destinations"
+            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
+          >
+            <span className="material-symbols-outlined">explore</span>
+            Destinations
+          </Link>
+          <div className="px-4 py-2 mt-6 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Settings
+          </div>
+          <Link
+            href="/profile"
+            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
+          >
+            <span className="material-symbols-outlined">person</span>
+            Profile
+          </Link>
+          <Link
+            href="/"
+            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors border-t border-slate-100 dark:border-slate-800 mt-4"
+          >
+            <span className="material-symbols-outlined">home</span>
+            Back to Home
+          </Link>
+        </nav>
+      </aside>
 
-      <main className="container mx-auto px-6 pt-28">
-        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 mb-10">
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto p-4 md:p-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">My Bookings</h1>
-            <p className="text-text-muted dark:text-gray-400">
-              Manage your upcoming and past adventures.
+            <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white">
+              My Trip Wallet
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 mt-1">
+              Access your tickets and travel itinerary.
             </p>
           </div>
-          <div className="flex gap-4">
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-              <p className="text-xs text-text-muted dark:text-gray-500 uppercase tracking-wider font-bold">
-                Total Trips
-              </p>
-              <p className="text-2xl font-black text-primary">{totalTrips}</p>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-              <p className="text-xs text-text-muted dark:text-gray-500 uppercase tracking-wider font-bold">
-                Total Spent
-              </p>
-              <p className="text-2xl font-black text-primary">
-                IDR {(totalSpent / 1000).toFixed(0)}k
-              </p>
-            </div>
-          </div>
+          <Link
+            href="/destinations"
+            className="flex items-center gap-2 bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm active:scale-95"
+          >
+            <span className="material-symbols-outlined">add</span>
+            Book New Trip
+          </Link>
         </div>
 
         {bookings.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm text-center">
-            <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-6">
-              <span className="material-symbols-outlined text-4xl text-gray-400">
-                confirmation_number
+          <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-dashed border-slate-200 dark:border-slate-800 text-center">
+            <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
+              <span className="material-symbols-outlined text-4xl text-slate-300">
+                airplane_ticket
               </span>
             </div>
-            <h2 className="text-xl font-bold mb-2">No bookings found</h2>
-            <p className="text-text-muted dark:text-gray-400 max-w-md mb-8">
-              You haven&apos;t booked any trips yet. Explore our destinations and
-              start your journey!
+            <h2 className="text-xl font-bold mb-2">Your wallet is empty</h2>
+            <p className="text-slate-500 dark:text-slate-400 max-w-sm mb-8">
+              Looks like you haven&apos;t booked your next adventure yet. Let&apos;s change that!
             </p>
             <Link
-              href="/"
-              className="px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-emerald-600 transition-colors shadow-lg shadow-primary/20"
+              href="/destinations"
+              className="px-8 py-3 bg-emerald-500 text-white font-bold rounded-xl hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20"
             >
               Explore Destinations
             </Link>
@@ -79,78 +122,95 @@ export default async function BookingsPage() {
         ) : (
           <div className="grid gap-6">
             {bookings.map((booking) => {
-              let image = "/placeholder.jpg";
+              let displayImage = "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=1000";
               try {
-                const parsedImages = JSON.parse(booking.destination.images);
-                if (Array.isArray(parsedImages) && parsedImages.length > 0)
-                  image = parsedImages[0];
+                const parsed = typeof booking.destination.images === 'string' ? JSON.parse(booking.destination.images) : booking.destination.images;
+                if (Array.isArray(parsed) && parsed.length > 0) displayImage = parsed[0];
               } catch (e) {}
 
               return (
                 <div
                   key={booking.id}
-                  className="group bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row gap-6"
+                  className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all flex flex-col md:flex-row gap-6 group"
                 >
-                  {/* Image */}
-                  <div className="w-full md:w-48 h-48 md:h-32 rounded-xl overflow-hidden shrink-0 relative">
+                  {/* Ticket Stub Visual (Left) */}
+                  <div className="w-full md:w-64 h-48 rounded-2xl overflow-hidden shrink-0 relative">
                     <img
-                      src={image}
+                      src={displayImage}
                       alt={booking.destination.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
-                    <div className="absolute top-2 right-2 bg-white/90 dark:bg-black/80 backdrop-blur text-xs font-bold px-2 py-1 rounded text-text-main dark:text-white">
-                      {booking.status}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-4 left-4 text-white">
+                      <p className="text-[10px] font-black uppercase tracking-widest bg-emerald-500 w-fit px-2 py-0.5 rounded mb-1">
+                        {booking.status}
+                      </p>
+                      <p className="font-bold text-lg leading-tight">
+                        {booking.destination.name}
+                      </p>
                     </div>
+                    {/* Perforated Edge Visual */}
+                    <div className="absolute right-0 top-0 bottom-0 w-4 bg-[url('/ticket-rip.svg')] bg-contain bg-repeat-y opacity-50 hidden md:block"></div>
                   </div>
 
-                  {/* Content */}
+                  {/* Ticket Details (Right) */}
                   <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-xl font-bold">
-                          {booking.destination.name}
-                        </h3>
-                        <p className="text-lg font-black text-primary">
-                          IDR {booking.totalPrice.toLocaleString("id-ID")}
-                        </p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                        <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">
+                          Date
+                        </span>
+                        <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                          <span className="material-symbols-outlined text-emerald-500 text-sm">
+                            calendar_today
+                          </span>
+                          {new Date(booking.date).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
                       </div>
-                      <div className="flex flex-wrap gap-4 text-sm text-text-muted dark:text-gray-400 mb-4">
-                        <div className="flex items-center gap-1">
-                          <span className="material-symbols-outlined text-lg">
-                            calendar_month
-                          </span>
-                          <span>
-                            {new Date(booking.date).toLocaleDateString(
-                              "id-ID",
-                              { dateStyle: "long" },
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className="material-symbols-outlined text-lg">
+                      <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                        <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">
+                          Guests
+                        </span>
+                        <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                          <span className="material-symbols-outlined text-emerald-500 text-sm">
                             group
                           </span>
-                          <span>{booking.pax} Travelers</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className="material-symbols-outlined text-lg">
-                            location_on
-                          </span>
-                          <span>{booking.destination.location}</span>
-                        </div>
+                          {booking.pax} Pax
+                        </span>
+                      </div>
+                      <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                        <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">
+                          Booking ID
+                        </span>
+                        <span className="font-mono font-bold text-slate-900 dark:text-white text-sm">
+                          #{booking.id.slice(0, 8).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                        <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">
+                          Total Paid
+                        </span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                          IDR {(booking.totalPrice / 1000).toFixed(0)}k
+                        </span>
                       </div>
                     </div>
 
-                    <div className="flex gap-3 mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <div className="flex gap-3 mt-6 pt-6 border-t border-dashed border-slate-200 dark:border-slate-800">
                       <Link
-                        href={`/destinations/${booking.destinationId}`}
-                        className="text-sm font-bold text-primary hover:underline"
+                        href={`/destinations/${booking.destination.slug || booking.destination.id}`} // Use slug preferably
+                        className="flex-1 py-3 text-center border-2 border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:border-emerald-500 hover:text-emerald-500 transition-colors text-sm"
                       >
-                        View Destination
+                        View Details
                       </Link>
-                      <span className="text-gray-300">|</span>
-                      <button className="text-sm font-bold text-gray-500 hover:text-text-main transition-colors">
-                        Download Ticket
+                      <button className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 text-sm">
+                        <span className="material-symbols-outlined text-lg">
+                          download
+                        </span>
+                        E-Ticket
                       </button>
                     </div>
                   </div>

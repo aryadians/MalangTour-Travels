@@ -7,35 +7,73 @@ import { redirect } from "next/navigation";
 
 export async function getAllBookings() {
   const session = await getSession();
-
-  if (!session || session.role !== "ADMIN") {
-    throw new Error("Unauthorized");
-  }
+  if (!session || session.role !== "ADMIN") throw new Error("Unauthorized");
 
   try {
     const bookings = await prisma.booking.findMany({
       include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
+        user: { select: { name: true, email: true } },
+        destination: { select: { name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    return { success: true, bookings };
+  } catch (error) {
+    return { success: false, error: "Failed to fetch bookings" };
+  }
+}
+
+export async function getUserBookings() {
+  const session = await getSession();
+  if (!session || !session.userId) return { success: false, error: "Unauthorized" };
+
+  try {
+    const bookings = await prisma.booking.findMany({
+      where: { userId: session.userId },
+      include: {
         destination: {
           select: {
             name: true,
+            slug: true,
+            images: true, // Sesuai schema Prisma
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
+      orderBy: { createdAt: "desc" },
+    });
+    return { success: true, bookings };
+  } catch (error) {
+    return { success: false, error: "Failed to fetch user bookings" };
+  }
+}
+
+export async function createBooking(data: {
+  destinationId: number;
+  date: string;
+  pax: number;
+  totalPrice: number;
+}) {
+  const session = await getSession();
+  if (!session || !session.userId) return { success: false, error: "Unauthorized" };
+
+  try {
+    const booking = await prisma.booking.create({
+      data: {
+        userId: session.userId,
+        destinationId: data.destinationId,
+        date: new Date(data.date),
+        pax: data.pax,
+        totalPrice: data.totalPrice,
+        status: "CONFIRMED", // Langsung confirmed setelah bayar
       },
     });
 
-    return { success: true, bookings };
+    revalidatePath("/dashboard");
+    revalidatePath("/bookings");
+    return { success: true, bookingId: booking.id };
   } catch (error) {
-    console.error("Failed to fetch bookings:", error);
-    return { success: false, error: "Failed to fetch bookings" };
+    console.error("Booking error:", error);
+    return { success: false, error: "Failed to create booking" };
   }
 }
 
@@ -46,7 +84,7 @@ export async function updateBookingStatus(
   const session = await getSession();
 
   if (!session || session.role !== "ADMIN") {
-    throw new Error("Unauthorized");
+    return { success: false, error: "Unauthorized" };
   }
 
   try {
@@ -57,78 +95,12 @@ export async function updateBookingStatus(
 
     revalidatePath("/admin/bookings");
     revalidatePath("/admin/dashboard");
+    revalidatePath("/dashboard");
+    revalidatePath("/bookings");
+    
     return { success: true };
   } catch (error) {
     console.error("Failed to update booking status:", error);
     return { success: false, error: "Failed to update booking status" };
-  }
-}
-
-export async function getUserBookings() {
-  const session = await getSession();
-
-  if (!session || !session.userId) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  try {
-    const bookings = await prisma.booking.findMany({
-      where: {
-        userId: session.userId,
-      },
-      include: {
-        destination: {
-          select: {
-            name: true,
-            imageUrl: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    return { success: true, bookings };
-  } catch (error) {
-    console.error("Failed to fetch user bookings:", error);
-    return { success: false, error: "Failed to fetch user bookings" };
-  }
-}
-
-export async function createBooking(prevState: any, formData: FormData) {
-  const session = await getSession();
-
-  if (!session || !session.userId) {
-    return { message: "You must be logged in to book a trip." };
-  }
-
-  const destinationId = parseInt(formData.get("destinationId") as string);
-  const dateStr = formData.get("date") as string;
-  const pax = parseInt(formData.get("pax") as string);
-  const totalPrice = parseFloat(formData.get("totalPrice") as string);
-
-  if (!dateStr) {
-    return { errors: { date: "Please select a date" } };
-  }
-
-  try {
-    const booking = await prisma.booking.create({
-      data: {
-        userId: session.userId,
-        destinationId,
-        date: new Date(dateStr),
-        pax,
-        totalPrice,
-        status: "PENDING",
-      },
-    });
-
-    revalidatePath("/dashboard");
-    revalidatePath("/admin/bookings");
-    redirect("/dashboard?booking=success");
-  } catch (error) {
-    console.error("Booking error:", error);
-    return { message: "Failed to create booking. Please try again." };
   }
 }
