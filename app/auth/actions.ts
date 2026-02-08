@@ -83,7 +83,11 @@ export async function register(prevState: any, formData: FormData) {
   redirect("/dashboard");
 }
 
+import { revalidatePath } from "next/cache";
+
 export async function logout() {
   await deleteSession();
+  revalidatePath("/");
+  revalidatePath("/", "layout");
   redirect("/auth/login");
 }
