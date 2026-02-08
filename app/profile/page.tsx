@@ -1,260 +1,181 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTravel } from "@/context/TravelContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { logout } from "@/actions/auth";
+import { motion } from "framer-motion";
+import toast from "react-hot-toast";
+import DashboardSidebar from "@/components/DashboardSidebar";
 
 export default function ProfilePage() {
   const { user, setUser } = useTravel();
   const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    setIsMounted(true);
     if (!user?.isLoggedIn) {
       router.push("/auth/login");
     }
   }, [user, router]);
 
-  if (!user || !user.isLoggedIn) {
-    return null; // Or a loading spinner
+  if (!isMounted || !user || !user.isLoggedIn) {
+    return null;
   }
 
   const handleLogout = async () => {
-    setUser({
-      name: "",
-      points: 0,
-      referralCode: "",
-      isLoggedIn: false,
-      email: "",
-      role: "USER",
-    });
-    await logout();
+    try {
+      await logout();
+      setUser({
+        name: "",
+        points: 0,
+        referralCode: "",
+        isLoggedIn: false,
+        email: "",
+        role: "USER",
+      });
+      toast.success("Logged out successfully");
+    } catch (e) {
+      toast.error("Logout failed");
+    }
   };
 
-  const dashboardLink =
-    user.role === "ADMIN" ? "/admin/dashboard" : "/dashboard";
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24 pb-20 px-4">
-      <div className="max-w-5xl mx-auto space-y-6">
-        {/* 1. New Clean Profile Header Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-          {/* Cover Area */}
-          <div className="h-32 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
+    <div className="bg-[#f0f4f3] dark:bg-slate-950 font-display text-slate-900 dark:text-white min-h-screen flex">
+      <DashboardSidebar />
 
-          <div className="px-8 pb-8">
-            <div className="flex flex-col md:flex-row gap-6 items-start -mt-12">
-              {/* Avatar */}
-              <div className="shrink-0 relative">
-                <div className="w-24 h-24 rounded-2xl bg-white dark:bg-gray-900 p-1 shadow-lg">
-                  <div className="w-full h-full rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-3xl font-black text-emerald-600">
-                    {user.name?.charAt(0).toUpperCase()}
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-4xl mx-auto space-y-10"
+        >
+          {/* Profile Header Card */}
+          <div className="bg-white dark:bg-slate-900 rounded-[3rem] shadow-xl shadow-slate-200/50 dark:shadow-none border border-white dark:border-slate-800 overflow-hidden">
+            <div className="h-40 bg-gradient-to-r from-emerald-400 to-cyan-400"></div>
+            <div className="px-10 pb-10">
+              <div className="flex flex-col md:flex-row gap-8 items-start -mt-16">
+                <div className="relative group">
+                  <div className="w-32 h-32 rounded-[2.5rem] bg-white dark:bg-slate-950 p-1.5 shadow-2xl transition-transform group-hover:scale-105">
+                    <div className="w-full h-full rounded-[2rem] bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-4xl font-black text-emerald-600">
+                      {user.name?.charAt(0).toUpperCase()}
+                    </div>
                   </div>
+                  <button className="absolute -bottom-2 -right-2 w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center border-4 border-white dark:border-slate-900 hover:bg-emerald-500 transition-all">
+                    <span className="material-symbols-outlined text-sm">edit</span>
+                  </button>
                 </div>
-                {user.role === "ADMIN" && (
-                  <div
-                    className="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-1.5 rounded-lg shadow-sm border-2 border-white dark:border-gray-800"
-                    title="Admin"
-                  >
-                    <span className="material-symbols-outlined text-[14px] block">
-                      verified_user
-                    </span>
-                  </div>
-                )}
-              </div>
 
-              {/* Info & Stats */}
-              <div className="flex-1 pt-0 md:pt-14 min-w-0">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white truncate">
-                      {user.name}
-                    </h1>
-                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      <span className="material-symbols-outlined text-[16px]">
-                        mail
-                      </span>
-                      {user.email}
+                <div className="flex-1 pt-0 md:pt-20">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                      <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                        {user.name}
+                      </h1>
+                      <p className="text-slate-400 font-medium flex items-center gap-2 mt-1">
+                        <span className="material-symbols-outlined text-sm">mail</span>
+                        {user.email}
+                      </p>
                     </div>
-                  </div>
-
-                  {/* Badges */}
-                  <div className="flex gap-3">
-                    <div className="px-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600 flex flex-col items-center min-w-[80px]">
-                      <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
-                        Role
-                      </span>
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">
-                        {user.role}
-                      </span>
-                    </div>
-                    <div className="px-4 py-2 rounded-xl bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-900/30 flex flex-col items-center min-w-[80px]">
-                      <span className="text-[10px] uppercase font-bold text-yellow-600/70 tracking-wider">
-                        Points
-                      </span>
-                      <span className="text-sm font-bold text-yellow-700 dark:text-yellow-500 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px] filled">
-                          stars
-                        </span>
-                        {user.points}
-                      </span>
+                    <div className="flex gap-4">
+                      <div className="px-6 py-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 text-center min-w-[100px]">
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                        <p className="text-sm font-black text-slate-900 dark:text-white">{user.role}</p>
+                      </div>
+                      <div className="px-6 py-3 bg-yellow-50 dark:bg-yellow-900/10 rounded-2xl border border-yellow-100 dark:border-yellow-900/20 text-center min-w-[100px]">
+                        <p className="text-[9px] font-black text-yellow-600 uppercase tracking-widest mb-1">Points</p>
+                        <p className="text-sm font-black text-yellow-700 dark:text-yellow-500 flex items-center justify-center gap-1">
+                          <span className="material-symbols-outlined text-xs filled">stars</span>
+                          {user.points}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              {/* Header Actions */}
-              <div className="hidden md:flex items-end self-end pb-1">
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 text-sm font-bold transition-colors"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Referral Section */}
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">
+                  <span className="material-symbols-outlined text-xl">redeem</span>
+                </div>
+                <h3 className="font-black text-slate-900 dark:text-white tracking-tight">Referral Program</h3>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 font-medium">
+                Share your unique code with friends and earn 500 points for each successful booking.
+              </p>
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                <code className="font-mono font-black text-xl text-slate-900 dark:text-white tracking-widest">{user.referralCode}</code>
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(user.referralCode || "");
+                    toast.success("Code copied!");
+                  }}
+                  className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all"
                 >
-                  <span className="material-symbols-outlined text-[18px]">
-                    logout
-                  </span>
-                  Sign Out
+                  Copy
                 </button>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* 2. Content Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Main Actions (Span 2) */}
-          <div className="md:col-span-2 space-y-6">
-            {/* Dashboard Cards */}
-            <div className="grid grid-cols-2 gap-4">
-              <Link
-                href={dashboardLink}
-                className="group p-6 rounded-3xl bg-white dark:bg-gray-800 border-2 border-transparent hover:border-emerald-500/20 shadow-sm hover:shadow-lg transition-all"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-2xl">
-                    space_dashboard
-                  </span>
+            {/* Travel Stats */}
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">
+                  <span className="material-symbols-outlined text-xl">insights</span>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                  Dashboard
-                </h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  {user.role === "ADMIN"
-                    ? "Manage system & users"
-                    : "Overview of your trips"}
-                </p>
-              </Link>
-
-              <Link
-                href={user.role === "ADMIN" ? "/admin/bookings" : "/bookings"}
-                className="group p-6 rounded-3xl bg-white dark:bg-gray-800 border-2 border-transparent hover:border-blue-500/20 shadow-sm hover:shadow-lg transition-all"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-2xl">
-                    confirmation_number
-                  </span>
+                <h3 className="font-black text-slate-900 dark:text-white tracking-tight">Travel Statistics</h3>
+              </div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-500 font-medium">Account Created</span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">Oct 2023</span>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                  Bookings
-                </h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Check reservation status
-                </p>
-              </Link>
-            </div>
-
-            {/* Personal Info Box */}
-            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <span className="material-symbols-outlined text-gray-400">
-                  badge
-                </span>
-                Referral Program
-              </h3>
-              <div className="flex flex-col sm:flex-row gap-4 items-center bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-dashed border-gray-300 dark:border-gray-600">
-                <div className="text-center sm:text-left flex-1">
-                  <p className="text-xs text-gray-500 mb-1">
-                    Your Referral Code
-                  </p>
-                  <p className="font-mono text-xl font-bold tracking-widest text-gray-900 dark:text-white">
-                    {user.referralCode}
-                  </p>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-500 font-medium">Total Adventures</span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">12 Trips</span>
                 </div>
-                <button
-                  onClick={() =>
-                    navigator.clipboard.writeText(user.referralCode || "")
-                  }
-                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold rounded-xl transition-colors shadow-sm shadow-emerald-500/20"
-                >
-                  Copy Code
-                </button>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-500 font-medium">Member Tier</span>
+                  <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-black rounded uppercase">Silver</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Sidebar Menu (Span 1) */}
-          <div className="space-y-4">
-            <div className="bg-white dark:bg-gray-800 rounded-3xl p-2 shadow-sm border border-gray-100 dark:border-gray-700">
-              <Link
-                href="/settings"
-                className="flex items-center gap-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-2xl transition-colors group"
-              >
-                <span className="material-symbols-outlined text-gray-400 group-hover:text-blue-500 transition-colors">
-                  settings
-                </span>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">
-                    Preferences
-                  </p>
-                </div>
-                <span className="material-symbols-outlined text-gray-300 text-sm">
-                  chevron_right
-                </span>
-              </Link>
-              <Link
-                href="/security"
-                className="flex items-center gap-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-2xl transition-colors group"
-              >
-                <span className="material-symbols-outlined text-gray-400 group-hover:text-emerald-500 transition-colors">
-                  lock
-                </span>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">
-                    Security
-                  </p>
-                </div>
-                <span className="material-symbols-outlined text-gray-300 text-sm">
-                  chevron_right
-                </span>
-              </Link>
-              <Link
-                href="/help"
-                className="flex items-center gap-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-2xl transition-colors group"
-              >
-                <span className="material-symbols-outlined text-gray-400 group-hover:text-orange-500 transition-colors">
-                  support_agent
-                </span>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">
-                    Help Center
-                  </p>
-                </div>
-                <span className="material-symbols-outlined text-gray-300 text-sm">
-                  chevron_right
-                </span>
-              </Link>
+          {/* Quick Settings */}
+          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm">
+            <div className="p-2">
+              {[
+                { icon: "security", label: "Security & Password", color: "text-blue-500", bg: "bg-blue-50" },
+                { icon: "notifications", label: "Notification Preferences", color: "text-orange-500", bg: "bg-orange-50" },
+                { icon: "payments", label: "Payment Methods", color: "text-purple-500", bg: "bg-purple-50" },
+                { icon: "help", label: "Support Center", color: "text-emerald-500", bg: "bg-emerald-50" },
+              ].map((item, i) => (
+                <button 
+                  key={i}
+                  className="w-full flex items-center gap-4 p-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group text-left"
+                >
+                  <div className={`w-12 h-12 rounded-2xl ${item.bg} dark:bg-slate-800 flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform`}>
+                    <span className="material-symbols-outlined text-xl">{item.icon}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-slate-900 dark:text-white uppercase tracking-widest text-[10px]">{item.label}</p>
+                  </div>
+                  <span className="material-symbols-outlined text-slate-300 group-hover:translate-x-1 transition-transform">chevron_right</span>
+                </button>
+              ))}
             </div>
-
-            {/* Mobile Logout (only visible on small screens) */}
-            <button
-              onClick={handleLogout}
-              className="md:hidden w-full py-3 rounded-2xl bg-red-50 text-red-600 font-bold text-sm border border-red-100"
-            >
-              Sign Out
-            </button>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </main>
     </div>
   );
 }

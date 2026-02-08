@@ -47,6 +47,32 @@ export async function getUserBookings() {
   }
 }
 
+export async function getUserBookingById(id: string) {
+  const session = await getSession();
+  if (!session || !session.userId) return { success: false, error: "Unauthorized" };
+
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { 
+        id,
+        userId: session.userId // Security: Ensure user owns this booking
+      },
+      include: {
+        destination: true,
+        user: { select: { name: true, email: true } }
+      },
+    });
+    
+    if (!booking) return { success: false, error: "Booking not found" };
+    
+    return { success: true, booking };
+  } catch (error) {
+    return { success: false, error: "Failed to fetch booking details" };
+  }
+}
+
+import { sendTicketEmail } from "@/lib/services/mail";
+
 export async function createBooking(data: {
   destinationId: number;
   date: string;
@@ -64,9 +90,24 @@ export async function createBooking(data: {
         date: new Date(data.date),
         pax: data.pax,
         totalPrice: data.totalPrice,
-        status: "CONFIRMED", // Langsung confirmed setelah bayar
+        status: "CONFIRMED", // Simulating instant confirmation via Midtrans
       },
+      include: {
+        destination: { select: { name: true } },
+        user: { select: { email: true } }
+      }
     });
+
+    // Send E-Ticket Email (Async, non-blocking)
+    if (booking.user.email) {
+      sendTicketEmail(booking.user.email, {
+        bookingId: booking.id,
+        destinationName: booking.destination.name,
+        date: booking.date.toDateString(),
+        pax: booking.pax,
+        totalPrice: booking.totalPrice
+      }).catch(err => console.error("Email failed:", err));
+    }
 
     revalidatePath("/dashboard");
     revalidatePath("/bookings");

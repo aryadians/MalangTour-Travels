@@ -7,6 +7,7 @@ import { logout, getMe } from "@/actions/auth";
 import { getUserBookings } from "@/actions/booking";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import DashboardSidebar from "@/components/DashboardSidebar";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -75,71 +76,7 @@ export default function DashboardPage() {
 
   return (
     <div className="bg-[#f0f4f3] dark:bg-slate-950 font-display text-slate-900 dark:text-white min-h-screen flex">
-      {/* Sidebar Navigation */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-[#1a2c26] border-r border-slate-200 dark:border-slate-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:block ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-3xl font-icon">
-              landscape
-            </span>
-            <h2 className="text-[#111816] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Malang Premium
-            </h2>
-          </Link>
-        </div>
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          <div className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            Menu
-          </div>
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-xl font-medium transition-all shadow-md shadow-primary/20"
-          >
-            <span className="material-symbols-outlined">dashboard</span>
-            Dashboard
-          </Link>
-          <Link
-            href="/bookings"
-            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
-          >
-            <span className="material-symbols-outlined">airplane_ticket</span>
-            My Trips
-          </Link>
-          <Link
-            href="/destinations"
-            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
-          >
-            <span className="material-symbols-outlined">explore</span>
-            Destinations
-          </Link>
-          <div className="px-4 py-2 mt-6 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            Settings
-          </div>
-          <Link
-            href="/profile"
-            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
-          >
-            <span className="material-symbols-outlined">person</span>
-            Profile
-          </Link>
-          <Link
-            href="/"
-            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors border-t border-slate-100 dark:border-slate-800 mt-4"
-          >
-            <span className="material-symbols-outlined">home</span>
-            Back to Home
-          </Link>
-        </nav>
-        <div className="p-4 border-t border-slate-100 dark:border-slate-800">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl font-medium transition-colors"
-          >
-            <span className="material-symbols-outlined">logout</span>
-            Sign Out
-          </button>
-        </div>
-      </aside>
+      <DashboardSidebar />
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">

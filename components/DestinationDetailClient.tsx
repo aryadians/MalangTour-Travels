@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import { submitReview, getReviewsByDestination } from "@/actions/review";
 
 interface Destination {
   id: number;
@@ -32,10 +33,19 @@ export default function DestinationDetailClient({
 }: DestinationDetailClientProps) {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [starRating, setStarRating] = useState(5);
 
   useEffect(() => {
     setIsMounted(true);
+    fetchReviews();
   }, []);
+
+  async function fetchReviews() {
+    const result = await getReviewsByDestination(destination.id);
+    if (result.success) setReviews(result.reviews || []);
+  }
 
   const parseJSON = (data: any, fallback: any) => {
     if (typeof data === "string") {
@@ -53,7 +63,6 @@ export default function DestinationDetailClient({
   const highlights = parseJSON(destination.highlights, []);
   let itinerary = parseJSON(destination.itinerary, []);
 
-  // Map facilities to icons
   const getIcon = (name: string) => {
     const low = name.toLowerCase();
     if (low.includes("guide")) return "verified";
@@ -62,9 +71,7 @@ export default function DestinationDetailClient({
     if (low.includes("insurance")) return "security";
     if (low.includes("food") || low.includes("dinner") || low.includes("lunch")) return "restaurant";
     if (low.includes("hotel") || low.includes("villa") || low.includes("stay")) return "hotel";
-    if (low.includes("wifi")) return "wifi";
-    if (low.includes("ticket") || low.includes("entrance")) return "confirmation_number";
-    return "star"; // fallback
+    return "star";
   };
 
   const [paxCount, setPaxCount] = useState(2);
@@ -82,7 +89,6 @@ export default function DestinationDetailClient({
     }
     
     setIsBooking(true);
-    
     const params = new URLSearchParams({
       destinationId: destination.id.toString(),
       destinationName: destination.name,
@@ -91,8 +97,31 @@ export default function DestinationDetailClient({
       price: pricePerPax.toString(),
       image: Array.isArray(images) ? images[0] : "",
     });
-
     router.push(`/booking/payment?${params.toString()}`);
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error("Please login to leave a review.");
+      return;
+    }
+    
+    setIsSubmittingReview(true);
+    const formData = new FormData(e.currentTarget);
+    formData.append("destinationId", destination.id.toString());
+    formData.append("rating", starRating.toString());
+
+    const result = await submitReview(formData);
+    if (result.success) {
+      toast.success("Thank you for your review!");
+      fetchReviews();
+      (e.target as HTMLFormElement).reset();
+      setStarRating(5);
+    } else {
+      toast.error(result.error || "Failed to submit review");
+    }
+    setIsSubmittingReview(false);
   };
 
   if (!isMounted) return null;
@@ -110,11 +139,7 @@ export default function DestinationDetailClient({
         
         <div className="absolute bottom-0 left-0 right-0 p-8 md:p-16 lg:p-24">
           <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-4"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
               <span className="bg-emerald-500 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg">
                 {destination.category}
               </span>
@@ -134,9 +159,7 @@ export default function DestinationDetailClient({
       <main className="max-w-7xl mx-auto px-6 md:px-12 mt-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
           
-          {/* LEFT SIDE: INFO */}
           <div className="lg:col-span-8 space-y-20">
-            {/* Overview */}
             <section className="space-y-6">
               <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">The Experience.</h2>
               <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed font-medium">
@@ -144,65 +167,111 @@ export default function DestinationDetailClient({
               </p>
             </section>
 
-            {/* Dynamic Facilities Grid */}
+            {/* Included Facilities */}
             <section className="space-y-8">
               <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-widest">Included Facilities</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {facilities.length > 0 ? (
-                  facilities.map((f: string, i: number) => (
-                    <div key={i} className="p-6 rounded-[2rem] bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center gap-3 transition-transform hover:scale-105">
-                      <span className="material-symbols-outlined text-emerald-500 text-3xl">{getIcon(f)}</span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white leading-tight">{f}</span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-slate-400 text-sm italic">Contact admin for facility details.</p>
-                )}
-              </div>
-            </section>
-
-            {/* Itinerary */}
-            <section className="space-y-10">
-              <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Itinerary Plan.</h2>
-              <div className="space-y-12 relative before:absolute before:left-[19px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800">
-                {itinerary.map((item: any, idx: number) => (
-                  <motion.div 
-                    key={idx}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    className="relative pl-12 group"
-                  >
-                    <div className="absolute left-0 top-1 w-10 h-10 rounded-full bg-white dark:bg-slate-900 border-4 border-slate-100 dark:border-slate-800 flex items-center justify-center z-10 group-hover:border-emerald-500 transition-colors">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em]">{item.time || item.day || `Step ${idx+1}`}</span>
-                      <h3 className="text-xl font-black text-slate-900 dark:text-white">{item.title || item.activity}</h3>
-                      <p className="text-slate-500 dark:text-slate-400 font-medium">{item.description || item.activity}</p>
-                    </div>
-                  </motion.div>
+                {facilities.map((f: string, i: number) => (
+                  <div key={i} className="p-6 rounded-[2rem] bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center gap-3 transition-transform hover:scale-105">
+                    <span className="material-symbols-outlined text-emerald-500 text-3xl">{getIcon(f)}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white leading-tight">{f}</span>
+                  </div>
                 ))}
               </div>
             </section>
 
-            {/* Gallery Section */}
-            <section className="space-y-10">
-              <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Visual Story.</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 h-[600px]">
-                <div className="col-span-2 row-span-2 rounded-[2.5rem] overflow-hidden group">
-                  <img src={images[1] || images[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt="" />
+            {/* Trip Highlights */}
+            {highlights.length > 0 && (
+              <section className="space-y-6">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-widest">Trip Highlights</h3>
+                <ul className="space-y-4">
+                  {highlights.map((h: string, i: number) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-emerald-500 mt-0.5">check_circle</span>
+                      <span className="text-slate-600 dark:text-slate-300 font-medium">{h}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* REVIEWS SECTION */}
+            <section className="space-y-12 pt-10 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex justify-between items-end">
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight text-left">Guest Reviews.</h2>
+                <div className="text-right">
+                  <p className="text-4xl font-black text-slate-900 dark:text-white">{destination.rating.toFixed(1)}</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Average Rating</p>
                 </div>
-                <div className="rounded-[2rem] overflow-hidden group">
-                  <img src={images[2] || images[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt="" />
+              </div>
+
+              {/* Review Form */}
+              {user ? (
+                <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800">
+                  <h4 className="font-black text-slate-900 dark:text-white mb-6 uppercase tracking-widest text-sm text-left">Leave a Review</h4>
+                  <form onSubmit={handleReviewSubmit} className="space-y-6">
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <button 
+                          key={s} 
+                          type="button" 
+                          onClick={() => setStarRating(s)}
+                          className={`material-symbols-outlined text-2xl transition-colors ${s <= starRating ? 'text-yellow-400 filled' : 'text-slate-300'}`}
+                        >
+                          star
+                        </button>
+                      ))}
+                    </div>
+                    <textarea 
+                      name="comment"
+                      placeholder="Share your experience..."
+                      className="w-full p-6 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-slate-900 dark:text-white min-h-[120px]"
+                      required
+                    ></textarea>
+                    <button 
+                      type="submit"
+                      disabled={isSubmittingReview}
+                      className="px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black uppercase tracking-widest text-[10px] rounded-xl hover:scale-105 transition-all disabled:opacity-50"
+                    >
+                      {isSubmittingReview ? "Posting..." : "Submit Review"}
+                    </button>
+                  </form>
                 </div>
-                <div className="rounded-[2rem] overflow-hidden group">
-                  <img src={images[3] || images[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt="" />
+              ) : (
+                <div className="p-8 text-center border-2 border-dashed border-slate-200 rounded-[2.5rem]">
+                  <p className="text-slate-400 font-bold text-sm">Please login to share your travel story.</p>
                 </div>
+              )}
+
+              {/* Reviews List */}
+              <div className="space-y-8">
+                {reviews.length > 0 ? (
+                  reviews.map((r, i) => (
+                    <div key={i} className="flex gap-6 items-start pb-8 border-b border-slate-50 dark:border-slate-800">
+                      <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center font-black text-emerald-600 shrink-0 uppercase">
+                        {r.user.name?.charAt(0)}
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <h5 className="font-black text-slate-900 dark:text-white uppercase text-xs tracking-tight">{r.user.name}</h5>
+                          <div className="flex text-yellow-400">
+                            {[...Array(r.rating)].map((_, i) => (
+                              <span key={i} className="material-symbols-outlined text-[14px] filled">star</span>
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed italic">&quot;{r.comment}&quot;</p>
+                        <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{new Date(r.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-slate-400 py-10 font-bold italic text-sm">No reviews yet. Be the first to share!</p>
+                )}
               </div>
             </section>
           </div>
 
-          {/* RIGHT SIDE: STICKY BOOKING CARD */}
           <div className="lg:col-span-4">
             <div className="sticky top-32 space-y-8">
               <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.08)] border border-slate-100 dark:border-slate-800 space-y-8">
@@ -219,52 +288,32 @@ export default function DestinationDetailClient({
                 </div>
 
                 <div className="space-y-6">
-                  {/* Date Input */}
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Select Date</label>
-                    <div className="relative">
-                      <input
-                        type="date"
-                        className="w-full p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-emerald-500 outline-none transition-all appearance-none"
-                        style={{ colorScheme: 'dark' }} // Force icons to show in dark mode if needed
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                      />
-                    </div>
+                    <input
+                      type="date"
+                      className="w-full p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white font-bold outline-none"
+                      value={selectedDate}
+                      onChange={(e) => setSelectedDate(e.target.value)}
+                    />
                   </div>
-
-                  {/* Guests Input */}
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Guests</label>
-                    <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-2 rounded-2xl border border-slate-100 dark:border-slate-700">
-                      <button
-                        onClick={() => setPaxCount(Math.max(1, paxCount - 1))}
-                        className="w-12 h-12 rounded-xl bg-white dark:bg-slate-700 shadow-sm flex items-center justify-center text-slate-900 dark:text-white font-black hover:bg-emerald-500 hover:text-white transition-all"
-                      >
-                        -
-                      </button>
-                      <span className="font-black text-slate-900 dark:text-white text-lg">{paxCount}</span>
-                      <button
-                        onClick={() => setPaxCount(paxCount + 1)}
-                        className="w-12 h-12 rounded-xl bg-white dark:bg-slate-700 shadow-sm flex items-center justify-center text-slate-900 dark:text-white font-black hover:bg-emerald-500 hover:text-white transition-all"
-                      >
-                        +
-                      </button>
+                    <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-2 rounded-2xl">
+                      <button onClick={() => setPaxCount(Math.max(1, paxCount - 1))} className="w-12 h-12 rounded-xl bg-white dark:bg-slate-700 font-black">-</button>
+                      <span className="font-black text-lg">{paxCount}</span>
+                      <button onClick={() => setPaxCount(paxCount + 1)} className="w-12 h-12 rounded-xl bg-white dark:bg-slate-700 font-black">+</button>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-6 border-t border-slate-50 dark:border-slate-800 space-y-4">
+                <div className="pt-6 border-t border-slate-50 dark:border-slate-800 space-y-4 text-left">
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-slate-400">Total Price</span>
-                    <span className="text-2xl font-black text-emerald-500">Rp {totalPrice.toLocaleString("id-ID")}</span>
+                    <span className="font-bold text-slate-400 text-xs uppercase tracking-widest">Total</span>
+                    <span className="text-2xl font-black text-emerald-500 text-left">Rp {totalPrice.toLocaleString("id-ID")}</span>
                   </div>
-                  <button
-                    onClick={handleBooking}
-                    disabled={isBooking}
-                    className="w-full py-5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black uppercase tracking-[0.2em] text-xs rounded-2xl shadow-xl shadow-emerald-500/20 transition-all active:scale-95 disabled:opacity-50"
-                  >
-                    {isBooking ? "Confirming..." : "Book This Experience"}
+                  <button onClick={handleBooking} disabled={isBooking} className="w-full py-5 bg-emerald-500 text-slate-950 font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl shadow-xl active:scale-95 disabled:opacity-50">
+                    {isBooking ? "Confirming..." : "Book Now"}
                   </button>
                 </div>
               </div>
@@ -272,51 +321,6 @@ export default function DestinationDetailClient({
           </div>
         </div>
       </main>
-
-      {/* 3. SUCCESS MODAL */}
-      <AnimatePresence>
-        {showSuccessModal && (
-          <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowSuccessModal(false)}
-              className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative bg-white dark:bg-slate-900 w-full max-w-md rounded-[3rem] p-12 text-center shadow-2xl overflow-hidden border border-white/10"
-            >
-              <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500" />
-              <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
-                <span className="material-symbols-outlined text-5xl text-emerald-600 dark:text-emerald-400">task_alt</span>
-              </div>
-              <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter mb-4">Reservation Confirmed!</h3>
-              <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-10">
-                Your journey to <strong className="text-slate-900 dark:text-white font-black">{destination.name}</strong> is ready. 
-                Check your dashboard for ticket details.
-              </p>
-              <div className="space-y-4">
-                <button
-                  onClick={() => router.push("/dashboard")}
-                  className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black uppercase tracking-widest text-xs rounded-2xl hover:scale-105 transition-all"
-                >
-                  Go to Dashboard
-                </button>
-                <button
-                  onClick={() => setShowSuccessModal(false)}
-                  className="w-full py-4 text-slate-400 font-bold uppercase tracking-widest text-[10px] hover:text-slate-900 dark:hover:text-white transition-all"
-                >
-                  Dismiss
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

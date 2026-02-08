@@ -22,6 +22,7 @@ model User {
   updatedAt    DateTime @updatedAt
   bookings     Booking[]
   wishlists    Wishlist[]
+  reviews      Review[]
 }
 
 model Destination {
@@ -31,9 +32,9 @@ model Destination {
   description String
   price       Float
   location    String
-  rating      Float
+  rating      Float    @default(5.0)
   category    String
-  images      String   // Storing as JSON string for SQLite simplicity
+  images      String   // Storing as JSON string
   openTime    String?
   ticketPrice String?
   facilities  String?  // Storing as JSON string
@@ -43,6 +44,19 @@ model Destination {
   updatedAt   DateTime @updatedAt
   bookings    Booking[]
   wishlists   Wishlist[]
+  reviews     Review[]
+}
+
+model Review {
+  id            String      @id @default(uuid())
+  userId        String
+  destinationId Int
+  rating        Int         @default(5)
+  comment       String
+  createdAt     DateTime    @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destination Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
 }
 
 model Booking {
@@ -76,7 +90,7 @@ model Offer {
   id          String   @id @default(uuid())
   title       String
   description String
-  discount    String   // e.g. "20% OFF" or "IDR 100k OFF"
+  discount    String   // e.g. "20% OFF"
   code        String   @unique
   validUntil  DateTime
   image       String   // JSON string or URL

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
+import DashboardSidebar from "@/components/DashboardSidebar";
 
 export default async function BookingsPage() {
   const session = await getSession();
@@ -24,62 +25,7 @@ export default async function BookingsPage() {
 
   return (
     <div className="bg-[#f0f4f3] dark:bg-slate-950 font-display text-slate-900 dark:text-white min-h-screen flex">
-      {/* Sidebar Navigation (Could be a shared component, but copying structure for now for speed) */}
-      <aside className="hidden lg:flex w-64 bg-white dark:bg-[#1a2c26] border-r border-slate-200 dark:border-slate-700 flex-col h-screen sticky top-0">
-        <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-emerald-500 text-3xl font-icon">
-              landscape
-            </span>
-            <h2 className="text-[#111816] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Malang Premium
-            </h2>
-          </Link>
-        </div>
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          <div className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            Menu
-          </div>
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
-          >
-            <span className="material-symbols-outlined">dashboard</span>
-            Dashboard
-          </Link>
-          <Link
-            href="/bookings"
-            className="flex items-center gap-3 px-4 py-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl font-medium transition-colors"
-          >
-            <span className="material-symbols-outlined">airplane_ticket</span>
-            My Trips
-          </Link>
-          <Link
-            href="/destinations"
-            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
-          >
-            <span className="material-symbols-outlined">explore</span>
-            Destinations
-          </Link>
-          <div className="px-4 py-2 mt-6 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            Settings
-          </div>
-          <Link
-            href="/profile"
-            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
-          >
-            <span className="material-symbols-outlined">person</span>
-            Profile
-          </Link>
-          <Link
-            href="/"
-            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors border-t border-slate-100 dark:border-slate-800 mt-4"
-          >
-            <span className="material-symbols-outlined">home</span>
-            Back to Home
-          </Link>
-        </nav>
-      </aside>
+      <DashboardSidebar />
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
@@ -206,12 +152,15 @@ export default async function BookingsPage() {
                       >
                         View Details
                       </Link>
-                      <button className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 text-sm">
+                      <Link
+                        href={`/bookings/${booking.id}/ticket`}
+                        className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 text-sm"
+                      >
                         <span className="material-symbols-outlined text-lg">
-                          download
+                          confirmation_number
                         </span>
                         E-Ticket
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
