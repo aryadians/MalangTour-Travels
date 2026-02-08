@@ -5,6 +5,12 @@ import Link from "next/link";
 import React from "react";
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <footer className="bg-gray-900 text-white pt-20 pb-10 border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-4 md:px-6">

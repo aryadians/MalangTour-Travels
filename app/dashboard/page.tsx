@@ -1,402 +1,390 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { logout, getMe } from "@/actions/auth";
+import { getUserBookings } from "@/actions/booking";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const userData = await getMe();
+        if (!userData) {
+          router.push("/auth/login");
+          return;
+        }
+        setUser(userData);
+
+        const bookingsData = await getUserBookings();
+        if (bookingsData.success) {
+          setBookings(bookingsData.bookings || []);
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [router]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Logged out successfully");
+    } catch (error) {
+      toast.error("Failed to logout");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f0f4f3] dark:bg-slate-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1
+    }
+  };
+
   return (
-    <div className="bg-[#f0f4f3] dark:bg-background-dark font-display text-slate-900 dark:text-white min-h-screen flex">
+    <div className="bg-[#f0f4f3] dark:bg-slate-950 font-display text-slate-900 dark:text-white min-h-screen flex">
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-slate-700 hidden lg:flex flex-col h-screen sticky top-0">
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-[#1a2c26] border-r border-slate-200 dark:border-slate-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:block ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-3xl">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary text-3xl font-icon">
               landscape
             </span>
             <h2 className="text-[#111816] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Malang Premium Tours
+              Malang Premium
             </h2>
-          </div>
+          </Link>
         </div>
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <div className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
             Menu
           </div>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-4 py-3 bg-primary/10 text-primary rounded-xl font-medium transition-colors"
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-xl font-medium transition-all shadow-md shadow-primary/20"
           >
             <span className="material-symbols-outlined">dashboard</span>
             Dashboard
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            href="/bookings"
             className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
           >
             <span className="material-symbols-outlined">airplane_ticket</span>
             My Trips
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            href="/destinations"
             className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
           >
-            <span className="material-symbols-outlined">favorite</span>
-            Wishlist
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
-          >
-            <span className="material-symbols-outlined">reviews</span>
-            My Reviews
-          </a>
+            <span className="material-symbols-outlined">explore</span>
+            Destinations
+          </Link>
           <div className="px-4 py-2 mt-6 text-xs font-semibold text-slate-400 uppercase tracking-wider">
             Settings
           </div>
-          <a
-            href="#"
+          <Link
+            href="/profile"
             className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
           >
             <span className="material-symbols-outlined">person</span>
             Profile
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
+          </Link>
+          <Link
+            href="/"
+            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors border-t border-slate-100 dark:border-slate-800 mt-4"
           >
-            <span className="material-symbols-outlined">settings</span>
-            Preferences
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl font-medium transition-colors"
-          >
-            <span className="material-symbols-outlined">credit_card</span>
-            Payment Methods
-          </a>
+            <span className="material-symbols-outlined">home</span>
+            Back to Home
+          </Link>
         </nav>
         <div className="p-4 border-t border-slate-100 dark:border-slate-800">
-          <a
-            href="#"
-            className="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl font-medium transition-colors"
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl font-medium transition-colors"
           >
             <span className="material-symbols-outlined">logout</span>
             Sign Out
-          </a>
+          </button>
         </div>
       </aside>
+
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile Header */}
-        <header className="lg:hidden bg-white dark:bg-surface-dark border-b border-slate-200 dark:border-slate-700 h-16 flex items-center justify-between px-4 sticky top-0 z-20">
+        <header className="lg:hidden bg-white dark:bg-[#1a2c26] border-b border-slate-200 dark:border-slate-700 h-16 flex items-center justify-between px-4 sticky top-0 z-20">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-3xl">
+            <span className="material-symbols-outlined text-primary text-3xl font-icon">
               landscape
             </span>
-            <h2 className="text-lg font-bold">Malang Premium Tours</h2>
+            <h2 className="text-lg font-bold">Malang Premium</h2>
           </div>
-          <button className="text-slate-900 dark:text-white">
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="text-slate-900 dark:text-white p-2"
+          >
             <span className="material-symbols-outlined">menu</span>
           </button>
         </header>
-        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+          className="flex-1 overflow-y-auto p-4 md:p-8"
+        >
           {/* Welcome Section */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
-                Welcome back, Alex! 👋
+              <h1 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+                Welcome back, {user?.name?.split(' ')[0] || 'Traveler'}! 👋
               </h1>
-              <p className="text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-slate-500 dark:text-slate-400 mt-1 text-lg">
                 Here's what's happening with your travel plans.
               </p>
             </div>
-            <button className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm shadow-primary/20">
+            <Link href="/destinations" className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-primary/25 hover:scale-105 active:scale-95">
               <span className="material-symbols-outlined">add</span>
               Plan New Trip
-            </button>
-          </div>
+            </Link>
+          </motion.div>
+
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-                <span className="material-symbols-outlined">
-                  flight_takeoff
-                </span>
+          <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white dark:bg-[#1a2c26] p-6 rounded-3xl border border-white dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none flex items-center gap-4 transition-transform hover:scale-[1.02]">
+              <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center">
+                <span className="material-symbols-outlined text-3xl">flight_takeoff</span>
               </div>
               <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-                  Total Trips
-                </p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Total Trips</p>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{bookings.length}</h3>
+              </div>
+            </div>
+            <div className="bg-white dark:bg-[#1a2c26] p-6 rounded-3xl border border-white dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none flex items-center gap-4 transition-transform hover:scale-[1.02]">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 flex items-center justify-center">
+                <span className="material-symbols-outlined text-3xl">upcoming</span>
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Upcoming</p>
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
-                  12
+                  {bookings.filter(b => new Date(b.date) > new Date()).length}
                 </h3>
               </div>
             </div>
-            <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <span className="material-symbols-outlined">upcoming</span>
+            <div className="bg-white dark:bg-[#1a2c26] p-6 rounded-3xl border border-white dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none flex items-center gap-4 transition-transform hover:scale-[1.02]">
+              <div className="w-14 h-14 rounded-2xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 flex items-center justify-center">
+                <span className="material-symbols-outlined text-3xl">monetization_on</span>
               </div>
               <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-                  Upcoming
-                </p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Total Spent</p>
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
-                  2
+                  ${bookings.reduce((acc, b) => acc + b.totalPrice, 0).toLocaleString()}
                 </h3>
               </div>
             </div>
-            <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center">
-                <span className="material-symbols-outlined">
-                  monetization_on
-                </span>
+            <div className="bg-white dark:bg-[#1a2c26] p-6 rounded-3xl border border-white dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none flex items-center gap-4 transition-transform hover:scale-[1.02]">
+              <div className="w-14 h-14 rounded-2xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 flex items-center justify-center">
+                <span className="material-symbols-outlined text-3xl">star</span>
               </div>
               <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-                  Total Spent
-                </p>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
-                  $4,250
-                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Loyalty Points</p>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{user?.points || 0}</h3>
               </div>
             </div>
-            <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center">
-                <span className="material-symbols-outlined">star</span>
-              </div>
-              <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-                  Loyalty Points
-                </p>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
-                  850
-                </h3>
-              </div>
-            </div>
-          </div>
+          </motion.div>
+
           {/* Recent Trips & Upcoming */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Recent Bookings (Left 2/3) */}
-            <div className="lg:col-span-2 space-y-6">
+            <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
                   Recent Bookings
                 </h2>
-                <a
-                  href="#"
-                  className="text-primary font-medium text-sm hover:underline"
-                >
-                  View All
-                </a>
+                <Link href="/bookings" className="text-primary font-bold text-sm hover:underline flex items-center gap-1">
+                  View All <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                </Link>
               </div>
-              <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+              <div className="bg-white dark:bg-[#1a2c26] rounded-3xl border border-white dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700">
-                        <th className="py-4 px-6 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
-                          Destination
-                        </th>
-                        <th className="py-4 px-6 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
-                          Date
-                        </th>
-                        <th className="py-4 px-6 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
-                          Price
-                        </th>
-                        <th className="py-4 px-6 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
-                          Status
-                        </th>
-                        <th className="py-4 px-6 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
-                          Action
-                        </th>
+                      <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700">
+                        <th className="py-5 px-6 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 tracking-widest">Destination</th>
+                        <th className="py-5 px-6 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 tracking-widest">Date</th>
+                        <th className="py-5 px-6 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 tracking-widest">Price</th>
+                        <th className="py-5 px-6 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 tracking-widest">Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                      <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                        <td className="py-4 px-6">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="w-10 h-10 rounded-lg bg-cover bg-center shrink-0"
-                              style={{
-                                backgroundImage:
-                                  "url('https://lh3.googleusercontent.com/p/AF1QipN3X-x2X2x2X2x2X2x2X2x2X2x2X2x2X2x2X2')",
-                              }}
-                            ></div>
-                            <span className="font-medium text-slate-900 dark:text-white">
-                              Mount Bromo Sunrise
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-4 px-6 text-sm text-slate-600 dark:text-slate-300">
-                          Aug 24, 2023
-                        </td>
-                        <td className="py-4 px-6 text-sm text-slate-900 dark:text-white font-medium">
-                          $120.00
-                        </td>
-                        <td className="py-4 px-6">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                            Confirmed
-                          </span>
-                        </td>
-                        <td className="py-4 px-6">
-                          <button className="text-slate-400 hover:text-primary transition-colors">
-                            <span className="material-symbols-outlined">
-                              more_vert
-                            </span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                        <td className="py-4 px-6">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="w-10 h-10 rounded-lg bg-cover bg-center shrink-0"
-                              style={{
-                                backgroundImage:
-                                  "url('https://lh3.googleusercontent.com/p/AF1QipN3X-x2X2x2X2x2X2x2X2x2X2x2X2x2X2x2X2')",
-                              }}
-                            ></div>
-                            <span className="font-medium text-slate-900 dark:text-white">
-                              Tumpak Sewu Waterfall
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-4 px-6 text-sm text-slate-600 dark:text-slate-300">
-                          Sep 02, 2023
-                        </td>
-                        <td className="py-4 px-6 text-sm text-slate-900 dark:text-white font-medium">
-                          $85.00
-                        </td>
-                        <td className="py-4 px-6">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
-                            Pending
-                          </span>
-                        </td>
-                        <td className="py-4 px-6">
-                          <button className="text-slate-400 hover:text-primary transition-colors">
-                            <span className="material-symbols-outlined">
-                              more_vert
-                            </span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                        <td className="py-4 px-6">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="w-10 h-10 rounded-lg bg-cover bg-center shrink-0"
-                              style={{
-                                backgroundImage:
-                                  "url('https://lh3.googleusercontent.com/p/AF1QipN3X-x2X2x2X2x2X2x2X2x2X2x2X2x2X2x2X2')",
-                              }}
-                            ></div>
-                            <span className="font-medium text-slate-900 dark:text-white">
-                              Malang City Tour
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-4 px-6 text-sm text-slate-600 dark:text-slate-300">
-                          Jul 15, 2023
-                        </td>
-                        <td className="py-4 px-6 text-sm text-slate-900 dark:text-white font-medium">
-                          $45.00
-                        </td>
-                        <td className="py-4 px-6">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300">
-                            Completed
-                          </span>
-                        </td>
-                        <td className="py-4 px-6">
-                          <button className="text-slate-400 hover:text-primary transition-colors">
-                            <span className="material-symbols-outlined">
-                              more_vert
-                            </span>
-                          </button>
-                        </td>
-                      </tr>
+                      {bookings.length > 0 ? (
+                        bookings.slice(0, 5).map((booking) => (
+                          <tr key={booking.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+                            <td className="py-4 px-6">
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className="w-12 h-12 rounded-xl bg-cover bg-center shrink-0 shadow-sm"
+                                  style={{ backgroundImage: `url('${booking.destination.imageUrl || 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=1000'}')` }}
+                                ></div>
+                                <span className="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">
+                                  {booking.destination.name}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-6 text-sm text-slate-600 dark:text-slate-300 font-medium">
+                              {new Date(booking.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </td>
+                            <td className="py-4 px-6 text-sm text-slate-900 dark:text-white font-bold">
+                              ${booking.totalPrice.toLocaleString()}
+                            </td>
+                            <td className="py-4 px-6">
+                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
+                                booking.status === 'CONFIRMED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                                booking.status === 'PENDING' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                                'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                              }`}>
+                                {booking.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={4} className="py-12 text-center text-slate-500 dark:text-slate-400">
+                            <div className="flex flex-col items-center gap-2">
+                              <span className="material-symbols-outlined text-4xl opacity-20">inventory_2</span>
+                              <p>No bookings found yet.</p>
+                              <Link href="/destinations" className="text-primary font-bold hover:underline">Explore destinations</Link>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
               </div>
-            </div>
+            </motion.div>
+
             {/* Next Trip Card (Right 1/3) */}
-            <div className="space-y-6">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                Next Trip
-              </h2>
-              <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden p-6 relative">
-                <div className="absolute top-0 right-0 p-6 opacity-10">
-                  <span className="material-symbols-outlined text-9xl text-primary">
-                    flight_takeoff
-                  </span>
+            <motion.div variants={itemVariants} className="space-y-6">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Next Trip</h2>
+              {bookings.find(b => new Date(b.date) > new Date()) ? (
+                (() => {
+                  const nextTrip = bookings.find(b => new Date(b.date) > new Date());
+                  const daysLeft = Math.ceil((new Date(nextTrip.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                  
+                  return (
+                    <div className="bg-white dark:bg-[#1a2c26] rounded-3xl border border-white dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden p-6 relative group">
+                      <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <span className="material-symbols-outlined text-9xl text-primary font-icon">flight_takeoff</span>
+                      </div>
+                      <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-xs font-black rounded-full mb-4 uppercase tracking-wider">
+                        In {daysLeft} Days
+                      </span>
+                      <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 leading-tight">
+                        {nextTrip.destination.name}
+                      </h3>
+                      <div className="space-y-4 my-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+                            <span className="material-symbols-outlined text-slate-400 text-sm">calendar_today</span>
+                          </div>
+                          <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                            {new Date(nextTrip.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+                            <span className="material-symbols-outlined text-slate-400 text-sm">group</span>
+                          </div>
+                          <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{nextTrip.pax} Person(s)</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-3 relative z-10">
+                        <Link href="/bookings" className="flex-1 bg-primary hover:bg-primary/90 text-white py-3.5 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-primary/20 text-center">
+                          View Ticket
+                        </Link>
+                        <button className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 py-3.5 rounded-2xl font-bold text-sm transition-all text-center">
+                          Details
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()
+              ) : (
+                <div className="bg-white dark:bg-[#1a2c26] rounded-3xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center">
+                  <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 mb-2">event_busy</span>
+                  <p className="text-slate-500 dark:text-slate-400 font-medium mb-4">No upcoming trips planned.</p>
+                  <Link href="/destinations" className="inline-block bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-6 py-2 rounded-xl font-bold text-sm">
+                    Book a Trip
+                  </Link>
                 </div>
-                <span className="inline-block px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full mb-4">
-                  In 3 Days
-                </span>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
-                  Mount Bromo Sunrise
-                </h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
-                  Experience the magical sunrise over the volcanic landscape.
+              )}
+
+              {/* Referral Card */}
+              <div className="bg-gradient-to-br from-primary to-emerald-600 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl shadow-primary/20">
+                <div className="absolute top-[-20px] right-[-20px] w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                <h3 className="text-2xl font-black mb-2 relative z-10">Earn Points!</h3>
+                <p className="text-white/80 text-sm mb-6 relative z-10 font-medium">
+                  Invite your friends and get 500 points for each referral.
                 </p>
-                <div className="space-y-4 mb-6">
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-slate-400">
-                      calendar_today
-                    </span>
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Aug 24, 2023 • 11:30 PM
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-slate-400">
-                      location_on
-                    </span>
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Malang City Center Pickup
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-slate-400">
-                      group
-                    </span>
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      2 Adults
-                    </span>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <button className="flex-1 bg-primary hover:bg-primary/90 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-sm">
-                    View Ticket
-                  </button>
-                  <button className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 py-3 rounded-xl font-bold text-sm transition-all">
-                    Details
-                  </button>
+                <div className="bg-white/20 backdrop-blur-md rounded-2xl p-4 flex items-center justify-between mb-6 relative z-10 border border-white/20">
+                  <span className="font-mono font-bold tracking-wider">{user?.referralCode || 'REF-12345'}</span>
+                  <button onClick={() => {
+                    navigator.clipboard.writeText(user?.referralCode || 'REF-12345');
+                    toast.success("Code copied!");
+                  }} className="text-xs bg-white text-primary px-3 py-1.5 rounded-lg font-black uppercase hover:bg-slate-100 transition-colors">Copy</button>
                 </div>
               </div>
-              {/* Promotion / Upsell */}
-              <div
-                className="rounded-2xl p-6 text-white relative overflow-hidden flex flex-col justify-end min-h-[200px]"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0)), url('https://lh3.googleusercontent.com/p/AF1QipN3X-x2X2x2X2x2X2x2X2x2X2x2X2x2X2x2X2')",
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              >
-                <h3 className="text-xl font-bold mb-2 relative z-10">
-                  Explore Ijen Crater
-                </h3>
-                <p className="text-sm text-slate-200 mb-4 relative z-10">
-                  Witness the blue fire phenomenon. Book now for 10% off.
-                </p>
-                <button className="bg-white text-slate-900 py-2 px-4 rounded-lg font-bold text-sm self-start hover:bg-slate-100 transition-colors relative z-10">
-                  Explore Now
-                </button>
-              </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </main>
+      
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsSidebarOpen(false)}
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

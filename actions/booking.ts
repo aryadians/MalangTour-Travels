@@ -64,6 +64,38 @@ export async function updateBookingStatus(
   }
 }
 
+export async function getUserBookings() {
+  const session = await getSession();
+
+  if (!session || !session.userId) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  try {
+    const bookings = await prisma.booking.findMany({
+      where: {
+        userId: session.userId,
+      },
+      include: {
+        destination: {
+          select: {
+            name: true,
+            imageUrl: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return { success: true, bookings };
+  } catch (error) {
+    console.error("Failed to fetch user bookings:", error);
+    return { success: false, error: "Failed to fetch user bookings" };
+  }
+}
+
 export async function createBooking(prevState: any, formData: FormData) {
   const session = await getSession();
 

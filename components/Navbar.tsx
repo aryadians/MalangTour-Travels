@@ -42,8 +42,13 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
       : null;
 
   const pathname = usePathname();
-  const isHome = pathname === "/";
 
+  // Hide Navbar on Dashboard and Admin pages (they have their own layouts)
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin")) {
+    return null;
+  }
+
+  const isHome = pathname === "/";
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);

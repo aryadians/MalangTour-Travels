@@ -55,61 +55,8 @@ export default async function PackageDetailPage({
       {/* Floral Background Overlay */}
       <div className="fixed inset-0 pointer-events-none bg-floral-pattern z-0 opacity-100" />
 
-      {/* Navigation */}
-      <div className="relative z-10 bg-white/90 backdrop-blur-md sticky top-0 border-b border-[#f0f4f3]">
-        <header className="flex items-center justify-between whitespace-nowrap px-6 py-4 max-w-7xl mx-auto w-full">
-          <Link href="/" className="flex items-center gap-8">
-            <div className="flex items-center gap-3 text-text-main">
-              <div className="size-8 text-primary">
-                <span className="material-symbols-outlined text-3xl">
-                  local_florist
-                </span>
-              </div>
-              <h2 className="text-text-main text-xl font-bold leading-tight tracking-[-0.015em]">
-                Malang Premium Tours
-              </h2>
-            </div>
-          </Link>
-          <div className="hidden md:flex items-center gap-8">
-            {/* Navigation Links */}
-            <Link
-              href="#"
-              className="text-text-main text-sm font-medium hover:text-primary transition-colors"
-            >
-              Honeymoon Packages
-            </Link>
-            <Link
-              href="#"
-              className="text-text-main text-sm font-medium hover:text-primary transition-colors"
-            >
-              Destinations
-            </Link>
-            <Link
-              href="#"
-              className="text-text-main text-sm font-medium hover:text-primary transition-colors"
-            >
-              About Us
-            </Link>
-            <Link
-              href="#"
-              className="text-text-main text-sm font-medium hover:text-primary transition-colors"
-            >
-              Contact
-            </Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/auth/login"
-              className="flex items-center justify-center rounded-xl h-10 px-5 bg-primary hover:bg-primary-dark transition-colors text-white text-sm font-bold shadow-lg shadow-primary/20"
-            >
-              <span className="truncate">Sign In</span>
-            </Link>
-          </div>
-        </header>
-      </div>
-
       {/* Main Content Wrapper */}
-      <main className="relative z-10 flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <main className="relative z-10 flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-10">
         {/* Hero Section */}
         <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl mb-12 group">
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
@@ -246,7 +193,7 @@ export default async function PackageDetailPage({
           </div>
 
           {/* Right Column: Sticky Booking Sidebar */}
-          <aside className="relative h-full">
+          <aside id="booking-form" className="relative h-full">
             <div className="sticky top-24 flex flex-col gap-6">
               <div className="bg-white rounded-2xl shadow-xl border border-[#edf2f0] p-6 overflow-hidden">
                 {/* Header */}
@@ -342,6 +289,22 @@ export default async function PackageDetailPage({
           font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
       `}</style>
+
+      {/* Mobile Sticky Booking Bar */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 lg:hidden z-50 flex items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+        <div className="flex flex-col">
+          <span className="text-xs text-gray-500">Starting from</span>
+          <span className="text-lg font-bold text-emerald-600">
+            {formatCurrency(destination.price)}
+          </span>
+        </div>
+        <a
+          href="#booking-form"
+          className="bg-emerald-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg active:scale-95 transition-transform"
+        >
+          Book Now
+        </a>
+      </div>
     </div>
   );
 }

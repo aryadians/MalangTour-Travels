@@ -2,7 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { useTravel } from "@/context/TravelContext";
 import Testimonials from "@/components/Testimonials";
 
@@ -10,6 +15,10 @@ export default function Home() {
   const { destinations, formatPrice } = useTravel();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+
+  const { scrollY } = useScroll();
+  const backgroundY = useTransform(scrollY, [0, 500], [0, 150]);
+  const textOpacity = useTransform(scrollY, [0, 300], [1, 0]);
 
   const [weather, setWeather] = useState<{
     temp: number;
@@ -103,86 +112,99 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 1. HERO SECTION */}
-      <section className="relative h-[85vh] w-full overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0">
+      <section className="relative h-[90vh] w-full overflow-hidden">
+        {/* Parallax Background Image */}
+        <motion.div className="absolute inset-0" style={{ y: backgroundY }}>
           <img
             src="https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&q=80&w=2000"
             alt="Mount Bromo"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-gray-50/90"></div>
-        </div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-gray-50/90"></div>
+        </motion.div>
 
         {/* Hero Content */}
         <div className="relative h-full flex flex-col justify-center items-center text-center px-4 md:px-6 pt-10">
           <motion.div
+            style={{ opacity: textOpacity }}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="space-y-6 max-w-4xl w-full"
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="space-y-8 max-w-5xl w-full"
           >
-            {/* Weather Widget */}
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-white animate-pulse">
-              <span className="material-symbols-outlined text-yellow-400">
+            {/* Weather Widget (Floating) */}
+            <motion.div
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-5 py-2 rounded-full border border-white/20 text-white shadow-lg"
+            >
+              <span className="material-symbols-outlined text-yellow-400 animate-spin-slow">
                 {weather ? "sunny" : "cloud"}
               </span>
-              <span className="text-sm font-semibold">Bromo, Malang</span>
-              <span className="text-white/50">|</span>
-              <span className="text-sm font-bold">
-                {weather ? `${weather.temp}°C` : "--°C"}
-              </span>
-            </div>
+              <div className="text-left leading-none">
+                <span className="block text-[10px] font-bold opacity-80 uppercase tracking-widest">
+                  Live Weather
+                </span>
+                <span className="text-sm font-bold">
+                  Bromo, {weather ? `${weather.temp}°C` : "--°C"}
+                </span>
+              </div>
+            </motion.div>
 
-            <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight drop-shadow-2xl">
-              EXPLORE{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+            <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter drop-shadow-2xl leading-[0.9]">
+              EXPLORE <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-cyan-400">
                 EAST JAVA
               </span>
             </h1>
 
-            <p className="text-white/90 text-lg md:text-xl font-medium max-w-2xl mx-auto">
-              #1 Premium Travel Agent in Malang. Trusted by 50,000+ happy
-              travelers.
+            <p className="text-white/90 text-lg md:text-2xl font-medium max-w-2xl mx-auto leading-relaxed drop-shadow-md">
+              Discover the hidden gems of Malang and Bromo with the #1 Premium
+              Travel Agent.
             </p>
 
             {/* BIG SEARCH BAR */}
-            <div className="bg-white p-2 rounded-[2rem] shadow-2xl max-w-3xl mx-auto flex items-center gap-2 transform translate-y-8">
-              <div className="flex-1 flex items-center px-6 gap-3 border-r border-gray-100">
-                <span className="material-symbols-outlined text-gray-400 text-2xl">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              className="bg-white p-2 pl-4 rounded-full shadow-2xl max-w-3xl mx-auto flex items-center gap-2 transform translate-y-8 border border-gray-100/50 backdrop-blur-xl"
+            >
+              <div className="flex-1 flex items-center px-4 gap-4 border-r border-gray-100">
+                <span className="material-symbols-outlined text-emerald-500 text-3xl">
                   location_on
                 </span>
-                <div className="text-left w-full">
-                  <label className="block text-[10px] font-bold text-gray-500 uppercase">
-                    Destinasi
+                <div className="text-left w-full py-2">
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                    Where to?
                   </label>
                   <input
                     type="text"
-                    placeholder="Mau kemana hari ini?"
+                    placeholder="Search destinations..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-transparent outline-none font-bold text-gray-900 placeholder:text-gray-300"
+                    className="w-full bg-transparent outline-none font-bold text-gray-900 placeholder:text-gray-300 text-lg"
                   />
                 </div>
               </div>
-              <div className="hidden md:flex flex-1 items-center px-6 gap-3 border-r border-gray-100">
-                <span className="material-symbols-outlined text-gray-400 text-2xl">
+              <div className="hidden md:flex flex-1 items-center px-4 gap-4">
+                <span className="material-symbols-outlined text-emerald-500 text-3xl">
                   calendar_month
                 </span>
-                <div className="text-left">
-                  <label className="block text-[10px] font-bold text-gray-500 uppercase">
-                    Tanggal
+                <div className="text-left py-2">
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                    When?
                   </label>
-                  <span className="block font-bold text-gray-500 text-sm">
+                  <span className="block font-bold text-gray-500 text-lg">
                     Any Date
                   </span>
                 </div>
               </div>
-              <button className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl px-8 py-4 font-bold shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2">
-                <span className="material-symbols-outlined">search</span>
-                Cari
+              <button className="bg-gray-900 hover:bg-emerald-600 text-white rounded-full w-14 h-14 flex items-center justify-center font-bold shadow-lg transition-all group">
+                <span className="material-symbols-outlined group-hover:scale-110 transition-transform">
+                  search
+                </span>
               </button>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>

@@ -40,6 +40,6 @@ export async function createBooking(prevState: any, formData: FormData) {
     },
   });
 
-  // redirect('/dashboard/bookings'); or success page
-  redirect("/dashboard?bookingSuccess=true");
+  // Redirect to success page
+  redirect("/checkout/success");
 }
