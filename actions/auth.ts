@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { createSession, deleteSession } from "@/lib/session";
+import { createSession, deleteSession, getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 // import bcrypt from "bcryptjs"; // bcryptjs handles imports differently in some environments, let's try direct require if import fails or standard import
 import * as bcrypt from "bcryptjs";

@@ -1,47 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useActionState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTravel } from "@/context/TravelContext";
 import toast from "react-hot-toast";
+import { login } from "../actions";
+
+const initialState = {
+  message: "",
+  errors: undefined,
+};
 
 export default function LoginPage() {
-  const router = useRouter();
   const { setUser } = useTravel();
-  const [loading, setLoading] = useState(false);
+  const [state, formAction, isPending] = useActionState(login, initialState);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const formData = new FormData(e.target as HTMLFormElement);
-    const email = formData.get("email") as string; // Get value from form
-
-    // Simulate API Login
-    setTimeout(() => {
-      const isAdmin = email === "admin@malangtour.com";
-
-      setUser({
-        name: isAdmin ? "Super Admin" : "Petualang Malang",
-        points: isAdmin ? 99999 : 2500,
-        referralCode: isAdmin ? "ADMINOFFICIAL" : "MALANGTOP2024",
-        isLoggedIn: true,
-        email: email,
-        role: isAdmin ? "ADMIN" : "USER",
-      });
-
-      toast.success(isAdmin ? "Welcome, Admin!" : "Welcome back!", {
-        icon: isAdmin ? "🛡️" : "👋",
-      });
-
-      if (isAdmin) {
-        router.push("/admin/dashboard");
-      } else {
-        router.push("/dashboard");
-      }
-    }, 1500);
-  };
+  useEffect(() => {
+    if (state.message) {
+      toast.error(state.message);
+    }
+  }, [state]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 pt-28 pb-12">
@@ -67,7 +45,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form action={formAction} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
                 Email Address
@@ -84,6 +62,11 @@ export default function LoginPage() {
                   placeholder="you@example.com"
                 />
               </div>
+              {state.errors?.email && (
+                <p className="text-red-500 text-xs mt-1">
+                  {state.errors.email}
+                </p>
+              )}
             </div>
             <div>
               <div className="flex justify-between mb-2">
@@ -103,18 +86,24 @@ export default function LoginPage() {
                 </span>
                 <input
                   type="password"
+                  name="password"
                   required
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-gray-900 placeholder:text-gray-400"
                   placeholder="••••••••"
                 />
               </div>
+              {state.errors?.password && (
+                <p className="text-red-500 text-xs mt-1">
+                  {state.errors.password}
+                </p>
+              )}
             </div>
 
             <button
-              disabled={loading}
+              disabled={isPending}
               className="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-black transition-all shadow-xl active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2"
             >
-              {loading ? (
+              {isPending ? (
                 <>
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                   Logging in...
@@ -196,7 +185,8 @@ export default function LoginPage() {
               </span>
             </div>
             <h3 className="text-2xl font-bold leading-relaxed mb-2">
-              &quot;The journey of a thousand miles begins with a single step.&quot;
+              &quot;The journey of a thousand miles begins with a single
+              step.&quot;
             </h3>
             <p className="text-emerald-200">– Lao Tzu</p>
           </div>

@@ -9,6 +9,7 @@ import { getSession } from "@/lib/session";
 // Schema for validation
 const DestinationSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
+  slug: z.string().min(3, "Slug must be at least 3 characters").regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase alphanumeric with hyphens"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   price: z.coerce.number().min(0, "Price must be positive"),
   location: z.string().min(3, "Location is required"),
@@ -31,6 +32,7 @@ export async function createDestination(prevState: any, formData: FormData) {
 
   const validatedFields = DestinationSchema.safeParse({
     name: formData.get("name"),
+    slug: formData.get("slug"),
     description: formData.get("description"),
     price: formData.get("price"),
     location: formData.get("location"),
@@ -55,6 +57,7 @@ export async function createDestination(prevState: any, formData: FormData) {
     await prisma.destination.create({
       data: {
         name: validatedFields.data.name,
+        slug: validatedFields.data.slug,
         description: validatedFields.data.description,
         price: validatedFields.data.price,
         location: validatedFields.data.location,
@@ -69,7 +72,7 @@ export async function createDestination(prevState: any, formData: FormData) {
       },
     });
   } catch (error) {
-    return { message: "Database Error: Failed to Create Destination." };
+    return { message: "Database Error: Failed to Create Destination. Slug might be taken." };
   }
 
   revalidatePath("/admin/destinations");
@@ -90,6 +93,7 @@ export async function updateDestination(
 
   const validatedFields = DestinationSchema.safeParse({
     name: formData.get("name"),
+    slug: formData.get("slug"),
     description: formData.get("description"),
     price: formData.get("price"),
     location: formData.get("location"),
@@ -115,6 +119,7 @@ export async function updateDestination(
       where: { id },
       data: {
         name: validatedFields.data.name,
+        slug: validatedFields.data.slug,
         description: validatedFields.data.description,
         price: validatedFields.data.price,
         location: validatedFields.data.location,
@@ -170,6 +175,18 @@ export async function getDestinationById(id: number) {
   try {
     const destination = await prisma.destination.findUnique({
       where: { id },
+    });
+    return destination;
+  } catch (error) {
+    console.error("Database Error:", error);
+    return null;
+  }
+}
+
+export async function getDestinationBySlug(slug: string) {
+  try {
+    const destination = await prisma.destination.findUnique({
+      where: { slug },
     });
     return destination;
   } catch (error) {

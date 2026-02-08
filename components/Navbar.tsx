@@ -195,26 +195,21 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
                       {user.points} Travel Points
                     </div>
                   </div>
-                  <Link
-                    href="/dashboard"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                  >
-                    Dashboard
-                  </Link>
-                  {activeUser.role === "ADMIN" && (
+                  {activeUser.role === "ADMIN" ? (
                     <Link
                       href="/admin/dashboard"
                       className="block px-4 py-2 text-sm font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                     >
                       Admin Dashboard
                     </Link>
+                  ) : (
+                    <Link
+                      href="/dashboard"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                    >
+                      My Dashboard
+                    </Link>
                   )}
-                  <Link
-                    href="/rewards"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                  >
-                    Reward Catalog
-                  </Link>
                   <Link
                     href="/profile"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -302,13 +297,23 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
         </Link>
         {activeUser ? (
           <>
-            <Link
-              href="/dashboard"
-              className="text-gray-900 dark:text-white text-xl font-bold"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Dashboard ({user.points} Pts)
-            </Link>
+            {user.role === "ADMIN" ? (
+              <Link
+                href="/admin/dashboard"
+                className="text-emerald-500 text-xl font-bold"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Admin Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/dashboard"
+                className="text-gray-900 dark:text-white text-xl font-bold"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                My Dashboard ({user.points} Pts)
+              </Link>
+            )}
             <button
               onClick={handleLogout}
               className="text-red-500 text-xl font-bold"

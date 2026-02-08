@@ -134,11 +134,12 @@ export default function DestinationTable({
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           href={`/admin/destinations/${dest.id}`}
-                          className="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors"
+                          className="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors flex items-center gap-1"
                         >
                           <span className="material-symbols-outlined text-lg">
                             edit
                           </span>
+                          <span className="text-xs font-bold">Edit</span>
                         </Link>
                         <button
                           onClick={() => handleDelete(dest.id)}

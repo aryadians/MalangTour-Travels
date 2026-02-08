@@ -21,9 +21,10 @@ export default function PlannerPage() {
 
   // Calculate total price
   const totalPrice = useMemo(() => {
-    const destinationsCost = selectedItems.reduce((acc, id) => {
+    const destinationsCost = selectedItems.reduce((acc: number, id) => {
       const dest = destinations.find((d) => d.id === id);
-      return acc + (dest ? dest.price : 0);
+      const price = dest ? Number(dest.price) : 0;
+      return acc + price;
     }, 0);
 
     // Simple logic: Base fee + (Destination Cost * Pax)
@@ -77,7 +78,7 @@ export default function PlannerPage() {
                 >
                   <div className="relative h-40">
                     <img
-                      src={dest.images[0]}
+                      src={dest.images?.[0] || dest.image}
                       className="w-full h-full object-cover"
                       alt={dest.name}
                     />

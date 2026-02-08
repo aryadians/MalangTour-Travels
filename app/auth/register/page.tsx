@@ -1,139 +1,237 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useActionState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { register } from "../actions";
 import toast from "react-hot-toast";
 
+const initialState = {
+  message: "",
+  errors: undefined,
+};
+
 export default function RegisterPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [state, formAction, isPending] = useActionState(register, initialState);
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    // Simulate API Register
-    setTimeout(() => {
-      toast.success("Account created successfully!", {
-        icon: "🎉",
-      });
-      router.push("/auth/login");
-    }, 1500);
-  };
+  useEffect(() => {
+    if (state.message) {
+      toast.error(state.message);
+    }
+  }, [state]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 pt-28 pb-12">
-      <div className="max-w-6xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
-        {/* Left Side - Image */}
-        <div className="hidden md:block relative bg-gray-900 order-2 md:order-1">
-          <img
-            src="https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&q=80&w=1000"
-            className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay"
-            alt="Bromo Background"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80 flex flex-col justify-end p-12 text-white">
-            <h3 className="text-3xl font-black mb-2">Join the Club</h3>
-            <p className="text-gray-300">
-              Unlock user-only prices and earn points on every trip.
-            </p>
+    <div className="bg-[#f0f4f3] font-display text-slate-900 min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background with Overlay */}
+      <div
+        className="absolute inset-0 bg-cover bg-center z-0"
+        style={{
+          backgroundImage:
+            "url('https://lh3.googleusercontent.com/p/AF1QipN3X-x2X2x2X2x2X2x2X2x2X2x2X2x2X2x2X2')",
+        }}
+      ></div>
+      <div className="absolute inset-0 bg-[#0e1715]/70 backdrop-blur-sm z-0"></div>
+
+      {/* Card */}
+      <div className="w-full max-w-[480px] bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10 p-8 md:p-10">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-6">
+            <span className="material-symbols-outlined text-3xl">
+              person_add
+            </span>
           </div>
-        </div>
-
-        {/* Right Side - Form */}
-        <div className="p-8 md:p-12 flex flex-col justify-center order-1 md:order-2">
-          <div className="mb-8">
-            <Link href="/" className="flex items-center gap-2 mb-8 group w-fit">
-              <div className="size-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white group-hover:scale-105 transition-transform">
-                <span className="material-symbols-outlined text-xl">
-                  landscape
-                </span>
-              </div>
-              <span className="font-bold text-gray-900 tracking-tight">
-                MalangTravel
-              </span>
-            </Link>
-            <h1 className="text-3xl font-black text-gray-900 mb-2">
-              Create Account
-            </h1>
-            <p className="text-gray-500">Start your adventure with us today.</p>
-          </div>
-
-          <form onSubmit={handleRegister} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
-                  badge
-                </span>
-                <input
-                  type="text"
-                  required
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-gray-900 placeholder:text-gray-400"
-                  placeholder="John Doe"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
-                  mail
-                </span>
-                <input
-                  type="email"
-                  required
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-gray-900 placeholder:text-gray-400"
-                  placeholder="you@example.com"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
-                  lock
-                </span>
-                <input
-                  type="password"
-                  required
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-gray-900 placeholder:text-gray-400"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-
-            <button
-              disabled={loading}
-              className="w-full bg-emerald-500 text-white font-bold py-4 rounded-xl hover:bg-emerald-600 transition-all shadow-lg active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                  Creating Account...
-                </>
-              ) : (
-                "Sign Up Now"
-              )}
-            </button>
-          </form>
-
-          <p className="mt-8 text-center text-sm text-gray-500">
-            Already have an account?{" "}
-            <Link
-              href="/auth/login"
-              className="text-emerald-600 font-bold hover:underline"
-            >
-              Log In
-            </Link>
+          <h1 className="text-2xl font-bold text-[#111816] mb-2">
+            Create your account
+          </h1>
+          <p className="text-slate-500 text-sm leading-relaxed">
+            Join thousands of travelers exploring Malang.
           </p>
         </div>
+
+        <form action={formAction} className="space-y-5">
+          {/* Full Name */}
+          <div>
+            <label
+              htmlFor="name"
+              className="block text-xs font-bold uppercase text-slate-500 mb-2 tracking-wider"
+            >
+              Full Name
+            </label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span className="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors">
+                  person
+                </span>
+              </div>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                className="block w-full h-12 pl-12 pr-4 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 bg-slate-50 focus:bg-white text-slate-900 placeholder:text-slate-400 transition-all font-medium"
+                placeholder="e.g. John Doe"
+                required
+              />
+            </div>
+            {state.errors?.name && (
+              <p className="text-red-500 text-xs mt-1">{state.errors.name}</p>
+            )}
+          </div>
+
+          {/* Email Address */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-xs font-bold uppercase text-slate-500 mb-2 tracking-wider"
+            >
+              Email Address
+            </label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span className="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors">
+                  mail
+                </span>
+              </div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                className="block w-full h-12 pl-12 pr-4 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 bg-slate-50 focus:bg-white text-slate-900 placeholder:text-slate-400 transition-all font-medium"
+                placeholder="e.g. name@example.com"
+                required
+              />
+            </div>
+            {state.errors?.email && (
+              <p className="text-red-500 text-xs mt-1">{state.errors.email}</p>
+            )}
+          </div>
+
+          {/* Password */}
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-xs font-bold uppercase text-slate-500 mb-2 tracking-wider"
+            >
+              Password
+            </label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span className="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors">
+                  lock
+                </span>
+              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                className="block w-full h-12 pl-12 pr-12 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 bg-slate-50 focus:bg-white text-slate-900 placeholder:text-slate-400 transition-all font-medium"
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                onClick={() => {
+                  const input = document.getElementById(
+                    "password",
+                  ) as HTMLInputElement;
+                  if (input) {
+                    input.type =
+                      input.type === "password" ? "text" : "password";
+                  }
+                }}
+              >
+                <span className="material-symbols-outlined text-[20px]">
+                  visibility_off
+                </span>
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-slate-400">
+              Must be at least 8 characters.
+            </p>
+            {state.errors?.password && (
+              <p className="text-red-500 text-xs mt-1">
+                {state.errors.password}
+              </p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={isPending}
+            className="w-full flex items-center justify-center h-12 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold transition-all shadow-lg shadow-primary/30 mt-2 disabled:opacity-70"
+          >
+            {isPending ? "Creating Account..." : "Create Account"}
+          </button>
+        </form>
+
+        {/* Divider */}
+        <div className="relative my-8">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-200"></div>
+          </div>
+          <div className="relative flex justify-center">
+            <span className="bg-white px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+              Or sign up with
+            </span>
+          </div>
+        </div>
+
+        {/* Social Buttons */}
+        <div className="grid grid-cols-2 gap-4">
+          <button className="flex items-center justify-center gap-2 h-12 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors bg-white">
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"
+              />
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                fill="#FBBC05"
+              />
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335"
+              />
+            </svg>
+            <span className="font-bold text-slate-600 text-sm">Google</span>
+          </button>
+          <button className="flex items-center justify-center gap-2 h-12 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors bg-white">
+            <svg
+              className="w-5 h-5 text-[#1877F2]"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.791-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+            </svg>
+            <span className="font-bold text-slate-600 text-sm">Facebook</span>
+          </button>
+        </div>
+
+        <div className="mt-8 text-center text-sm font-medium text-slate-500">
+          Already have an account?{" "}
+          <Link
+            href="/auth/login"
+            className="text-primary font-bold hover:underline"
+          >
+            Log in here
+          </Link>
+        </div>
+      </div>
+
+      {/* Footer Branding */}
+      <div className="absolute bottom-6 text-center w-full z-10">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <span className="material-symbols-outlined text-white/80 text-xl">
+            landscape
+          </span>
+          <span className="text-white/90 font-bold text-sm tracking-wide">
+            Malang Premium Tours
+          </span>
+        </div>
+        <p className="text-white/50 text-xs">© 2023 All Rights Reserved</p>
       </div>
     </div>
   );

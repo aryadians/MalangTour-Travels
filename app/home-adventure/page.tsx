@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import DestinationCard from "@/components/DestinationCard";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
@@ -105,33 +106,37 @@ export default async function HomeAdventure() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-4 translate-y-8">
               <div className="h-64 rounded-xl overflow-hidden bg-gray-800 relative group">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1534234828569-fa33213c32fc?auto=format&fit=crop&q=80&w=400"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0"
                   alt="Jeep"
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0"
                 />
               </div>
               <div className="h-40 rounded-xl overflow-hidden bg-gray-800 relative group">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80&w=400"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0"
                   alt="Snorkeling"
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0"
                 />
               </div>
             </div>
             <div className="space-y-4">
               <div className="h-40 rounded-xl overflow-hidden bg-gray-800 relative group">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1518709414768-a88986a45d5a?auto=format&fit=crop&q=80&w=400"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0"
                   alt="Waterfall"
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0"
                 />
               </div>
               <div className="h-64 rounded-xl overflow-hidden bg-gray-800 relative group">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1605218427368-35b84d4360e2?auto=format&fit=crop&q=80&w=400"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0"
                   alt="Running"
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0"
                 />
               </div>
             </div>
