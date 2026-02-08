@@ -20,76 +20,109 @@ async function main() {
     },
   });
 
-  console.log({ admin });
-
   // 1.5 Create/Upsert Regular User
   const user = await prisma.user.upsert({
     where: { email: "user@malangtour.com" },
     update: {},
     create: {
       email: "user@malangtour.com",
-      name: "Regular User",
-      password: hashedPassword, // Reuse the same hash for simplicity (admin123) or create new one
+      name: "Sarah Wijaya",
+      password: hashedPassword,
       role: "USER",
-      points: 100,
-      referralCode: "USER123",
+      points: 1200,
+      referralCode: "SARAH123",
     },
   });
 
-  console.log({ user });
+  const user2 = await prisma.user.upsert({
+    where: { email: "david@example.com" },
+    update: {},
+    create: {
+      email: "david@example.com",
+      name: "David Chen",
+      password: hashedPassword,
+      role: "USER",
+      points: 500,
+      referralCode: "DAVID777",
+    },
+  });
 
   // 2. Create/Upsert Destinations
-  // We'll use the data from the Packages page
-  const bromoPackage = await prisma.destination.upsert({
+  const bromo = await prisma.destination.upsert({
+    where: { slug: "bromo-sunrise-adventure" },
+    update: {},
+    create: {
+      name: "Bromo Sunrise Adventure",
+      slug: "bromo-sunrise-adventure",
+      description: "Experience the iconic sunrise over the Bromo Tengger Semeru National Park. A journey through the sea of sand and the majestic crater rim.",
+      price: 750000,
+      location: "Probolinggo, East Java",
+      rating: 5.0,
+      category: "Gunung",
+      images: JSON.stringify([
+        "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&q=80&w=1000",
+        "https://images.unsplash.com/photo-1626245914933-9f0940cc0603?auto=format&fit=crop&q=80&w=1000"
+      ]),
+      facilities: JSON.stringify(["Private 4x4 Jeep", "Certified Guide", "Hot Coffee/Tea", "Entrance Tickets"]),
+      highlights: JSON.stringify(["Sunrise at King Kong Hill", "Widodaren Valley", "Bromo Crater Hike"]),
+      itinerary: JSON.stringify([
+        { time: "00:30 AM", title: "Malang Pickup", activity: "Start from your location" },
+        { time: "03:30 AM", title: "Penanjakan", activity: "Wait for the sunrise" },
+        { time: "06:00 AM", title: "Sea of Sand", activity: "Jeep photo session" }
+      ]),
+    },
+  });
+
+  const honeymoon = await prisma.destination.upsert({
     where: { slug: "bromo-batu-honeymoon" },
     update: {},
     create: {
       name: "Bromo & Batu Honeymoon",
       slug: "bromo-batu-honeymoon",
-      description:
-        "A 3-Day Journey of Love above the Clouds. Experience the magic of East Java with exclusive private service.",
+      description: "A 3-Day Journey of Love above the Clouds. Experience the magic of East Java with exclusive private service.",
       price: 8500000,
       location: "Malang, East Java",
       rating: 5.0,
       category: "Honeymoon",
       images: JSON.stringify([
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAAsUaYrtDhpjhzGKaLvVmz0zMf5ozDezVTbhtMfPiIhN7GMKQRpZM_KnbN0igrOMOgxjIe8Q8n54GL3OqeECATpOEiTRXdttnDNGbzBkQsmVvaXdrqPlY-JbeY54lJY6Pjk3Z1aeooHRrMdXs8HgsMf5ZOh2VflDP_EOh3tchktECxPTV_PE8Q_1EWo2bB0yNCjOBAzuvE2EnZJHmXpt3gDd5QLg-HAF5Fwp2sPB-u_LcEAzG9t2KwgSewoAkOx9kCQxAKW3cb3A",
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDimMY5bU60ckH73VFh0Bd9AGvDd_9LFm3uzdfSgTySMy7ihf8ErdBpEWk8uRTwrA3D0zPBifa7CRIvo3YYKwHwIQIdL38VFu1t7voTN0XBC0sXpxPB9A-9F1YIFvzSZiSxlZrvmqrHe9BEym7-9ctZSeboZPwsNoekBnq6QTS-O85bIbMfcxgMlYIMv3hYAGAIvLIDIF12BOWPV95Lf8sCTNjdVoSQMfV-BUXpY_DdjF1Mc3LQqcEdV6LpYqU0hCboUibGKIdiwA",
+        "https://images.unsplash.com/photo-1510662145379-13537db782dc?auto=format&fit=crop&q=80&w=1000",
+        "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1000"
       ]),
-      openTime: "24 Hours",
-      ticketPrice: "Included",
-      facilities: JSON.stringify([
-        "Private Jeep",
-        "Luxury Villa",
-        "Candlelight Dinner",
-        "Photographer",
-      ]),
-      highlights: JSON.stringify([
-        "Sunrise at King Kong Hill",
-        "Savana Picnic",
-        "Batu Flower Garden",
-      ]),
+      facilities: JSON.stringify(["Luxury Villa", "Private Photographer", "Romantic Dinner", "Private Car"]),
+      highlights: JSON.stringify(["Picnic at Savanna", "Batu Flower Garden", "Sunset at Paralayang"]),
       itinerary: JSON.stringify([
-        {
-          day: 1,
-          title: "Arrival & Candlelight Dinner",
-          description: "Pick up and check-in to villa.",
-        },
-        {
-          day: 2,
-          title: "Bromo Sunrise",
-          description: "Early morning Jeep tour to Bromo.",
-        },
-        {
-          day: 3,
-          title: "Batu Flower Garden",
-          description: "Leisurely breakfast and city tour.",
-        },
+        { day: 1, title: "Arrival", activity: "Candlelight Dinner" },
+        { day: 2, title: "Bromo", activity: "Private Sunrise" },
+        { day: 3, title: "Batu", activity: "City Tour" }
       ]),
     },
   });
 
-  console.log({ bromoPackage });
+  // 3. Seed Reviews
+  await prisma.review.createMany({
+    data: [
+      {
+        userId: user.id,
+        destinationId: bromo.id,
+        rating: 5,
+        comment: "Absolutely breathtaking! The Jeep driver was a pro and the sunrise was perfect.",
+      },
+      {
+        userId: user2.id,
+        destinationId: bromo.id,
+        rating: 5,
+        comment: "Seamless experience. Best way to see Bromo without any stress.",
+      },
+      {
+        userId: user.id,
+        destinationId: honeymoon.id,
+        rating: 5,
+        comment: "Our honeymoon was perfect. The villa was incredible and the photos are stunning!",
+      }
+    ],
+  });
+
+  console.log("Seeding finished successfully.");
 }
 
 main()

@@ -5,6 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { verifySession } from "@/lib/session";
 import { redirect } from "next/navigation";
 
+import { sendTicketEmail } from "@/lib/services/mail";
+import { revalidatePath } from "next/cache";
+
 const bookingSchema = z.object({
   destinationId: z.coerce.number(),
   date: z.string(),
@@ -28,18 +31,56 @@ export async function createBooking(prevState: any, formData: FormData) {
 
   const { destinationId, date, pax, totalPrice } = result.data;
 
-  // Create Booking
-  const booking = await prisma.booking.create({
-    data: {
-      userId: session.userId as string,
-      destinationId,
-      date: new Date(date),
-      pax,
-      totalPrice,
-      status: "CONFIRMED", // Immediate confirmation for MVP
-    },
-  });
+  let bookingId: string | null = null;
+
+  try {
+    // Fetch details for email
+    const [destination, user] = await Promise.all([
+      prisma.destination.findUnique({ where: { id: destinationId } }),
+      prisma.user.findUnique({ where: { id: session.userId as string } }),
+    ]);
+
+    if (!destination || !user) {
+      return { message: "Data not found" };
+    }
+
+    // Create Booking
+    const booking = await prisma.booking.create({
+      data: {
+        userId: session.userId as string,
+        destinationId,
+        date: new Date(date),
+        pax,
+        totalPrice,
+        status: "CONFIRMED", // Immediate confirmation for MVP
+      },
+    });
+
+    bookingId = booking.id;
+
+    // Send E-Ticket Email (Async, non-blocking)
+    if (user.email) {
+      sendTicketEmail(user.email, {
+        bookingId: booking.id,
+        destinationName: destination.name,
+        date: new Date(date).toDateString(),
+        pax,
+        totalPrice,
+      }).catch((err) => console.error("Email failed:", err));
+    }
+
+    revalidatePath("/dashboard");
+    revalidatePath("/bookings");
+  } catch (error) {
+    if ((error as any).digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+    console.error("Booking error:", error);
+    return { message: "Failed to create booking" };
+  }
 
   // Redirect to success page
-  redirect("/checkout/success");
+  if (bookingId) {
+    redirect(`/checkout/success?bookingId=${bookingId}`);
+  }
 }
