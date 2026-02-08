@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
 
-// Types matching Prisma + extensions
 interface Destination {
   id: number;
   name: string;
@@ -13,10 +13,10 @@ interface Destination {
   location: string;
   rating: number;
   category: string;
-  images: string[] | string; // Handled in parsing
+  images: string[] | string;
   facilities: string[] | string | null;
   highlights: string[] | string | null;
-  itinerary: any[] | string | null; // Complex object or string
+  itinerary: any[] | string | null;
   openTime?: string | null;
   ticketPrice?: string | null;
 }
@@ -31,8 +31,12 @@ export default function DestinationDetailClient({
   user,
 }: DestinationDetailClientProps) {
   const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Parse JSON fields
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const parseJSON = (data: any, fallback: any) => {
     if (typeof data === "string") {
       try {
@@ -45,362 +49,266 @@ export default function DestinationDetailClient({
   };
 
   const images = parseJSON(destination.images, []);
+  const facilities = parseJSON(destination.facilities, []);
   const highlights = parseJSON(destination.highlights, []);
-
-  // Itinerary might be specialized for Bromo as requested or generic
-  // If Bromo (id 2 usually), we might want to ensure it matches the prompt's specific request if the DB data is lackluster.
-  // For now, we try to use DB data, but if it's empty, we might fallback for Bromo.
   let itinerary = parseJSON(destination.itinerary, []);
 
-  // Fallback for Bromo if itinerary is empty (Just to ensure the prompt's "Specific time" requirement is met if data is missing)
-  if (destination.name.includes("Bromo") && itinerary.length === 0) {
-    itinerary = [
-      {
-        time: "03:00 AM",
-        title: "Pickup in Malang",
-        description: "Start the journey.",
-      },
-      {
-        time: "05:00 AM",
-        title: "Sunrise at Penanjakan",
-        description: "Witness the golden hour.",
-      },
-      {
-        time: "07:00 AM",
-        title: "Bromo Crater Hike",
-        description: "Trek to the volcano rim.",
-      },
-      {
-        time: "09:00 AM",
-        title: "Teletubbies Savanna",
-        description: "Explore the green expanse.",
-      },
-      {
-        time: "11:00 AM",
-        title: "Return Trip",
-        description: "Head back to Malang.",
-      },
-    ];
-  }
+  // Map facilities to icons
+  const getIcon = (name: string) => {
+    const low = name.toLowerCase();
+    if (low.includes("guide")) return "verified";
+    if (low.includes("transport") || low.includes("car") || low.includes("jeep")) return "local_taxi";
+    if (low.includes("photo") || low.includes("camera")) return "camera";
+    if (low.includes("insurance")) return "security";
+    if (low.includes("food") || low.includes("dinner") || low.includes("lunch")) return "restaurant";
+    if (low.includes("hotel") || low.includes("villa") || low.includes("stay")) return "hotel";
+    if (low.includes("wifi")) return "wifi";
+    if (low.includes("ticket") || low.includes("entrance")) return "confirmation_number";
+    return "star"; // fallback
+  };
 
-  // State
   const [paxCount, setPaxCount] = useState(2);
   const [selectedDate, setSelectedDate] = useState("");
   const [isBooking, setIsBooking] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Dynamic Pricing
   const pricePerPax = destination.price;
   const totalPrice = paxCount * pricePerPax;
 
   const handleBooking = () => {
     if (!selectedDate) {
-      alert("Please select a date first.");
+      toast.error("Please select a travel date.");
       return;
     }
-
     setIsBooking(true);
-
-    // Prepare query params for payment page
-    const params = new URLSearchParams({
-      destinationId: destination.id.toString(),
-      destinationName: destination.name,
-      paxCount: paxCount.toString(),
-      date: selectedDate,
-      price: pricePerPax.toString(),
-      image: images[0] || "",
-    });
-
-    // Simulate short delay then push to payment
     setTimeout(() => {
       setIsBooking(false);
-      router.push(`/booking/payment?${params.toString()}`);
-    }, 500);
+      setShowSuccessModal(true);
+    }, 1500);
   };
 
-  // Features (Icon Mapping)
-  const features = [
-    { icon: "schedule", label: "Sunrise", value: "03:00 AM" },
-    { icon: "directions_car", label: "Jeep", value: "4x4 Included" },
-    { icon: "hiking", label: "Trekking", value: "Moderate" },
-    { icon: "photo_camera", label: "Photos", value: "Best Spots" },
-  ];
+  if (!isMounted) return null;
 
   return (
-    <div className="bg-gray-50 min-h-screen font-sans pb-20">
-      {/* 1. Hero Section */}
-      <div className="relative w-full max-w-[1400px] mx-auto pt-6 px-4 md:px-6">
-        <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-3xl overflow-hidden shadow-2xl group">
-          <img
-            src={
-              images[0] ||
-              "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&q=80"
-            }
-            alt={destination.name}
-            className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
-          />
-
-          {/* Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-
-          {/* Top Left Badges */}
-          <div className="absolute top-6 left-6 flex flex-col gap-3">
-            <span className="bg-emerald-500 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg shadow-emerald-500/20 backdrop-blur-md animate-fade-in-down">
-              Most Popular
-            </span>
-            <span className="bg-black/50 backdrop-blur-md text-white border border-white/20 px-4 py-1.5 rounded-full text-sm font-semibold animate-fade-in-down delay-100">
-              4x4 Jeep Experience
-            </span>
-          </div>
-
-          {/* Bottom Left Title */}
-          <div className="absolute bottom-8 left-6 md:left-10 animate-fade-in-up">
-            <h1 className="text-white text-3xl md:text-5xl font-bold drop-shadow-lg mb-2">
-              {destination.name}
-            </h1>
-            <div className="flex items-center gap-2 text-white/90">
-              <span className="material-symbols-outlined text-emerald-400">
-                location_on
-              </span>
-              {destination.location}
-            </div>
-          </div>
-
-          {/* Bottom Right Rating */}
-          <div className="absolute bottom-8 right-6 md:right-10 hidden md:flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full shadow-lg">
-            <span
-              className="text-yellow-400 material-symbols-outlined"
-              style={{ fontVariationSettings: "'FILL' 1" }}
+    <div className="bg-white dark:bg-slate-950 min-h-screen font-display pb-32">
+      {/* 1. HERO HEADER */}
+      <div className="relative h-[65vh] w-full overflow-hidden">
+        <img
+          src={images[0] || "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&q=80"}
+          alt={destination.name}
+          className="w-full h-full object-cover brightness-[0.6]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-950 via-transparent to-transparent" />
+        
+        <div className="absolute bottom-0 left-0 right-0 p-8 md:p-16 lg:p-24">
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-4"
             >
-              star
-            </span>
-            <span className="text-white font-bold text-lg">
-              {destination.rating.toFixed(1)}
-            </span>
-            <span className="text-white/70 text-sm">| 124 Reviews</span>
+              <span className="bg-emerald-500 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg">
+                {destination.category}
+              </span>
+              <h1 className="text-4xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
+                {destination.name}
+              </h1>
+              <p className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-bold tracking-wide">
+                <span className="material-symbols-outlined text-emerald-500">location_on</span>
+                {destination.location}
+              </p>
+            </motion.div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6 mt-12 grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12">
-        {/* 2. Main Content (Left) */}
-        <div className="space-y-12">
-          {/* Feature Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {features.map((f, i) => (
-              <div
-                key={i}
-                className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center gap-2"
-              >
-                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-full mb-1">
-                  <span className="material-symbols-outlined">{f.icon}</span>
-                </div>
-                <span className="text-sm font-bold text-gray-800">
-                  {f.label}
-                </span>
-                <span className="text-xs text-gray-500">{f.value}</span>
+      {/* 2. CONTENT GRID */}
+      <main className="max-w-7xl mx-auto px-6 md:px-12 mt-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+          
+          {/* LEFT SIDE: INFO */}
+          <div className="lg:col-span-8 space-y-20">
+            {/* Overview */}
+            <section className="space-y-6">
+              <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">The Experience.</h2>
+              <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed font-medium">
+                {destination.description}
+              </p>
+            </section>
+
+            {/* Dynamic Facilities Grid */}
+            <section className="space-y-8">
+              <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-widest">Included Facilities</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {facilities.length > 0 ? (
+                  facilities.map((f: string, i: number) => (
+                    <div key={i} className="p-6 rounded-[2rem] bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center gap-3 transition-transform hover:scale-105">
+                      <span className="material-symbols-outlined text-emerald-500 text-3xl">{getIcon(f)}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white leading-tight">{f}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-slate-400 text-sm italic">Contact admin for facility details.</p>
+                )}
               </div>
-            ))}
+            </section>
+
+            {/* Itinerary */}
+            <section className="space-y-10">
+              <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Itinerary Plan.</h2>
+              <div className="space-y-12 relative before:absolute before:left-[19px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800">
+                {itinerary.map((item: any, idx: number) => (
+                  <motion.div 
+                    key={idx}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    className="relative pl-12 group"
+                  >
+                    <div className="absolute left-0 top-1 w-10 h-10 rounded-full bg-white dark:bg-slate-900 border-4 border-slate-100 dark:border-slate-800 flex items-center justify-center z-10 group-hover:border-emerald-500 transition-colors">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em]">{item.time || item.day || `Step ${idx+1}`}</span>
+                      <h3 className="text-xl font-black text-slate-900 dark:text-white">{item.title || item.activity}</h3>
+                      <p className="text-slate-500 dark:text-slate-400 font-medium">{item.description || item.activity}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </section>
+
+            {/* Gallery Section */}
+            <section className="space-y-10">
+              <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Visual Story.</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 h-[600px]">
+                <div className="col-span-2 row-span-2 rounded-[2.5rem] overflow-hidden group">
+                  <img src={images[1] || images[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt="" />
+                </div>
+                <div className="rounded-[2rem] overflow-hidden group">
+                  <img src={images[2] || images[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt="" />
+                </div>
+                <div className="rounded-[2rem] overflow-hidden group">
+                  <img src={images[3] || images[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt="" />
+                </div>
+              </div>
+            </section>
           </div>
 
-          {/* Description */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-gray-900">
-              About this Trip
-            </h2>
-            <p className="text-gray-600 leading-relaxed text-lg">
-              {destination.description}
-            </p>
-          </div>
-
-          {/* Itinerary */}
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900">Itinerary</h2>
-            <div className="relative pl-8 border-l-2 border-dashed border-gray-300 space-y-8">
-              {itinerary.map((item: any, idx: number) => (
-                <div key={idx} className="relative group">
-                  {/* Dot */}
-                  <div className="absolute -left-[39px] top-1 w-5 h-5 rounded-full bg-emerald-500 border-4 border-white shadow-sm group-hover:scale-125 transition-transform" />
-
-                  <div className="flex flex-col gap-1">
-                    <span className="text-emerald-600 font-bold text-sm tracking-wide">
-                      {item.time}
-                    </span>
-                    <h3 className="text-lg font-bold text-gray-900">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-500 text-sm">{item.description}</p>
+          {/* RIGHT SIDE: STICKY BOOKING CARD */}
+          <div className="lg:col-span-4">
+            <div className="sticky top-32 space-y-8">
+              <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.08)] border border-slate-100 dark:border-slate-800 space-y-8">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Price per person</p>
+                    <h4 className="text-3xl font-black text-slate-900 dark:text-white font-serif italic">
+                      Rp {pricePerPax.toLocaleString("id-ID")}
+                    </h4>
+                  </div>
+                  <div className="bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-xl text-emerald-600 dark:text-emerald-400 font-black text-xs">
+                    ★ {destination.rating.toFixed(1)}
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Gallery (Masonry-ish) */}
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900">Gallery</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-96 md:h-80">
-              <div className="md:col-span-2 h-full rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                <img
-                  src={images[1] || images[0]}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  alt="Gallery 1"
-                />
-              </div>
-              <div className="hidden md:flex flex-col gap-4 h-full">
-                <div className="flex-1 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                  <img
-                    src={images[2] || images[0]}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    alt="Gallery 2"
-                  />
-                </div>
-                <div className="flex-1 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                  <img
-                    src={images[3] || images[0]}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    alt="Gallery 3"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+                <div className="space-y-6">
+                  {/* Date Input */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Select Date</label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        className="w-full p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-emerald-500 outline-none transition-all appearance-none"
+                        style={{ colorScheme: 'dark' }} // Force icons to show in dark mode if needed
+                        value={selectedDate}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
 
-        {/* 3. Sticky Sidebar (Right) */}
-        <div className="relative">
-          <div className="sticky top-24 bg-white p-6 rounded-3xl border border-gray-100 shadow-xl space-y-6">
-            <div className="flex justify-between items-end border-b border-gray-100 pb-6">
-              <div>
-                <span className="text-gray-400 text-sm block mb-1">
-                  Starting from
-                </span>
-                <span className="text-3xl font-bold text-gray-900">
-                  Rp {pricePerPax.toLocaleString("id-ID")}
-                </span>
-                <span className="text-gray-400 text-sm"> /pax</span>
-              </div>
-              <div className="text-right">
-                <div className="flex items-center text-yellow-500 text-sm font-bold gap-1">
-                  <span
-                    className="material-symbols-outlined text-lg"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  {/* Guests Input */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Guests</label>
+                    <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-2 rounded-2xl border border-slate-100 dark:border-slate-700">
+                      <button
+                        onClick={() => setPaxCount(Math.max(1, paxCount - 1))}
+                        className="w-12 h-12 rounded-xl bg-white dark:bg-slate-700 shadow-sm flex items-center justify-center text-slate-900 dark:text-white font-black hover:bg-emerald-500 hover:text-white transition-all"
+                      >
+                        -
+                      </button>
+                      <span className="font-black text-slate-900 dark:text-white text-lg">{paxCount}</span>
+                      <button
+                        onClick={() => setPaxCount(paxCount + 1)}
+                        className="w-12 h-12 rounded-xl bg-white dark:bg-slate-700 shadow-sm flex items-center justify-center text-slate-900 dark:text-white font-black hover:bg-emerald-500 hover:text-white transition-all"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-slate-50 dark:border-slate-800 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-slate-400">Total Price</span>
+                    <span className="text-2xl font-black text-emerald-500">Rp {totalPrice.toLocaleString("id-ID")}</span>
+                  </div>
+                  <button
+                    onClick={handleBooking}
+                    disabled={isBooking}
+                    className="w-full py-5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black uppercase tracking-[0.2em] text-xs rounded-2xl shadow-xl shadow-emerald-500/20 transition-all active:scale-95 disabled:opacity-50"
                   >
-                    star
-                  </span>
-                  5.0
+                    {isBooking ? "Confirming..." : "Book This Experience"}
+                  </button>
                 </div>
               </div>
             </div>
-
-            {/* Date Picker */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                <span className="material-symbols-outlined text-emerald-500">
-                  calendar_today
-                </span>
-                Select Date
-              </label>
-              <input
-                type="date"
-                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-              />
-            </div>
-
-            {/* Pax Counter */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                <span className="material-symbols-outlined text-emerald-500">
-                  group
-                </span>
-                Guests
-              </label>
-              <div className="flex items-center justify-between bg-gray-50 p-2 rounded-xl border border-gray-200">
-                <button
-                  onClick={() => setPaxCount(Math.max(1, paxCount - 1))}
-                  className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-gray-600 hover:text-emerald-600 font-bold transition-colors"
-                >
-                  -
-                </button>
-                <span className="font-bold text-lg">{paxCount}</span>
-                <button
-                  onClick={() => setPaxCount(paxCount + 1)}
-                  className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-gray-600 hover:text-emerald-600 font-bold transition-colors"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            {/* Total Price & CTA */}
-            <div className="pt-4 space-y-4">
-              <div className="flex justify-between items-center text-lg font-bold text-gray-900">
-                <span>Total</span>
-                <span className="text-emerald-600">
-                  Rp {totalPrice.toLocaleString("id-ID")}
-                </span>
-              </div>
-
-              <button
-                onClick={handleBooking}
-                disabled={isBooking}
-                className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {isBooking ? (
-                  <span className="animate-spin material-symbols-outlined">
-                    progress_activity
-                  </span>
-                ) : (
-                  <>
-                    <span>Book Trip Now</span>
-                    <span className="material-symbols-outlined text-sm">
-                      arrow_forward
-                    </span>
-                  </>
-                )}
-              </button>
-              <p className="text-xs text-center text-gray-400">
-                No payment required today.
-              </p>
-            </div>
           </div>
         </div>
-      </div>
+      </main>
 
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl transform transition-all scale-100 animate-in zoom-in-95 duration-300 flex flex-col items-center text-center">
-            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
-              <span className="material-symbols-outlined text-4xl text-emerald-600">
-                check_circle
-              </span>
-            </div>
-            <h3 className="text-2xl font-black text-gray-900 mb-2">
-              Booking Successful!
-            </h3>
-            <p className="text-gray-500 mb-8 leading-relaxed">
-              Your trip to <strong className="text-gray-800">Bromo</strong> for{" "}
-              <strong className="text-gray-800">{paxCount} people</strong> on{" "}
-              <strong className="text-gray-800">
-                {new Date(selectedDate).toLocaleDateString()}
-              </strong>{" "}
-              is confirmed.
-            </p>
-            <button
-              onClick={() => {
-                setShowSuccessModal(false);
-                router.push("/dashboard"); // Redirect to dashboard or just close
-              }}
-              className="w-full py-3 bg-gray-900 hover:bg-black text-white font-bold rounded-xl transition-colors"
+      {/* 3. SUCCESS MODAL */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSuccessModal(false)}
+              className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative bg-white dark:bg-slate-900 w-full max-w-md rounded-[3rem] p-12 text-center shadow-2xl overflow-hidden border border-white/10"
             >
-              View Ticket in Dashboard
-            </button>
+              <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500" />
+              <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
+                <span className="material-symbols-outlined text-5xl text-emerald-600 dark:text-emerald-400">task_alt</span>
+              </div>
+              <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter mb-4">Reservation Confirmed!</h3>
+              <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-10">
+                Your journey to <strong className="text-slate-900 dark:text-white font-black">{destination.name}</strong> is ready. 
+                Check your dashboard for ticket details.
+              </p>
+              <div className="space-y-4">
+                <button
+                  onClick={() => router.push("/dashboard")}
+                  className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black uppercase tracking-widest text-xs rounded-2xl hover:scale-105 transition-all"
+                >
+                  Go to Dashboard
+                </button>
+                <button
+                  onClick={() => setShowSuccessModal(false)}
+                  className="w-full py-4 text-slate-400 font-bold uppercase tracking-widest text-[10px] hover:text-slate-900 dark:hover:text-white transition-all"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }
