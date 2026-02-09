@@ -2,8 +2,45 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+
+export async function savePlan(planData: any, preferences: string) {
+  const session = await getSession();
+  
+  try {
+    const saved = await prisma.savedPlan.create({
+      data: {
+        userId: session?.userId || null,
+        title: planData.title,
+        summary: planData.summary,
+        estimatedTotal: planData.estimatedTotal,
+        days: JSON.stringify(planData.days),
+        preferences: preferences,
+      }
+    });
+    return { success: true, id: saved.id };
+  } catch (error) {
+    console.error("Save Plan Error:", error);
+    return { success: false, error: "Failed to save plan." };
+  }
+}
+
+export async function getSavedPlan(id: string) {
+  try {
+    const plan = await prisma.savedPlan.findUnique({
+      where: { id }
+    });
+    if (!plan) return null;
+    return {
+      ...plan,
+      days: JSON.parse(plan.days)
+    };
+  } catch (error) {
+    return null;
+  }
+}
 
 export async function generateItinerary(preferences: string, budget: number, days: number) {
   if (!process.env.GEMINI_API_KEY) {

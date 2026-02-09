@@ -4,11 +4,11 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useTravel } from "@/context/TravelContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { generateItinerary } from "@/actions/ai";
+import { generateItinerary, savePlan } from "@/actions/ai";
 import toast from "react-hot-toast";
 
 export default function PlannerPage() {
-  const { destinations } = useTravel();
+  const { destinations, t } = useTravel();
   const [activeTab, setActiveTab] = useState<"manual" | "ai">("manual");
 
   // Manual States
@@ -21,6 +21,7 @@ export default function PlannerPage() {
   const [budget, setBudget] = useState(2000000);
   const [aiPlan, setAiPlan] = useState<any>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Manual logic
   const toggleDestination = (id: number | string) => {
@@ -43,7 +44,7 @@ export default function PlannerPage() {
   // AI logic
   const handleGenerateAI = async () => {
     if (!preferences.trim()) {
-      toast.error("Please enter your travel preferences.");
+      toast.error(t("aiPlaceholder"));
       return;
     }
     setIsAiLoading(true);
@@ -51,11 +52,30 @@ export default function PlannerPage() {
     const result = await generateItinerary(preferences, budget, days);
     if (result.success) {
       setAiPlan(result.data);
-      toast.success("AI Itinerary Generated!");
+      toast.success("Itinerary Generated!");
     } else {
       toast.error(result.error || "Failed to generate plan");
     }
     setIsAiLoading(false);
+  };
+
+  const handleSavePlan = async () => {
+    if (!aiPlan) return;
+    setIsSaving(true);
+    try {
+      const result = await savePlan(aiPlan, preferences);
+      if (result.success) {
+        const url = `${window.location.origin}/plan/share/${result.id}`;
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copied!");
+      } else {
+        toast.error("Failed to save.");
+      }
+    } catch (err) {
+      toast.error("Error occurred.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -67,7 +87,7 @@ export default function PlannerPage() {
             <Link href="/" className="bg-slate-100 dark:bg-slate-800 p-2 rounded-full hover:bg-emerald-500 hover:text-white transition-all">
               <span className="material-symbols-outlined text-xl">arrow_back</span>
             </Link>
-            <h1 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Trip Planner</h1>
+            <h1 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{t("tripPlanner")}</h1>
           </div>
           
           <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
@@ -75,14 +95,14 @@ export default function PlannerPage() {
               onClick={() => setActiveTab("manual")}
               className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'manual' ? 'bg-white dark:bg-slate-700 text-emerald-600 shadow-sm' : 'text-slate-400'}`}
             >
-              Manual
+              {t("manualTab")}
             </button>
             <button 
               onClick={() => setActiveTab("ai")}
               className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'ai' ? 'bg-white dark:bg-slate-700 text-emerald-600 shadow-sm' : 'text-slate-400'}`}
             >
               <span className="material-symbols-outlined text-sm">magic_button</span>
-              AI Gemini
+              {t("aiTab")}
             </button>
           </div>
         </div>
@@ -94,7 +114,7 @@ export default function PlannerPage() {
           <>
             {/* Left: Manual Destination List */}
             <div className="w-full md:w-2/3 space-y-6">
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Select Destinations</h2>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{t("selectDestinations")}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {destinations.map((dest) => {
                   const isSelected = selectedItems.includes(dest.id);
@@ -131,12 +151,12 @@ export default function PlannerPage() {
               <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 sticky top-24">
                 <h3 className="text-xl font-black text-slate-900 dark:text-white mb-8 flex items-center gap-3">
                   <span className="material-symbols-outlined text-emerald-500">analytics</span>
-                  Itinerary Estimate
+                  {t("itineraryEstimate")}
                 </h3>
 
                 <div className="space-y-6 mb-8">
                   <div className="flex justify-between items-center">
-                    <label className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Duration (Days)</label>
+                    <label className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">{t("durationDays")}</label>
                     <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 p-1 rounded-xl">
                       <button onClick={() => setDays(Math.max(1, days - 1))} className="w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm text-slate-600 dark:text-slate-300">-</button>
                       <span className="font-black w-4 text-center dark:text-white">{days}</span>
@@ -144,7 +164,7 @@ export default function PlannerPage() {
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
-                    <label className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Travelers (Pax)</label>
+                    <label className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">{t("travelersPax")}</label>
                     <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 p-1 rounded-xl">
                       <button onClick={() => setPax(Math.max(1, pax - 1))} className="w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm text-slate-600 dark:text-slate-300">-</button>
                       <span className="font-black w-4 text-center dark:text-white">{pax}</span>
@@ -167,7 +187,7 @@ export default function PlannerPage() {
 
                 <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-800/50">
                   <div className="flex justify-between items-end">
-                    <span className="text-emerald-600 dark:text-emerald-400 font-black text-[10px] uppercase tracking-widest">Total Estimate</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-black text-[10px] uppercase tracking-widest">{t("totalEstimate")}</span>
                     <div className="text-right">
                       <span className="block text-2xl font-black text-emerald-700 dark:text-emerald-400">IDR {manualTotalPrice.toLocaleString()}</span>
                     </div>
@@ -175,7 +195,7 @@ export default function PlannerPage() {
                 </div>
                 
                 <button className="w-full mt-6 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all">
-                  Book Custom Itinerary
+                  {t("bookCustom")}
                 </button>
               </div>
             </div>
@@ -187,15 +207,15 @@ export default function PlannerPage() {
               <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-slate-800">
                 <h2 className="text-xl font-black text-slate-900 dark:text-white mb-6 flex items-center gap-2">
                   <span className="material-symbols-outlined text-emerald-500">psychology</span>
-                  AI Preferences
+                  {t("aiPreferences")}
                 </h2>
                 
                 <div className="space-y-6">
                   <div>
-                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 block">What do you like?</label>
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 block">{t("aiQuestion")}</label>
                     <textarea 
                       className="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-sm font-medium"
-                      placeholder="e.g. I love sunrise, coffee, and quiet beaches. I prefer a slow pace."
+                      placeholder={t("aiPlaceholder")}
                       rows={4}
                       value={preferences}
                       onChange={(e) => setPreferences(e.target.value)}
@@ -203,7 +223,7 @@ export default function PlannerPage() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 block">Max Budget (IDR)</label>
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 block">{t("maxPrice")} (IDR)</label>
                     <input 
                       type="range" min="500000" max="10000000" step="500000"
                       className="w-full accent-emerald-500"
@@ -222,7 +242,7 @@ export default function PlannerPage() {
                     disabled={isAiLoading}
                     className="w-full py-4 bg-emerald-500 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-xl shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                   >
-                    {isAiLoading ? "Dreaming up your trip..." : "Generate Magic Itinerary"}
+                    {isAiLoading ? "Dreaming up your trip..." : t("generateMagic")}
                   </button>
                 </div>
               </div>
@@ -248,10 +268,22 @@ export default function PlannerPage() {
                       <div className="absolute top-0 right-0 p-10 opacity-10">
                         <span className="material-symbols-outlined text-[12rem]">auto_awesome</span>
                       </div>
-                      <h2 className="text-4xl font-black tracking-tight relative z-10">{aiPlan.title}</h2>
-                      <p className="text-emerald-100 font-medium mt-4 relative z-10 text-lg">{aiPlan.summary}</p>
+                      <div className="flex justify-between items-start relative z-10">
+                        <div>
+                          <h2 className="text-4xl font-black tracking-tight">{aiPlan.title}</h2>
+                          <p className="text-emerald-100 font-medium mt-4 text-lg max-w-xl">{aiPlan.summary}</p>
+                        </div>
+                        <button 
+                          onClick={handleSavePlan}
+                          disabled={isSaving}
+                          className="flex items-center gap-2 px-6 py-3 bg-white text-emerald-600 rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-all shadow-xl disabled:opacity-50"
+                        >
+                          <span className="material-symbols-outlined text-sm">{isSaving ? 'sync' : 'share'}</span>
+                          {isSaving ? 'Saving...' : t("saveShare")}
+                        </button>
+                      </div>
                       <div className="mt-8 flex items-center gap-4 relative z-10">
-                        <div className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-xl text-xs font-black uppercase">Estimated IDR {aiPlan.estimatedTotal.toLocaleString()}</div>
+                        <div className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-xl text-xs font-black uppercase">{t("totalEstimate")} IDR {aiPlan.estimatedTotal.toLocaleString()}</div>
                       </div>
                     </div>
 

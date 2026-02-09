@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { getDestinations } from "@/actions/destination";
 import { getMe } from "@/actions/auth";
 import { getWishlist, toggleWishlist as toggleWishlistAction } from "@/actions/wishlist";
+import { translations, Language } from "@/lib/i18n";
 
 // Define Types
 export interface Destination {
@@ -50,8 +51,8 @@ export interface BookingHistoryItem {
 
 interface TravelContextType {
   destinations: Destination[];
-  language: string;
-  setLanguage: (lang: string) => void;
+  language: Language;
+  setLanguage: (lang: Language) => void;
   currency: string;
   setCurrency: (curr: string) => void;
   formatPrice: (amount: number) => string;
@@ -62,6 +63,7 @@ interface TravelContextType {
   bookingHistory: BookingHistoryItem[];
   wishlist: (string | number)[];
   toggleWishlist: (id: string | number) => void;
+  t: (key: keyof typeof translations.ID) => string;
 }
 
 const TravelContext = createContext<TravelContextType | undefined>(undefined);
@@ -74,9 +76,13 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   // 1. GLOBAL SETTINGS STATE
-  const [language, setLanguage] = useState("ID"); // ID or EN
+  const [language, setLanguage] = useState<Language>("ID"); // ID or EN
   const [currency, setCurrency] = useState("IDR"); // IDR or USD
   const [exchangeRate] = useState(15500); // Simple mock rate for USD
+
+  const t = (key: keyof typeof translations.ID) => {
+    return translations[language][key] || key;
+  };
 
   // 2. DESTINATIONS STATE (Fetched from DB)
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -222,6 +228,7 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
         bookingHistory,
         wishlist,
         toggleWishlist,
+        t,
       }}
     >
       {children}

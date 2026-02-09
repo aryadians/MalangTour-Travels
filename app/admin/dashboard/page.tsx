@@ -62,12 +62,15 @@ export default function AdminDashboard() {
     },
   ];
 
+  // Calculate max revenue for chart scaling
+  const maxRevenue = Math.max(...data?.analytics.map((a: any) => a.revenue) || [100]);
+
   return (
     <div className="space-y-8 pb-20">
       {/* Header */}
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             System Overview
           </h1>
           <p className="text-gray-500 text-sm mt-1 font-medium">
@@ -78,59 +81,6 @@ export default function AdminDashboard() {
           <span className="material-symbols-outlined text-sm">download</span>
           Export
         </button>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Link
-          href="/admin/destinations"
-          className="bg-emerald-500 hover:bg-emerald-600 transition-all p-8 rounded-[2.5rem] text-white shadow-xl shadow-emerald-500/20 group"
-        >
-          <div className="flex justify-between items-start mb-6">
-            <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-md border border-white/20">
-              <span className="material-symbols-outlined text-3xl">map</span>
-            </div>
-            <span className="material-symbols-outlined opacity-50 group-hover:translate-x-2 transition-transform">
-              arrow_forward
-            </span>
-          </div>
-          <h3 className="text-xl font-black uppercase tracking-tight">Destinations</h3>
-          <p className="text-emerald-100 text-sm mt-2 font-medium">
-            Manage your high-end inventory and tour packages.
-          </p>
-        </Link>
-
-        <Link
-          href="/admin/bookings"
-          className="bg-slate-900 hover:bg-black transition-all p-8 rounded-[2.5rem] text-white shadow-xl shadow-black/10 group"
-        >
-          <div className="flex justify-between items-start mb-6">
-            <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10">
-              <span className="material-symbols-outlined text-3xl">confirmation_number</span>
-            </div>
-            <span className="material-symbols-outlined opacity-50 group-hover:translate-x-2 transition-transform">
-              arrow_forward
-            </span>
-          </div>
-          <h3 className="text-xl font-black uppercase tracking-tight">Reservations</h3>
-          <p className="text-slate-400 text-sm mt-2 font-medium">
-            Monitor and confirm incoming travel requests.
-          </p>
-        </Link>
-
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800 group relative overflow-hidden">
-           <div className="relative z-10">
-              <div className="flex justify-between items-start mb-6">
-                <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl text-slate-400">
-                  <span className="material-symbols-outlined text-3xl">verified_user</span>
-                </div>
-              </div>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Security</h3>
-              <p className="text-slate-400 text-sm mt-2 font-medium">
-                System access and administrator logs.
-              </p>
-           </div>
-        </div>
       </div>
 
       {/* Stats Grid */}
@@ -162,54 +112,121 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Recent Activity */}
-        <div className="lg:col-span-3 bg-white dark:bg-slate-900 p-10 rounded-[3rem] shadow-sm border border-slate-100 dark:border-slate-800">
-          <div className="flex justify-between items-center mb-10">
-            <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
-              Recent Activity
-            </h3>
-            <Link
-              href="/admin/bookings"
-              className="text-emerald-500 text-xs font-black uppercase tracking-widest hover:underline"
-            >
-              Review All
-            </Link>
+        {/* Revenue Chart (2/3) */}
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-10 rounded-[3rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col">
+          <div className="flex justify-between items-center mb-12">
+            <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Revenue Trends</h3>
+            <span className="text-[10px] font-black text-slate-400 uppercase bg-slate-50 dark:bg-slate-800 px-3 py-1 rounded-full">Last 6 Months</span>
           </div>
+          
+          <div className="flex-1 flex items-end justify-between gap-4 h-64">
+            {data?.analytics.map((item: any, i: number) => {
+              const height = (item.revenue / maxRevenue) * 100;
+              return (
+                <div key={i} className="flex-1 flex flex-col items-center group gap-4">
+                  <div className="relative w-full flex flex-col items-center justify-end h-full">
+                    {/* Tooltip */}
+                    <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-all bg-slate-900 text-white text-[10px] font-black px-3 py-1.5 rounded-lg shadow-xl z-20 pointer-events-none whitespace-nowrap">
+                      IDR {item.revenue.toLocaleString()}
+                    </div>
+                    {/* Bar */}
+                    <motion.div 
+                      initial={{ height: 0 }}
+                      animate={{ height: `${height}%` }}
+                      transition={{ delay: i * 0.1, duration: 1 }}
+                      className="w-full max-w-[40px] bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-xl group-hover:from-emerald-400 group-hover:to-cyan-400 transition-all shadow-lg shadow-emerald-500/10"
+                    />
+                  </div>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.month}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] border-b border-slate-50 dark:border-slate-800">
-                  <th className="pb-6 px-4">Guest</th>
-                  <th className="pb-6 px-4">Destination</th>
-                  <th className="pb-6 px-4 text-right">Revenue</th>
-                  <th className="pb-6 px-4 text-center">Status</th>
+        {/* Quick Actions (1/3) */}
+        <div className="space-y-6">
+          <Link
+            href="/admin/destinations"
+            className="block bg-emerald-500 hover:bg-emerald-600 transition-all p-8 rounded-[2.5rem] text-white shadow-xl shadow-emerald-500/20 group"
+          >
+            <div className="flex justify-between items-start mb-6">
+              <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-md border border-white/20">
+                <span className="material-symbols-outlined text-3xl">map</span>
+              </div>
+              <span className="material-symbols-outlined opacity-50 group-hover:translate-x-2 transition-transform">
+                arrow_forward
+              </span>
+            </div>
+            <h3 className="text-xl font-black uppercase tracking-tight">Inventory</h3>
+            <p className="text-emerald-100 text-sm mt-2 font-medium">Manage tour packages.</p>
+          </Link>
+
+          <Link
+            href="/admin/bookings"
+            className="block bg-slate-900 hover:bg-black transition-all p-8 rounded-[2.5rem] text-white shadow-xl shadow-black/10 group"
+          >
+            <div className="flex justify-between items-start mb-6">
+              <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10">
+                <span className="material-symbols-outlined text-3xl">confirmation_number</span>
+              </div>
+              <span className="material-symbols-outlined opacity-50 group-hover:translate-x-2 transition-transform">
+                arrow_forward
+              </span>
+            </div>
+            <h3 className="text-xl font-black uppercase tracking-tight">Reservations</h3>
+            <p className="text-slate-400 text-sm mt-2 font-medium">Monitor travel requests.</p>
+          </Link>
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] shadow-sm border border-slate-100 dark:border-slate-800">
+        <div className="flex justify-between items-center mb-10">
+          <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
+            Recent Activity
+          </h3>
+          <Link
+            href="/admin/bookings"
+            className="text-emerald-500 text-xs font-black uppercase tracking-widest hover:underline"
+          >
+            Review All
+          </Link>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] border-b border-slate-50 dark:border-slate-800">
+                <th className="pb-6 px-4">Guest</th>
+                <th className="pb-6 px-4">Destination</th>
+                <th className="pb-6 px-4 text-right">Revenue</th>
+                <th className="pb-6 px-4 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+              {data?.recentBookings.map((booking: any) => (
+                <tr key={booking.id} className="group">
+                  <td className="py-6 px-4">
+                    <p className="font-black text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors uppercase tracking-tight">{booking.user.name}</p>
+                  </td>
+                  <td className="py-6 px-4">
+                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400">{booking.destination.name}</p>
+                  </td>
+                  <td className="py-6 px-4 text-right">
+                    <p className="font-black text-slate-900 dark:text-white">Rp {booking.totalPrice.toLocaleString("id-ID")}</p>
+                  </td>
+                  <td className="py-6 px-4 text-center">
+                    <span className={`inline-block px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                      booking.status === "CONFIRMED" ? "bg-emerald-50 text-emerald-600" : "bg-blue-50 text-blue-600"
+                    }`}>
+                      {booking.status}
+                    </span>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                {data?.recentBookings.map((booking: any) => (
-                  <tr key={booking.id} className="group">
-                    <td className="py-6 px-4">
-                      <p className="font-black text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors uppercase tracking-tight">{booking.user.name}</p>
-                    </td>
-                    <td className="py-6 px-4">
-                      <p className="text-sm font-bold text-slate-500 dark:text-slate-400">{booking.destination.name}</p>
-                    </td>
-                    <td className="py-6 px-4 text-right">
-                      <p className="font-black text-slate-900 dark:text-white">Rp {booking.totalPrice.toLocaleString("id-ID")}</p>
-                    </td>
-                    <td className="py-6 px-4 text-center">
-                      <span className={`inline-block px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
-                        booking.status === "CONFIRMED" ? "bg-emerald-50 text-emerald-600" : "bg-blue-50 text-blue-600"
-                      }`}>
-                        {booking.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

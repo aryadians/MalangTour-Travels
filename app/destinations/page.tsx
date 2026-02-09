@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTravel } from "@/context/TravelContext";
 
 export default function DestinationsPage() {
-  const { destinations, formatPrice } = useTravel();
+  const { destinations, formatPrice, t } = useTravel();
   const [filter, setFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange] = useState(10000000); // 10 Million max
@@ -27,11 +27,11 @@ export default function DestinationsPage() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
           <div className="max-w-xl">
-            <span className="text-emerald-500 font-black text-xs tracking-[0.3em] uppercase mb-4 block">The Collection</span>
-            <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">Explore <br /> Hotspots.</h1>
+            <span className="text-emerald-500 font-black text-xs tracking-[0.3em] uppercase mb-4 block">{t("destinations")}</span>
+            <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">{t("exploreHotspots")}.</h1>
           </div>
           <p className="text-slate-400 font-medium text-lg max-w-sm">
-            Curated premium journeys through the most iconic landscapes of East Java.
+            {t("curatedJourneys")}
           </p>
         </div>
 
@@ -44,7 +44,7 @@ export default function DestinationsPage() {
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors">search</span>
               <input 
                 type="text" 
-                placeholder="Search by name or location..."
+                placeholder={t("searchPlaceholder")}
                 className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -63,7 +63,7 @@ export default function DestinationsPage() {
                       : "bg-slate-50 dark:bg-slate-800 text-slate-400 hover:bg-slate-100"
                   }`}
                 >
-                  {cat}
+                  {cat === "All" ? "All" : cat}
                 </button>
               ))}
             </div>
@@ -71,7 +71,7 @@ export default function DestinationsPage() {
             {/* Price Filter */}
             <div className="lg:col-span-3 space-y-2">
               <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
-                <span>Max Price</span>
+                <span>{t("maxPrice")}</span>
                 <span className="text-emerald-500">{formatPrice(priceRange)}</span>
               </div>
               <input 
@@ -90,7 +90,7 @@ export default function DestinationsPage() {
         {/* Results Grid */}
         <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
           <AnimatePresence mode="popLayout">
-            {filtered.map((dest, idx) => (
+            {filtered.map((dest) => (
               <motion.div
                 key={dest.id}
                 layout
@@ -135,13 +135,13 @@ export default function DestinationsPage() {
                       
                       <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                         <div>
-                          <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Starting from</p>
+                          <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">{t("startingFrom")}</p>
                           <p className="text-2xl font-black text-slate-900 dark:text-white">
                             {formatPrice(dest.price)}
                           </p>
                         </div>
                         <button className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-500 hover:text-white transition-all shadow-lg active:scale-95">
-                          Book Now
+                          {t("bookNow")}
                         </button>
                       </div>
                     </div>
@@ -155,7 +155,7 @@ export default function DestinationsPage() {
         {filtered.length === 0 && (
           <div className="text-center py-40">
             <span className="material-symbols-outlined text-6xl text-slate-200 mb-4">search_off</span>
-            <p className="text-slate-400 font-black uppercase tracking-widest text-xs">No matching destinations found.</p>
+            <p className="text-slate-400 font-black uppercase tracking-widest text-xs">{t("noDestinations")}</p>
           </div>
         )}
       </div>
