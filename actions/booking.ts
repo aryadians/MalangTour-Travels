@@ -5,24 +5,6 @@ import { getSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function getAllBookings() {
-  const session = await getSession();
-  if (!session || session.role !== "ADMIN") throw new Error("Unauthorized");
-
-  try {
-    const bookings = await prisma.booking.findMany({
-      include: {
-        user: { select: { name: true, email: true } },
-        destination: { select: { name: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-    return { success: true, bookings };
-  } catch (error) {
-    return { success: false, error: "Failed to fetch bookings" };
-  }
-}
-
 export async function getUserBookings() {
   const session = await getSession();
   if (!session || !session.userId) return { success: false, error: "Unauthorized" };
@@ -109,7 +91,7 @@ export async function createBooking(data: {
       }).catch(err => console.error("Email failed:", err));
     }
 
-    revalidatePath("/dashboard");
+        revalidatePath("/dashboard");
     revalidatePath("/bookings");
     return { success: true, bookingId: booking.id };
   } catch (error) {
@@ -118,30 +100,13 @@ export async function createBooking(data: {
   }
 }
 
-export async function updateBookingStatus(
-  bookingId: string,
-  newStatus: "PENDING" | "CONFIRMED" | "CANCELLED",
-) {
-  const session = await getSession();
+export async function createBookingFormAction(prevState: any, formData: FormData) {
+  const data = {
+    destinationId: parseInt(formData.get("destinationId") as string),
+    date: formData.get("date") as string,
+    pax: parseInt(formData.get("pax") as string),
+    totalPrice: parseFloat(formData.get("totalPrice") as string),
+  };
 
-  if (!session || session.role !== "ADMIN") {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  try {
-    await prisma.booking.update({
-      where: { id: bookingId },
-      data: { status: newStatus },
-    });
-
-    revalidatePath("/admin/bookings");
-    revalidatePath("/admin/dashboard");
-    revalidatePath("/dashboard");
-    revalidatePath("/bookings");
-    
-    return { success: true };
-  } catch (error) {
-    console.error("Failed to update booking status:", error);
-    return { success: false, error: "Failed to update booking status" };
-  }
+  return await createBooking(data);
 }

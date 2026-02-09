@@ -5,6 +5,7 @@ import DestinationCard from "@/components/DestinationCard";
 
 interface Destination {
   id: number;
+  slug: string;
   name: string;
   description: string;
   price: number;
@@ -12,7 +13,6 @@ interface Destination {
   rating: number;
   category: string;
   images: string; // JSON string
-  // Add other fields if strictly needed, but DestinationCard uses a subset.
 }
 
 interface PackagesGridProps {
@@ -65,6 +65,7 @@ export default function PackagesGrid({ destinations }: PackagesGridProps) {
             <DestinationCard
               key={dest.id}
               id={dest.id}
+              slug={dest.slug}
               image={imageUrl}
               name={dest.name}
               price={dest.price}

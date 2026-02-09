@@ -2,6 +2,53 @@
 
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { revalidatePath } from "next/cache";
+
+export async function getAllBookings() {
+  const session = await getSession();
+  if (!session || session.role !== "ADMIN") throw new Error("Unauthorized");
+
+  try {
+    const bookings = await prisma.booking.findMany({
+      include: {
+        user: { select: { name: true, email: true } },
+        destination: { select: { name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    return { success: true, bookings };
+  } catch (error) {
+    return { success: false, error: "Failed to fetch bookings" };
+  }
+}
+
+export async function updateBookingStatus(
+  bookingId: string,
+  newStatus: "PENDING" | "CONFIRMED" | "CANCELLED",
+) {
+  const session = await getSession();
+
+  if (!session || session.role !== "ADMIN") {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  try {
+    await prisma.booking.update({
+      where: { id: bookingId },
+      data: { status: newStatus },
+    });
+
+    revalidatePath("/admin/bookings");
+    revalidatePath("/admin/dashboard");
+    revalidatePath("/dashboard");
+    revalidatePath("/bookings");
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update booking status:", error);
+    return { success: false, error: "Failed to update booking status" };
+  }
+}
 
 export async function getDashboardStats() {
   const session = await getSession();

@@ -22,7 +22,7 @@ export default function BookingTable({ bookings }: { bookings: Booking[] }) {
       b.destination.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const handleStatusChange = async (id: string, newStatus: string) => {
+  const handleStatusChange = async (id: string, newStatus: "PENDING" | "CONFIRMED" | "CANCELLED") => {
     await updateBookingStatus(id, newStatus);
   };
 

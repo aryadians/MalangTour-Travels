@@ -416,5 +416,6 @@ export default function CheckoutClient({
         }
       `}</style>
     </div>
+    </>
   );
 }

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useFormState } from "react-dom";
-import { createBooking } from "@/actions/booking";
+import { createBookingFormAction } from "@/actions/booking";
 
 interface BookingFormProps {
   destinationId: number;
@@ -18,7 +18,7 @@ export default function BookingForm({
   const [pax, setPax] = useState(1);
   const [date, setDate] = useState("");
   const [totalPrice, setTotalPrice] = useState(pricePerPax);
-  const [state, action] = useFormState(createBooking, undefined);
+  const [state, action] = useFormState(createBookingFormAction, undefined);
 
   useEffect(() => {
     setTotalPrice(pax * pricePerPax);
@@ -68,9 +68,6 @@ export default function BookingForm({
               min={new Date().toISOString().split("T")[0]}
             />
           </div>
-          {state?.errors?.date && (
-            <p className="text-red-500 text-xs">{state.errors.date}</p>
-          )}
         </div>
 
         {/* Pax Counter */}
@@ -115,9 +112,9 @@ export default function BookingForm({
           </div>
         </div>
 
-        {state?.message && (
+        {state?.error && (
           <p className="text-red-500 text-sm text-center font-bold">
-            {state.message}
+            {state.error}
           </p>
         )}
 

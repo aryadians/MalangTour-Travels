@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getAllBookings, updateBookingStatus } from "@/actions/booking";
+import { getAllBookings, updateBookingStatus } from "@/actions/admin";
 import toast from "react-hot-toast";
 
 interface Booking {
