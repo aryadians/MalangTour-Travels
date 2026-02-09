@@ -3,6 +3,9 @@
 import React, { useActionState, useState } from "react";
 import { createBooking } from "../actions";
 import { motion, AnimatePresence } from "framer-motion";
+import { validateVoucher } from "@/actions/voucher";
+import { useTravel } from "@/context/TravelContext";
+import toast from "react-hot-toast";
 
 import Image from "next/image";
 
@@ -19,27 +22,34 @@ export default function CheckoutClient({
   pax,
   totalPrice: initialTotalPrice,
 }: CheckoutClientProps) {
+  const { user } = useTravel();
   const [selectedMethod, setSelectedMethod] = useState("qris");
   const [couponCode, setCouponCode] = useState("");
   const [isCouponApplied, setIsCouponApplied] = useState(false);
   const [discount, setDiscount] = useState(0);
+  const [isPointsApplied, setIsPointsApplied] = useState(false);
 
-  const totalPrice = initialTotalPrice - discount;
+  const pointsValue = user.points * 100; // 1 point = Rp 100
+  const pointsDiscount = isPointsApplied ? pointsValue : 0;
+  const totalPrice = Math.max(0, initialTotalPrice - discount - pointsDiscount);
+  
   const images = JSON.parse((destination.images as string) || "[]");
 
-  // We don't use useActionState for the main form submission here typically if we want custom loading,
-  // but let's use it for the server action.
   const [state, formAction, isPending] = useActionState(createBooking, {
     errors: {},
   });
 
-  const handleApplyCoupon = (e: React.MouseEvent) => {
+  const handleApplyCoupon = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (couponCode.trim().toUpperCase() === "PROMO") {
+    if (!couponCode.trim()) return;
+
+    const result = await validateVoucher(couponCode, initialTotalPrice);
+    if (result.success) {
       setIsCouponApplied(true);
-      setDiscount(initialTotalPrice * 0.1); // 10% discount
+      setDiscount(result.discountAmount || 0);
+      toast.success(result.message);
     } else {
-      // Shake animation or error toast could go here
+      toast.error(result.message || "Invalid coupon code");
     }
   };
 
@@ -106,7 +116,7 @@ export default function CheckoutClient({
             </div>
             {isCouponApplied && (
               <div className="flex justify-between text-sm text-emerald-600 font-bold">
-                <span>Discount (PROMO)</span>
+                <span>Voucher Discount</span>
                 <span>
                   -
                   {new Intl.NumberFormat("id-ID", {
@@ -114,6 +124,19 @@ export default function CheckoutClient({
                     currency: "IDR",
                     minimumFractionDigits: 0,
                   }).format(discount)}
+                </span>
+              </div>
+            )}
+            {isPointsApplied && (
+              <div className="flex justify-between text-sm text-blue-600 font-bold">
+                <span>Points Used ({user.points})</span>
+                <span>
+                  -
+                  {new Intl.NumberFormat("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                    minimumFractionDigits: 0,
+                  }).format(pointsDiscount)}
                 </span>
               </div>
             )}
@@ -185,6 +208,8 @@ export default function CheckoutClient({
         <input type="hidden" name="date" value={date} />
         <input type="hidden" name="pax" value={pax} />
         <input type="hidden" name="totalPrice" value={totalPrice} />
+        <input type="hidden" name="usedPoints" value={isPointsApplied ? user.points : 0} />
+        <input type="hidden" name="voucherCode" value={isCouponApplied ? couponCode : ""} />
 
         <div className="flex-1 overflow-y-auto no-scrollbar space-y-4 pr-2 pb-4">
           {/* Payment Methods */}
@@ -347,6 +372,27 @@ export default function CheckoutClient({
               </motion.div>
             )}
           </div>
+
+          {/* Loyalty Points Section */}
+          {user.points > 0 && (
+            <div className="mt-6 pt-6 border-t border-gray-100 dark:border-white/10">
+              <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between ${isPointsApplied ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/10' : 'border-gray-100 dark:border-white/10 hover:border-blue-200'}`}
+                   onClick={() => setIsPointsApplied(!isPointsApplied)}>
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isPointsApplied ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-400'}`}>
+                    <span className="material-symbols-outlined">stars</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">Use {user.points} Points</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Save Rp {pointsValue.toLocaleString()}</p>
+                  </div>
+                </div>
+                <div className={`w-10 h-6 rounded-full relative transition-colors ${isPointsApplied ? 'bg-blue-500' : 'bg-gray-200 dark:bg-white/10'}`}>
+                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isPointsApplied ? 'left-5' : 'left-1'}`} />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="pt-6 mt-2 border-t border-gray-100 dark:border-white/10 bg-white dark:bg-[#1a2c26] z-10">

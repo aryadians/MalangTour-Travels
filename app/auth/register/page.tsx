@@ -5,9 +5,9 @@ import Link from "next/link";
 import { signup } from "@/actions/auth";
 import toast from "react-hot-toast";
 
-const initialState = {
+const initialState: { message?: string; errors?: any } = {
   message: "",
-  errors: undefined,
+  errors: {},
 };
 
 export default function RegisterPage() {

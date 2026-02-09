@@ -28,6 +28,7 @@ export async function signup(prevState: any, formData: FormData) {
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
+      message: "Validation failed.",
     };
   }
 
@@ -43,6 +44,7 @@ export async function signup(prevState: any, formData: FormData) {
       errors: {
         email: ["Email already exists."],
       },
+      message: "Registration failed.",
     };
   }
 
@@ -75,6 +77,7 @@ export async function login(prevState: any, formData: FormData) {
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
+      message: "Validation failed.",
     };
   }
 

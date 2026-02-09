@@ -6,9 +6,9 @@ import { useTravel } from "@/context/TravelContext";
 import toast from "react-hot-toast";
 import { login } from "@/actions/auth";
 
-const initialState = {
+const initialState: { message?: string; errors?: any } = {
   message: "",
-  errors: undefined,
+  errors: {},
 };
 
 export default function LoginPage() {

@@ -13,6 +13,8 @@ const bookingSchema = z.object({
   date: z.string(),
   pax: z.coerce.number(),
   totalPrice: z.coerce.number(),
+  usedPoints: z.coerce.number().optional(),
+  voucherCode: z.string().optional(),
 });
 
 export async function createBooking(prevState: any, formData: FormData) {
@@ -29,7 +31,7 @@ export async function createBooking(prevState: any, formData: FormData) {
     };
   }
 
-  const { destinationId, date, pax, totalPrice } = result.data;
+  const { destinationId, date, pax, totalPrice, usedPoints, voucherCode } = result.data;
 
   let bookingId: string | null = null;
 
@@ -44,16 +46,40 @@ export async function createBooking(prevState: any, formData: FormData) {
       return { message: "Data not found" };
     }
 
-    // Create Booking
-    const booking = await prisma.booking.create({
-      data: {
-        userId: session.userId as string,
-        destinationId,
-        date: new Date(date),
-        pax,
-        totalPrice,
-        status: "CONFIRMED", // Immediate confirmation for MVP
-      },
+    // Create Booking and Update User Points in a transaction
+    const booking = await prisma.$transaction(async (tx) => {
+      const b = await tx.booking.create({
+        data: {
+          userId: session.userId as string,
+          destinationId,
+          date: new Date(date),
+          pax,
+          totalPrice,
+          status: "CONFIRMED",
+        },
+      });
+
+      // Deduct used points and Add new points (1% of total price)
+      const pointsToAdd = Math.floor(totalPrice / 100);
+      await tx.user.update({
+        where: { id: session.userId as string },
+        data: {
+          points: {
+            decrement: usedPoints || 0,
+            increment: pointsToAdd,
+          }
+        }
+      });
+
+      // Update voucher usage if applied
+      if (voucherCode) {
+        await tx.voucher.update({
+          where: { code: voucherCode.toUpperCase() },
+          data: { usageCount: { increment: 1 } }
+        }).catch(() => {}); // Ignore if voucher logic fails
+      }
+
+      return b;
     });
 
     bookingId = booking.id;
