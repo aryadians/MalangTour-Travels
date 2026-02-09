@@ -16,7 +16,6 @@ export const translations = {
     startingFrom: "Mulai dari",
     latestStories: "Cerita Terbaru",
     points: "Poin",
-<<<<<<< HEAD
     exploreHotspots: "Jelajahi Titik Populer",
     curatedJourneys: "Perjalanan premium yang dikurasi melalui lanskap paling ikonik di Jawa Timur.",
     searchPlaceholder: "Cari nama atau lokasi...",
@@ -36,8 +35,6 @@ export const translations = {
     aiPlaceholder: "Contoh: Saya suka matahari terbit, kopi, dan pantai yang tenang.",
     generateMagic: "Buat Itinerary Ajaib",
     saveShare: "Simpan & Bagikan",
-=======
->>>>>>> e37202ce95eaf86b5caf490c1442ee4afa4ffe96
   },
   EN: {
     heroTitle: "REDEFINE",
@@ -56,7 +53,6 @@ export const translations = {
     startingFrom: "Starting from",
     latestStories: "Latest Stories",
     points: "Points",
-<<<<<<< HEAD
     exploreHotspots: "Explore Hotspots",
     curatedJourneys: "Curated premium journeys through the most iconic landscapes of East Java.",
     searchPlaceholder: "Search by name or location...",
@@ -80,9 +76,3 @@ export const translations = {
 };
 
 export type Language = keyof typeof translations;
-=======
-  }
-};
-
-export type Language = keyof typeof translations;
->>>>>>> e37202ce95eaf86b5caf490c1442ee4afa4ffe96
