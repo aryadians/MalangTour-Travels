@@ -210,8 +210,6 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
     setCurrentBooking((prev) => ({ ...prev, ...data }));
   };
 
-  if (!isMounted) return null;
-
   return (
     <TravelContext.Provider
       value={{
@@ -231,7 +229,9 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
         t,
       }}
     >
-      {children}
+      <div style={{ visibility: isMounted ? 'visible' : 'hidden' }}>
+        {children}
+      </div>
     </TravelContext.Provider>
   );
 };

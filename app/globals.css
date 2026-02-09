@@ -83,6 +83,11 @@
   transform: scale(1);
 }
 
+:root {
+  --background: #f9fafb;
+  --foreground: #111816;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #10221c;
@@ -91,5 +96,7 @@
 }
 
 body {
-  @apply bg-background-light text-text-main dark:bg-background-dark dark:text-white antialiased overflow-x-hidden selection:bg-emerald-500 selection:text-white font-display;
+  background-color: var(--background);
+  color: var(--foreground);
+  @apply antialiased overflow-x-hidden selection:bg-emerald-500 selection:text-white font-display;
 }

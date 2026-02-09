@@ -1,58 +1,75 @@
 "use client";
 
-import React, { use } from "react";
+import React, { use, useState, useEffect } from "react";
 import { getUserBookingById } from "@/actions/booking";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-export default function TicketPage({
-  params,
-}: {
+interface PageProps {
   params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
-  const [booking, setBooking] = React.useState<any>(null);
-  const [loading, setLoading] = React.useState(true);
+}
 
-  React.useEffect(() => {
+export default function TicketPage({ params }: PageProps) {
+  const resolvedParams = use(params);
+  const id = resolvedParams.id;
+
+  const [booking, setBooking] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
     async function fetchBooking() {
-      const result = await getUserBookingById(id);
-      if (result.success && result.booking) {
-        setBooking(result.booking);
-      } else {
-        setBooking(null);
+      try {
+        setLoading(true);
+        const result = await getUserBookingById(id);
+        if (result.success && result.booking) {
+          setBooking(result.booking);
+        } else {
+          setError(result.error || "Booking not found");
+        }
+      } catch (err) {
+        setError("Failed to load booking details");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchBooking();
   }, [id]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-slate-950">
         <div className="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />
         <p className="text-slate-400 font-bold text-[10px] tracking-widest uppercase">Securing your pass...</p>
       </div>
     );
   }
 
-  if (!booking) {
-    notFound();
+  if (error || !booking) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-slate-950 p-6 text-center">
+        <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Oops!</h1>
+        <p className="text-slate-500 mb-6">{error || "We couldn't find your ticket."}</p>
+        <Link href="/bookings" className="px-6 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg">
+          Back to Wallet
+        </Link>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center pt-32 pb-20 px-4">
       
-      {/* 1. TOP INTERFACE (Screen Only) */}
-      <div className="max-w-[850px] w-full no-print">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-xl">
+      {/* 1. SCREEN UI - HEADER */}
+      <div className="max-w-[850px] w-full no-print mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-xl">
           <div>
             <Link href="/bookings" className="inline-flex items-center gap-2 text-emerald-600 font-bold text-xs uppercase tracking-widest mb-3 hover:gap-3 transition-all">
               <span className="material-symbols-outlined text-sm">arrow_back</span>
               Back to Wallet
             </Link>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Exploration Boarding Pass</h1>
-            <p className="text-slate-500 text-sm">Official digital entry document for your upcoming trip.</p>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Digital Boarding Pass</h1>
+            <p className="text-slate-500 text-sm">Authorized ticket for your journey to {booking.destination.name}.</p>
           </div>
           <button 
             onClick={() => window.print()}
@@ -64,7 +81,7 @@ export default function TicketPage({
         </div>
       </div>
 
-      {/* 2. THE TICKET (Print and Screen) */}
+      {/* 2. THE TICKET CARD */}
       <div 
         id="printable-ticket" 
         className="bg-white text-black border-2 border-slate-200 rounded-[2.5rem] shadow-2xl overflow-hidden w-full max-w-[850px] flex flex-col md:flex-row relative print:border-black print:rounded-none"
@@ -87,7 +104,7 @@ export default function TicketPage({
               </div>
             </div>
 
-            <div className="space-y-8 mb-10">
+            <div className="space-y-8 mb-10 text-left">
               <div>
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] print:text-black">Destination</p>
                 <h3 className="text-4xl font-black tracking-tighter leading-tight">{booking.destination.name}</h3>
@@ -117,7 +134,7 @@ export default function TicketPage({
 
           <div className="pt-8 border-t border-dashed border-slate-200 flex items-center gap-4 print:border-black">
              <span className="material-symbols-outlined">verified_user</span>
-             <p className="text-[9px] font-bold uppercase tracking-widest">Authorized Ticket - Present upon arrival at meeting point.</p>
+             <p className="text-[9px] font-bold uppercase tracking-widest text-left">Authorized Ticket - Present upon arrival at meeting point.</p>
           </div>
         </div>
 
@@ -126,7 +143,6 @@ export default function TicketPage({
           <div className="w-full mb-10">
              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 print:text-black">Scan to Verify</p>
              <div className="bg-white p-4 rounded-2xl shadow-xl inline-block border-2 border-black">
-                {/* SVG QR CODE - Fixed Black Fill */}
                 <svg viewBox="0 0 100 100" className="w-32 h-32">
                   <path fill="#000000" d="M0,0h35v35h-35V0z M5,5v25h25v-25H5z M12,12h11v11h-11V12z" />
                   <path fill="#000000" d="M65,0h35v35h-35V0z M70,5v25h25v-25H70z M77,12h11v11h-11V12z" />
@@ -149,27 +165,28 @@ export default function TicketPage({
         </div>
       </div>
 
-      {/* 3. PRINT LOGIC (Anti-Blank Page) */}
+      {/* 3. PRINT STYLES */}
       <style dangerouslySetInnerHTML={{ __html: `
+        @media screen {
+          .no-print { display: flex; }
+        }
+        
         @media print {
-          /* 1. Reset Page and Orientation */
           @page {
             size: landscape;
             margin: 0;
           }
           
-          /* 2. Hide everything by default */
           body * {
             visibility: hidden;
           }
           
-          /* 3. Force Ticket to be visible and at the top */
           #printable-ticket, #printable-ticket * {
             visibility: visible;
           }
           
           #printable-ticket {
-            position: absolute;
+            position: fixed;
             left: 0;
             top: 0;
             width: 100% !important;
@@ -183,12 +200,10 @@ export default function TicketPage({
             border-radius: 0 !important;
           }
 
-          /* Reset layout proportions for print */
-          .flex-\\[2\\.5\\] { flex: 2.5 !important; }
-          .flex-1 { flex: 1 !important; }
-          .bg-slate-50 { background-color: white !important; }
-          
-          /* Force colors and SVG to appear */
+          .no-print {
+            display: none !important;
+          }
+
           * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
@@ -199,11 +214,6 @@ export default function TicketPage({
             display: block !important;
             width: 50mm !important;
             height: 50mm !important;
-          }
-
-          /* Hide UI elements */
-          .no-print {
-            display: none !important;
           }
         }
       `}} />

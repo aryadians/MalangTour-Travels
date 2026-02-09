@@ -2,8 +2,14 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTravel } from "@/context/TravelContext";
+
+const MapComponent = dynamic(() => import("@/components/MapComponent"), { 
+  ssr: false,
+  loading: () => <div className="h-[400px] w-full bg-slate-100 dark:bg-slate-800 rounded-[3rem] animate-pulse flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Loading Interactive Map...</div>
+});
 
 export default function DestinationsPage() {
   const { destinations, formatPrice, t } = useTravel();
@@ -25,7 +31,7 @@ export default function DestinationsPage() {
     <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 pt-32 pb-20 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8">
           <div className="max-w-xl">
             <span className="text-emerald-500 font-black text-xs tracking-[0.3em] uppercase mb-4 block">{t("destinations")}</span>
             <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">{t("exploreHotspots")}.</h1>
@@ -33,6 +39,11 @@ export default function DestinationsPage() {
           <p className="text-slate-400 font-medium text-lg max-w-sm">
             {t("curatedJourneys")}
           </p>
+        </div>
+
+        {/* Interactive Map */}
+        <div className="mb-16">
+           <MapComponent destinations={destinations} />
         </div>
 
         {/* Filter & Search Bar */}
@@ -63,7 +74,7 @@ export default function DestinationsPage() {
                       : "bg-slate-50 dark:bg-slate-800 text-slate-400 hover:bg-slate-100"
                   }`}
                 >
-                  {cat === "All" ? "All" : cat}
+                  {cat}
                 </button>
               ))}
             </div>

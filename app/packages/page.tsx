@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { useTravel } from "@/context/TravelContext";
 
-export default function PackagesPage() {
+function PackagesContent() {
   const { destinations, formatPrice } = useTravel();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
@@ -35,8 +35,7 @@ export default function PackagesPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-28 pb-20 px-4 md:px-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
@@ -170,6 +169,19 @@ export default function PackagesPage() {
           )}
         </div>
       </div>
+  );
+}
+
+export default function PackagesPage() {
+  return (
+    <div className="min-h-screen bg-gray-50 pt-28 pb-20 px-4 md:px-6">
+      <Suspense fallback={
+        <div className="max-w-7xl mx-auto flex flex-col items-center justify-center py-20">
+          <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+        </div>
+      }>
+        <PackagesContent />
+      </Suspense>
     </div>
   );
 }

@@ -6,6 +6,28 @@ import { getSession } from "@/lib/session";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
+export async function generalChat(message: string) {
+  if (!process.env.GEMINI_API_KEY) {
+    return { success: false, error: "AI Service not configured." };
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `
+      You are a friendly and helpful travel assistant for "Malang Premium Tours". 
+      Answer the following user question about traveling in Malang, East Java: "${message}".
+      Keep your answer concise (max 3 sentences), engaging, and professional. 
+      If you don't know about a specific hidden spot, suggest visiting Mount Bromo or Tumpak Sewu.
+    `;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return { success: true, text: response.text() };
+  } catch (error) {
+    return { success: false, error: "Failed to connect to AI assistant." };
+  }
+}
+
 export async function savePlan(planData: any, preferences: string) {
   const session = await getSession();
   

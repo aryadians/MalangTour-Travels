@@ -1,4 +1,4 @@
-import React from "react";
+import React, { use, Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 
@@ -15,13 +15,25 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-export default async function PackageDetailPage({
+export default function PackageDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug } = use(params);
 
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950">
+        <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+      </div>
+    }>
+      <PackageDetailContent slug={slug} />
+    </Suspense>
+  );
+}
+
+async function PackageDetailContent({ slug }: { slug: string }) {
   const destination = await prisma.destination.findFirst({
     where: { slug },
   });
@@ -41,7 +53,6 @@ export default async function PackageDetailPage({
     "use server";
     const date = formData.get("date");
     const guests = 2; // Fixed for honeymoon for now, or get from form
-    // In a real app we'd get guests from form
 
     if (date) {
       redirect(
@@ -51,12 +62,12 @@ export default async function PackageDetailPage({
   }
 
   return (
-    <div className="bg-background-light dark:bg-background-dark text-text-main font-display antialiased min-h-screen flex flex-col relative overflow-x-hidden">
+    <div className="bg-background-light dark:bg-background-dark text-text-main font-display antialiased min-h-screen flex flex-col relative overflow-x-hidden pt-20">
       {/* Floral Background Overlay */}
       <div className="fixed inset-0 pointer-events-none bg-floral-pattern z-0 opacity-100" />
 
       {/* Main Content Wrapper */}
-      <main className="relative z-10 flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-10">
+      <main className="relative z-10 flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-10">
         {/* Hero Section */}
         <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl mb-12 group">
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
@@ -79,10 +90,10 @@ export default async function PackageDetailPage({
             </span>
           </div>
           <div className="absolute bottom-0 left-0 p-8 sm:p-12 z-20 max-w-3xl">
-            <h1 className="text-white text-4xl sm:text-5xl md:text-6xl font-black leading-tight tracking-tight mb-4 drop-shadow-lg">
+            <h1 className="text-white text-4xl sm:text-5xl md:text-6xl font-black leading-tight tracking-tight mb-4 drop-shadow-lg text-left">
               {destination.name}
             </h1>
-            <p className="text-white/90 text-lg sm:text-xl font-medium max-w-xl drop-shadow-md">
+            <p className="text-white/90 text-lg sm:text-xl font-medium max-w-xl drop-shadow-md text-left">
               {destination.description}
             </p>
           </div>
@@ -96,10 +107,10 @@ export default async function PackageDetailPage({
             <section>
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2">
-                  <h2 className="text-3xl font-bold text-text-main">
+                  <h2 className="text-3xl font-bold text-text-main dark:text-white text-left">
                     Package Highlights
                   </h2>
-                  <p className="text-text-muted text-lg">
+                  <p className="text-text-muted text-lg text-left">
                     Curated experiences for the perfect romantic getaway.
                   </p>
                 </div>
@@ -108,12 +119,12 @@ export default async function PackageDetailPage({
                   {highlights.map((highlight: string, index: number) => (
                     <div
                       key={index}
-                      className="flex flex-col items-center text-center p-5 bg-white border border-[#edf2f0] rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                      className="flex flex-col items-center text-center p-5 bg-white dark:bg-slate-900 border border-[#edf2f0] dark:border-slate-800 rounded-xl shadow-sm hover:shadow-md transition-shadow"
                     >
                       <div className="p-3 bg-primary/10 text-primary rounded-full mb-3">
                         <span className="material-symbols-outlined">star</span>
                       </div>
-                      <h3 className="font-bold text-text-main text-sm">
+                      <h3 className="font-bold text-text-main dark:text-white text-sm">
                         {highlight}
                       </h3>
                     </div>
@@ -124,7 +135,7 @@ export default async function PackageDetailPage({
 
             {/* Gallery */}
             <section>
-              <h2 className="text-3xl font-bold text-text-main mb-6">
+              <h2 className="text-3xl font-bold text-text-main dark:text-white mb-6 text-left">
                 Gallery
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -146,13 +157,13 @@ export default async function PackageDetailPage({
 
             {/* Itinerary */}
             <section>
-              <h2 className="text-3xl font-bold text-text-main mb-8">
+              <h2 className="text-3xl font-bold text-text-main dark:text-white mb-8 text-left">
                 Itinerary Timeline
               </h2>
-              <div className="relative pl-4 border-l-2 border-[#dbe6e2] ml-4 space-y-12">
+              <div className="relative pl-4 border-l-2 border-[#dbe6e2] dark:border-slate-800 ml-4 space-y-12">
                 {itinerary.map((item: any, index: number) => (
                   <div key={index} className="relative pl-8 group">
-                    <div className="absolute -left-[25px] top-0 flex items-center justify-center size-12 bg-white border-2 border-primary rounded-full z-10 shadow-sm group-hover:scale-110 transition-transform">
+                    <div className="absolute -left-[25px] top-0 flex items-center justify-center size-12 bg-white dark:bg-slate-900 border-2 border-primary rounded-full z-10 shadow-sm group-hover:scale-110 transition-transform">
                       <span className="material-symbols-outlined text-primary">
                         {index === 0
                           ? "flight_land"
@@ -161,8 +172,8 @@ export default async function PackageDetailPage({
                             : "explore"}
                       </span>
                     </div>
-                    <div className="flex flex-col gap-3">
-                      <h3 className="text-xl font-bold text-text-main">
+                    <div className="flex flex-col gap-3 text-left">
+                      <h3 className="text-xl font-bold text-text-main dark:text-white">
                         Day {item.day}: {item.title}
                       </h3>
                       <p className="text-text-muted leading-relaxed">
@@ -175,8 +186,8 @@ export default async function PackageDetailPage({
             </section>
 
             {/* Inclusions */}
-            <section className="bg-white rounded-2xl p-8 border border-[#edf2f0] shadow-sm">
-              <h2 className="text-2xl font-bold text-text-main mb-6">
+            <section className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-[#edf2f0] dark:border-slate-800 shadow-sm">
+              <h2 className="text-2xl font-bold text-text-main dark:text-white mb-6 text-left">
                 Facilities
               </h2>
               <ul className="space-y-3">
@@ -185,7 +196,7 @@ export default async function PackageDetailPage({
                     <span className="material-symbols-outlined text-primary text-xl mt-0.5">
                       check_circle
                     </span>
-                    <span className="text-text-main text-sm">{item}</span>
+                    <span className="text-text-main dark:text-slate-300 text-sm">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -195,14 +206,14 @@ export default async function PackageDetailPage({
           {/* Right Column: Sticky Booking Sidebar */}
           <aside id="booking-form" className="relative h-full">
             <div className="sticky top-24 flex flex-col gap-6">
-              <div className="bg-white rounded-2xl shadow-xl border border-[#edf2f0] p-6 overflow-hidden">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-[#edf2f0] dark:border-slate-800 p-6 overflow-hidden">
                 {/* Header */}
-                <div className="border-b border-[#f0f4f3] pb-4 mb-4">
-                  <p className="text-text-muted text-sm font-medium">
+                <div className="border-b border-[#f0f4f3] dark:border-slate-800 pb-4 mb-4">
+                  <p className="text-text-muted text-sm font-medium text-left">
                     Starting from
                   </p>
                   <div className="flex items-baseline gap-2">
-                    <h3 className="text-3xl font-bold text-text-main text-primary">
+                    <h3 className="text-3xl font-bold text-text-main dark:text-white text-primary">
                       {formatCurrency(destination.price)}
                     </h3>
                   </div>
@@ -211,7 +222,7 @@ export default async function PackageDetailPage({
                 <form action={bookPackage} className="flex flex-col gap-4">
                   {/* Date Selector */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase text-text-main tracking-wider">
+                    <label className="text-xs font-bold uppercase text-text-main dark:text-slate-400 tracking-wider text-left block">
                       Travel Dates
                     </label>
                     <div className="relative">
@@ -224,17 +235,17 @@ export default async function PackageDetailPage({
                         type="date"
                         name="date"
                         required
-                        className="block w-full pl-10 pr-3 py-2.5 bg-[#f0f4f3] border-transparent rounded-lg text-text-main focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-white transition-all text-sm font-sans"
+                        className="block w-full pl-10 pr-3 py-2.5 bg-[#f0f4f3] dark:bg-slate-800 border-transparent rounded-lg text-text-main dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-white dark:focus:bg-slate-700 transition-all text-sm font-sans"
                       />
                     </div>
                   </div>
                   {/* Guests (Fixed for Couple) */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase text-text-main tracking-wider">
+                    <label className="text-xs font-bold uppercase text-text-main dark:text-slate-400 tracking-wider text-left block">
                       Guests
                     </label>
-                    <div className="flex items-center justify-between px-4 py-2.5 bg-[#f0f4f3] rounded-lg">
-                      <span className="text-sm font-medium">2 Adults</span>
+                    <div className="flex items-center justify-between px-4 py-2.5 bg-[#f0f4f3] dark:bg-slate-800 rounded-lg">
+                      <span className="text-sm font-medium dark:text-slate-300">2 Adults</span>
                       <input type="hidden" name="pax" value="2" />
                       <span className="material-symbols-outlined text-text-muted text-sm">
                         group
@@ -245,7 +256,7 @@ export default async function PackageDetailPage({
                   {/* CTA Button */}
                   <button
                     type="submit"
-                    className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-primary/30 transition-all transform active:scale-95 flex items-center justify-center gap-2 mt-2"
+                    className="w-full bg-primary hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-primary/30 transition-all transform active:scale-95 flex items-center justify-center gap-2 mt-2"
                   >
                     <span className="material-symbols-outlined">favorite</span>
                     Book This Trip
@@ -271,40 +282,6 @@ export default async function PackageDetailPage({
           </p>
         </div>
       </footer>
-      <style>{`
-        ::-webkit-scrollbar {
-          width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-          background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #d1d5db;
-          border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: #9ca3af;
-        }
-        .icon-filled {
-          font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-      `}</style>
-
-      {/* Mobile Sticky Booking Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 lg:hidden z-50 flex items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-        <div className="flex flex-col">
-          <span className="text-xs text-gray-500">Starting from</span>
-          <span className="text-lg font-bold text-emerald-600">
-            {formatCurrency(destination.price)}
-          </span>
-        </div>
-        <a
-          href="#booking-form"
-          className="bg-emerald-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg active:scale-95 transition-transform"
-        >
-          Book Now
-        </a>
-      </div>
     </div>
   );
 }
