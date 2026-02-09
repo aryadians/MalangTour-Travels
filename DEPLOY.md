@@ -1,46 +1,57 @@
-# Deployment Guide for Malang Travel 🚀
+# 🚀 Deployment Guide
 
-This application is built with **Next.js 14** and is optimized for deployment on Vercel or Netlify.
+This guide covers the steps to deploy **MalangTour Premium** to production environments.
 
-## 1. Prerequisites
-- GitHub Account
-- Vercel Account (recommended for Next.js)
+## 🏁 Prerequisites
 
-## 2. Deploy to Vercel (Recommended)
-1.  Push your code to a GitHub repository.
-2.  Go to [Vercel Dashboard](https://vercel.com/new).
-3.  Import your repository.
-4.  **Framework Preset**: Next.js.
-5.  **Build Command**: `npm run build` (default).
-6.  **Output Directory**: `.next` (default).
-7.  **Environment Variables**:
-    *   No complex DB variables needed for this demo version!
-    *   (Optional) If you used Image Optimization with external domains, add them to `next.config.js`.
+- **Google AI Studio Key**: For the AI Chatbot and Planner.
+- **Midtrans Account**: For payment processing (Production keys required for real money).
+- **Resend Account**: For automated E-Ticket emails.
+- **Vercel Account**: Recommended hosting provider.
 
-8.  Click **Deploy**.
+## 📦 Step 1: Prepare Database
 
-## 3. Deploy to Netlify
-1.  Go to [Netlify](https://app.netlify.com/start).
-2.  Connect GitHub and select repo.
-3.  **Build Command**: `npm run build`.
-4.  **Publish Directory**: `.next`.
-5.  Install the **Next.js Runtime** plugin if prompted.
+If you are moving from SQLite to production, use **PostgreSQL** (e.g., Vercel Postgres, Supabase, or Railway).
 
-## 4. Local Production Build
-To test the production build locally:
-```bash
-npm run build
-npm start
-```
+1. Change the provider in `prisma/schema.prisma`:
+   ```prisma
+   datasource db {
+     provider = "postgresql"
+     url      = env("DATABASE_URL")
+   }
+   ```
+2. Update your `DATABASE_URL` in environment variables.
 
-## Performance Logic
-The app uses **Client-Side Data Mocking** via `TravelContext`. This ensures:
--   ⚡ Ultra-fast page loads (no DB latency).
--   🛡️ Zero deployment crashes due to missing database connections.
--   📱 Smooth animations and transitions.
+## 🌐 Step 2: Deploy to Vercel
 
-## Future Backend Integration
-To switch to a real database:
-1.  Set up a PostgreSQL/SQLite database.
-2.  Rename `context/TravelContext.tsx` to use `fetch('/api/destinations')`.
-3.  Uncomment Prisma logic in `lib/prisma.ts`.
+1. **Push your code** to a GitHub repository.
+2. **Import to Vercel**: Connect your repo.
+3. **Environment Variables**: Add all keys from your `.env` to Vercel Dashboard.
+   - `GEMINI_API_KEY`
+   - `MIDTRANS_SERVER_KEY`
+   - `MIDTRANS_CLIENT_KEY`
+   - `RESEND_API_KEY`
+   - `AUTH_SECRET`
+   - `NEXT_PUBLIC_APP_URL` (e.g., `https://malangtour.vercel.app`)
+4. **Build Settings**: Next.js defaults are correct.
+5. **Post-Deployment**: Run `npx prisma db push` to sync your schema.
+
+## 💳 Step 3: Midtrans Configuration
+
+1. Log in to [Midtrans Dashboard](https://dashboard.midtrans.com/).
+2. Set the **Payment Notification URL** to:
+   `https://your-domain.com/api/payment/webhook` (If implemented)
+3. Ensure the environment matches (Sandbox vs Production).
+
+## 📧 Step 4: Email Verification
+
+1. In **Resend**, verify your domain.
+2. Update the `from` address in `lib/services/mail.ts` to match your verified domain.
+
+---
+
+## 🛠️ Common Troubleshooting
+
+- **AI 404 Errors**: Ensure your API key has "Generative Language API" enabled in Google Cloud.
+- **Prisma Client**: If you see "Module not found", run `npx prisma generate` during the build step.
+- **Turbopack Issues**: If the build fails on Vercel, try disabling Turbopack by removing the `--turbo` flag from `package.json`.

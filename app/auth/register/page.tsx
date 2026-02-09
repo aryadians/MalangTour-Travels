@@ -154,6 +154,30 @@ export default function RegisterPage() {
             )}
           </div>
 
+          {/* Referral Code (Optional) */}
+          <div>
+            <label
+              htmlFor="referralCode"
+              className="block text-xs font-bold uppercase text-slate-500 mb-2 tracking-wider"
+            >
+              Referral Code (Optional)
+            </label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span className="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors">
+                  redeem
+                </span>
+              </div>
+              <input
+                id="referralCode"
+                name="referralCode"
+                type="text"
+                className="block w-full h-12 pl-12 pr-4 rounded-xl border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 bg-slate-50 focus:bg-white text-slate-900 placeholder:text-slate-400 transition-all font-mono text-sm uppercase"
+                placeholder="e.g. ABCDEF"
+              />
+            </div>
+          </div>
+
           <button
             type="submit"
             disabled={isPending}

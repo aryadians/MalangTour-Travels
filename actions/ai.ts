@@ -3,10 +3,37 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 
-// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+// Basic in-memory rate limiter (will reset on server restart)
+const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
+
+function isRateLimited(userId: string) {
+  const now = Date.now();
+  const limit = 5; // 5 requests
+  const timeframe = 60000; // per 1 minute
+
+  const userRecord = rateLimitMap.get(userId);
+
+  if (!userRecord || now > userRecord.resetTime) {
+    rateLimitMap.set(userId, { count: 1, resetTime: now + timeframe });
+    return false;
+  }
+
+  if (userRecord.count >= limit) {
+    return true;
+  }
+
+  userRecord.count++;
+  return false;
+}
 
 export async function generalChat(message: string) {
   const { GoogleGenerativeAI } = await import("@google/generative-ai");
+  const session = await getSession();
+  
+  if (session?.userId && isRateLimited(session.userId)) {
+    return { success: false, error: "Too many requests. Please wait a minute." };
+  }
+
   console.log("Chat request received. message:", message);
   
   let apiKey = process.env.GEMINI_API_KEY;

@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏔️ MalangTour Premium - High-Fidelity Travel Platform
 
-## Getting Started
+<div align="center">
 
-First, run the development server:
+![Next.js](https://img.shields.io/badge/Next.js-15+-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Google Gemini](https://img.shields.io/badge/Google_Gemini-4285F4?style=for-the-badge&logo=google-gemini&logoColor=white)
+![Midtrans](https://img.shields.io/badge/Midtrans-003366?style=for-the-badge&logo=visa&logoColor=white)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+**Redefining High-Quality Journeys through East Java's Most Majestic Landscapes.**
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[Explore Features](#-core-features) • [Deployment](#-deployment) • [Documentation](#-documentation)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+</div>
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 📖 Overview
 
-To learn more about Next.js, take a look at the following resources:
+**MalangTour Premium** is a robust, end-to-end travel platform built for the modern era. It combines high-fidelity UI/UX with cutting-edge AI integration and real-time payment processing. Whether it's catching the Bromo sunrise or exploring hidden waterfalls, this platform handles everything from AI-driven planning to automated E-Ticketing.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ✨ Core Features
 
-## Deploy on Vercel
+### 🤖 1. AI-Powered Concierge
+- **Gemini Chatbot**: Intelligent travel assistant providing real-time advice and hidden gem secrets.
+- **Smart Itinerary Planner**: Generate personalized multi-day trip plans based on budget and mood using Google Gemini 1.5 Pro.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 💳 2. Enterprise Payment System
+- **Midtrans Integration**: Real-time payment processing supporting QRIS, GoPay, and Virtual Accounts.
+- **Dynamic Pricing**: Automatic currency conversion and price calculation.
+- **Loyalty Program**: Integrated point-based reward system (1% cashback per booking).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 🛡️ 3. Advanced Admin Command Center
+- **Live Analytics**: Real-time revenue charts and performance metrics.
+- **Inventory Control**: Seamless management of tour packages and SEO-optimized metadata.
+- **Moderation System**: Full control over user reviews and community feedback.
+- **Voucher Engine**: Create and manage promo codes (Percentage or Flat discounts).
+
+### 📱 4. Premium User Experience
+- **E-Ticket Generator**: Automated, print-ready digital tickets with unique QR validation.
+- **Membership Tiers**: Silver, Gold, and Platinum status based on travel history.
+- **Interactive Hotspot Map**: Geographical visualization of destinations using Leaflet.js.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router & Turbopack)
+- **Database**: [Prisma](https://www.prisma.io/) with SQLite/PostgreSQL
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/) & [Framer Motion](https://www.framer.com/motion/)
+- **AI Engine**: [Google Generative AI](https://aistudio.google.com/) (Gemini Pro/Flash)
+- **Payment**: [Midtrans Snap SDK](https://midtrans.com/)
+- **Notification**: [Resend API](https://resend.com/) & [React Hot Toast](https://react-hot-toast.com/)
+
+---
+
+## 🚀 Quick Start
+
+1. **Clone and Install**
+   ```bash
+   git clone https://github.com/youruser/malangtour-travels.git
+   cd malangtour-travels
+   npm install
+   ```
+
+2. **Environment Setup**
+   Create a `.env` file and populate:
+   ```env
+   DATABASE_URL="file:./dev.db"
+   GEMINI_API_KEY="your_google_ai_key"
+   MIDTRANS_SERVER_KEY="your_midtrans_key"
+   RESEND_API_KEY="your_resend_key"
+   ```
+
+3. **Database Initialization**
+   ```bash
+   npx prisma migrate dev
+   npx prisma db seed
+   ```
+
+4. **Run Development**
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## 📑 Documentation
+
+- [Deployment Guide](DEPLOY.md)
+- [Security Policy](SECURITY.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Contributing](CONTRIBUTING.md)
+
+---
+
+## ⚖️ License
+
+Distributed under the **MIT License**. See `LICENSE` for more information.
+
+<div align="center">
+  <p>Built with ❤️ by Malang Premium Team</p>
+</div>

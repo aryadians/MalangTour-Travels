@@ -35,6 +35,13 @@ export const translations = {
     aiPlaceholder: "Contoh: Saya suka matahari terbit, kopi, dan pantai yang tenang.",
     generateMagic: "Buat Itinerary Ajaib",
     saveShare: "Simpan & Bagikan",
+    membership: "Keanggotaan",
+    history: "Riwayat",
+    wishlist: "Simpanan",
+    logout: "Keluar",
+    pointsBalance: "Saldo Poin",
+    memberTier: "Level Member",
+    referralBonus: "Bonus Referal",
   },
   EN: {
     heroTitle: "REDEFINE",
@@ -72,6 +79,13 @@ export const translations = {
     aiPlaceholder: "e.g. I love sunrise, coffee, and quiet beaches.",
     generateMagic: "Generate Magic Itinerary",
     saveShare: "Save & Share",
+    membership: "Membership",
+    history: "History",
+    wishlist: "Wishlist",
+    logout: "Logout",
+    pointsBalance: "Points Balance",
+    memberTier: "Member Tier",
+    referralBonus: "Referral Bonus",
   }
 };
 

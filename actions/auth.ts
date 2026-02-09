@@ -13,6 +13,7 @@ const SignupSchema = z.object({
     .min(2, { message: "Name must be at least 2 characters long." }),
   email: z.string().email({ message: "Please enter a valid email." }),
   password: z.string().min(6, { message: "Be at least 6 characters long." }),
+  referralCode: z.string().optional(),
 });
 
 const LoginSchema = z.object({
@@ -32,7 +33,7 @@ export async function signup(prevState: any, formData: FormData) {
     };
   }
 
-  const { name, email, password } = validatedFields.data;
+  const { name, email, password, referralCode } = validatedFields.data;
 
   // Check if user already exists
   const existingUser = await prisma.user.findUnique({
@@ -48,19 +49,41 @@ export async function signup(prevState: any, formData: FormData) {
     };
   }
 
+  // Handle Referral Logic
+  let referrerId = null;
+  if (referralCode) {
+    const referrer = await prisma.user.findUnique({
+      where: { referralCode: referralCode.toUpperCase() }
+    });
+    if (referrer) {
+      referrerId = referrer.id;
+    }
+  }
+
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Create user
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-      role: "USER",
-      points: 0,
-      referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
-    },
+  // Create user and update referrer points in a transaction
+  const user = await prisma.$transaction(async (tx) => {
+    const newUser = await tx.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role: "USER",
+        points: referrerId ? 100 : 0, // Bonus for the new user if they use a code
+        referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
+      },
+    });
+
+    if (referrerId) {
+      await tx.user.update({
+        where: { id: referrerId },
+        data: { points: { increment: 500 } } // Bonus for the referrer
+      });
+    }
+
+    return newUser;
   });
 
   // Create session
