@@ -91,5 +91,5 @@
 }
 
 body {
-  @apply bg-background-light text-text-main dark:bg-background-dark dark:text-white antialiased overflow-x-hidden selection:bg-primary selection:text-white font-display;
+  @apply bg-background-light text-text-main dark:bg-background-dark dark:text-white antialiased overflow-x-hidden selection:bg-emerald-500 selection:text-white font-display;
 }

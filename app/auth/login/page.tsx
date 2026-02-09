@@ -4,7 +4,7 @@ import React, { useActionState, useEffect } from "react";
 import Link from "next/link";
 import { useTravel } from "@/context/TravelContext";
 import toast from "react-hot-toast";
-import { login } from "../actions";
+import { login } from "@/actions/auth";
 
 const initialState = {
   message: "",

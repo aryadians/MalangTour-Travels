@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import { Destination } from "@prisma/client";
-import { useFormState } from "react-dom";
 import { createDestination, updateDestination } from "@/actions/destination";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import ImageUploader from "./ImageUploader";
 
 interface DestinationFormProps {
   destination?: Destination;
@@ -28,7 +28,7 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
     }
   };
 
-  const initialImages = safelyParse(destination?.images, [""]);
+  const initialImages = safelyParse(destination?.images, []);
   const initialFacilities = safelyParse(destination?.facilities, [""]);
   const initialHighlights = safelyParse(destination?.highlights, [""]);
   const initialItinerary = safelyParse(destination?.itinerary, [
@@ -72,27 +72,41 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
+    // Filter out empty strings from dynamic lists
+    const cleanImages = images.filter((i) => i.trim() !== "");
+    const cleanFacilities = facilities.filter((i) => i.trim() !== "");
+    const cleanHighlights = highlights.filter((i) => i.trim() !== "");
+
+    // Validation
+    if (cleanImages.length === 0) {
+      toast.error("Please provide at least one image.");
+      return;
+    }
+
     // Append complex fields as JSON strings
-    formData.set(
-      "images",
-      JSON.stringify(images.filter((i) => i.trim() !== "")),
-    );
-    formData.set(
-      "facilities",
-      JSON.stringify(facilities.filter((i) => i.trim() !== "")),
-    );
-    formData.set(
-      "highlights",
-      JSON.stringify(highlights.filter((i) => i.trim() !== "")),
-    );
+    formData.set("images", JSON.stringify(cleanImages));
+    formData.set("facilities", JSON.stringify(cleanFacilities));
+    formData.set("highlights", JSON.stringify(cleanHighlights));
     formData.set("itinerary", JSON.stringify(itinerary));
 
-    if (isEdit && destination) {
-      await updateDestination(destination.id, null, formData);
-      toast.success("Destination updated successfully!");
-    } else {
-      await createDestination(null, formData);
-      toast.success("Destination created successfully!");
+    try {
+      if (isEdit && destination) {
+        const result = await updateDestination(destination.id, null, formData);
+        if (result && 'message' in result && result.message.includes("Error")) {
+           toast.error(result.message);
+        } else {
+           toast.success("Destination updated successfully!");
+        }
+      } else {
+        const result = await createDestination(null, formData);
+        if (result && 'message' in result && result.message.includes("Error")) {
+           toast.error(result.message);
+        } else {
+           toast.success("Destination created successfully!");
+        }
+      }
+    } catch (err) {
+      toast.error("An unexpected error occurred.");
     }
   };
 
@@ -112,7 +126,7 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
               name="name"
               defaultValue={destination?.name}
               required
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
             />
           </div>
           <div>
@@ -122,13 +136,14 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
             <select
               name="category"
               defaultValue={destination?.category || "Gunung"}
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
             >
               <option value="Gunung">Gunung</option>
               <option value="Pantai">Pantai</option>
               <option value="Kota">Kota</option>
               <option value="Budaya">Budaya</option>
               <option value="Kuliner">Kuliner</option>
+              <option value="Honeymoon">Honeymoon</option>
             </select>
           </div>
           <div className="md:col-span-2">
@@ -140,7 +155,7 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
               defaultValue={destination?.description}
               rows={4}
               required
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
             ></textarea>
           </div>
           <div>
@@ -152,7 +167,7 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
               name="location"
               defaultValue={destination?.location}
               required
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
             />
           </div>
           <div>
@@ -164,7 +179,7 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
               name="openTime"
               defaultValue={destination?.openTime || ""}
               placeholder="e.g. 08:00 - 17:00"
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
             />
           </div>
           <div>
@@ -177,7 +192,7 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
               defaultValue={destination?.price}
               required
               min="0"
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
             />
           </div>
           <div>
@@ -189,7 +204,7 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
               name="ticketPrice"
               defaultValue={destination?.ticketPrice || ""}
               placeholder="e.g. Rp 5.000 / person"
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
             />
           </div>
           <div>
@@ -203,46 +218,28 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
               step="0.1"
               min="0"
               max="5"
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+              Slug (URL)
+            </label>
+            <input
+              type="text"
+              name="slug"
+              defaultValue={destination?.slug}
+              required
+              placeholder="e.g. pantai-balekambang"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
             />
           </div>
         </div>
       </div>
 
-      {/* Images */}
+      {/* Images Section */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-            Images (URLs)
-          </h3>
-          <button
-            type="button"
-            onClick={() => addToList(setImages, "")}
-            className="text-sm text-emerald-500 font-bold hover:underline"
-          >
-            + Add Image
-          </button>
-        </div>
-        <div className="space-y-3">
-          {images.map((img, idx) => (
-            <div key={idx} className="flex gap-2">
-              <input
-                type="text"
-                value={img}
-                onChange={(e) => updateList(setImages, idx, e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                className="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-              <button
-                type="button"
-                onClick={() => removeFromList(setImages, idx)}
-                className="text-red-500 hover:bg-red-50 p-2 rounded-lg"
-              >
-                <span className="material-symbols-outlined">delete</span>
-              </button>
-            </div>
-          ))}
-        </div>
+        <ImageUploader initialImages={images} onChange={setImages} />
       </div>
 
       {/* Facilities & Highlights */}
@@ -270,12 +267,12 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
                     updateList(setFacilities, idx, e.target.value)
                   }
                   placeholder="e.g. WiFi"
-                  className="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
                 />
                 <button
                   type="button"
                   onClick={() => removeFromList(setFacilities, idx)}
-                  className="text-red-500 hover:bg-red-50 p-2 rounded-lg"
+                  className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"
                 >
                   <span className="material-symbols-outlined">delete</span>
                 </button>
@@ -306,12 +303,12 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
                     updateList(setHighlights, idx, e.target.value)
                   }
                   placeholder="e.g. Sunrise View"
-                  className="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
                 />
                 <button
                   type="button"
                   onClick={() => removeFromList(setHighlights, idx)}
-                  className="text-red-500 hover:bg-red-50 p-2 rounded-lg"
+                  className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"
                 >
                   <span className="material-symbols-outlined">delete</span>
                 </button>
@@ -347,7 +344,7 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
                     updateList(setItinerary, idx, newVal);
                   }}
                   placeholder="Time (e.g. 08:00)"
-                  className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
                 />
                 <input
                   type="text"
@@ -357,13 +354,13 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
                     updateList(setItinerary, idx, newVal);
                   }}
                   placeholder="Activity Description"
-                  className="md:col-span-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="md:col-span-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
                 />
               </div>
               <button
                 type="button"
                 onClick={() => removeFromList(setItinerary, idx)}
-                className="text-red-500 hover:bg-red-50 p-2 rounded-lg mt-1"
+                className="text-red-500 hover:bg-red-50 p-2 rounded-lg mt-1 transition-colors"
               >
                 <span className="material-symbols-outlined">delete</span>
               </button>
@@ -381,7 +378,7 @@ export default function DestinationForm({ destination }: DestinationFormProps) {
         </Link>
         <button
           type="submit"
-          className="px-6 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-105"
+          className="px-6 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-105 active:scale-95"
         >
           {isEdit ? "Update Destination" : "Create Destination"}
         </button>

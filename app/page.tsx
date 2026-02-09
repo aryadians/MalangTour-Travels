@@ -68,7 +68,7 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-display selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 font-display">
       
       {/* 1. HERO SECTION */}
       <section className="relative h-screen min-h-[800px] w-full flex flex-col items-center justify-center z-10 overflow-visible">

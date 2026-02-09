@@ -321,7 +321,7 @@ export default function TourDetail() {
                 </div>
                 {/* CTA Button */}
                 <Link
-                  href="/booking/payment"
+                  href="/checkout/payment?packageId=2&date=2023-10-14&pax=2"
                   className="w-full py-4 rounded-xl bg-primary text-[#111816] dark:text-[#10221c] hover:bg-primary/90 transition-all transform active:scale-[0.98] font-bold text-lg shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
                 >
                   <span>Book Trip Now</span>

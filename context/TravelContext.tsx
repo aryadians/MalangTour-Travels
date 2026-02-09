@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getDestinations } from "@/actions/destination";
 import { getMe } from "@/actions/auth";
+import { getWishlist, toggleWishlist as toggleWishlistAction } from "@/actions/wishlist";
 
 // Define Types
 export interface Destination {
@@ -150,15 +151,38 @@ export const TravelProvider = ({ children }: { children: React.ReactNode }) => {
     totalPrice: 0,
   });
 
-  // 3.5. BOOKING HISTORY & WISHLIST (MOCK)
+  // 3.5. BOOKING HISTORY & WISHLIST (REAL)
   const [bookingHistory] = useState<BookingHistoryItem[]>([]);
-
   const [wishlist, setWishlist] = useState<(string | number)[]>([]);
 
-  const toggleWishlist = (id: string | number) => {
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (user.isLoggedIn) {
+        const items = await getWishlist();
+        setWishlist(items);
+      } else {
+        setWishlist([]);
+      }
+    };
+    fetchWishlist();
+  }, [user.isLoggedIn]);
+
+  const toggleWishlist = async (id: string | number) => {
+    if (!user.isLoggedIn) return;
+
+    // Optimistic Update
+    const isAdding = !wishlist.includes(id);
     setWishlist((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+      isAdding ? [...prev, id] : prev.filter((item) => item !== id),
     );
+
+    const result = await toggleWishlistAction(Number(id));
+    if (result.error) {
+      // Rollback
+      setWishlist((prev) =>
+        isAdding ? prev.filter((item) => item !== id) : [...prev, id],
+      );
+    }
   };
 
   // 4. HELPER FUNCTIONS

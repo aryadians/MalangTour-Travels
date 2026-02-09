@@ -98,6 +98,54 @@ async function main() {
     },
   });
 
+  const jatimPark = await prisma.destination.upsert({
+    where: { slug: "jatim-park-2-zoo" },
+    update: {},
+    create: {
+      name: "Jatim Park 2 (Batu Secret Zoo)",
+      slug: "jatim-park-2-zoo",
+      description: "Explore one of Asia's best zoos and the Pohon Inn hotel. A world-class educational and recreational park perfect for families.",
+      price: 150000,
+      location: "Batu, East Java",
+      rating: 4.8,
+      category: "Kota",
+      images: JSON.stringify([
+        "https://images.unsplash.com/photo-1534567153574-2b12153a87f0?auto=format&fit=crop&q=80&w=1000",
+        "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=1000"
+      ]),
+      facilities: JSON.stringify(["Shuttle Bus", "Food Court", "Locker Room", "Wheelchair Accessible"]),
+      highlights: JSON.stringify(["Secret Zoo", "Museum Satwa", "Eco Green Park"]),
+      itinerary: JSON.stringify([
+        { time: "09:00 AM", title: "Zoo Entry", activity: "Animal observation" },
+        { time: "01:00 PM", title: "Lunch Break", activity: "Jungle-themed food court" }
+      ]),
+    },
+  });
+
+  const museumAngkut = await prisma.destination.upsert({
+    where: { slug: "museum-angkut-heritage" },
+    update: {},
+    create: {
+      name: "Museum Angkut",
+      slug: "museum-angkut-heritage",
+      description: "The first transportation museum in Asia. Features over 300 collections of traditional to modern transportation.",
+      price: 120000,
+      location: "Batu, East Java",
+      rating: 4.7,
+      category: "Kota",
+      images: JSON.stringify([
+        "https://images.unsplash.com/photo-1533158674514-6330554c0e64?auto=format&fit=crop&q=80&w=1000",
+        "https://images.unsplash.com/photo-1510662145379-13537db782dc?auto=format&fit=crop&q=80&w=1000"
+      ]),
+      facilities: JSON.stringify(["Photo Spot", "Snack Bar", "Gift Shop"]),
+      highlights: JSON.stringify(["Buckingham Palace Zone", "Gangster Town", "Movie Star Studio"]),
+      itinerary: JSON.stringify([
+        { time: "03:00 PM", title: "Exploration", activity: "Walk through history" },
+        { time: "06:30 PM", title: "Night Parade", activity: "Vibrant costume show" }
+      ]),
+    },
+  });
+
   // 3. Seed Reviews
   await prisma.review.createMany({
     data: [

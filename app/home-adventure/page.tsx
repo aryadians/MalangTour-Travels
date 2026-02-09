@@ -26,7 +26,7 @@ export default async function HomeAdventure() {
   const user = await getSession();
 
   return (
-    <main className="bg-[#0f172a] text-slate-200 font-sans selection:bg-orange-500 selection:text-white">
+    <main className="bg-[#0f172a] text-slate-200 font-sans">
       {/* Adventure Nav */}
       <nav className="sticky top-0 z-50 bg-[#0f172a]/90 backdrop-blur-md border-b border-white/10 px-6 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center gap-2 group">

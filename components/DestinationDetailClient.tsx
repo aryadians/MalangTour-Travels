@@ -90,14 +90,11 @@ export default function DestinationDetailClient({
     
     setIsBooking(true);
     const params = new URLSearchParams({
-      destinationId: destination.id.toString(),
-      destinationName: destination.name,
-      paxCount: paxCount.toString(),
+      packageId: destination.id.toString(),
       date: selectedDate,
-      price: pricePerPax.toString(),
-      image: Array.isArray(images) ? images[0] : "",
+      pax: paxCount.toString(),
     });
-    router.push(`/booking/payment?${params.toString()}`);
+    router.push(`/checkout/payment?${params.toString()}`);
   };
 
   const handleReviewSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

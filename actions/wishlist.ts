@@ -44,3 +44,20 @@ export async function toggleWishlist(destinationId: number) {
     return { error: "Failed to update wishlist" };
   }
 }
+
+export async function getWishlist() {
+  const session = await getSession();
+  if (!session || !session.userId) {
+    return [];
+  }
+
+  try {
+    const items = await prisma.wishlist.findMany({
+      where: { userId: session.userId },
+      select: { destinationId: true },
+    });
+    return items.map((i) => i.destinationId);
+  } catch (error) {
+    return [];
+  }
+}

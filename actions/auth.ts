@@ -4,7 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createSession, deleteSession, getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-// import bcrypt from "bcryptjs"; // bcryptjs handles imports differently in some environments, let's try direct require if import fails or standard import
+import { revalidatePath } from "next/cache";
 import * as bcrypt from "bcryptjs";
 
 const SignupSchema = z.object({
@@ -22,11 +22,7 @@ const LoginSchema = z.object({
 
 export async function signup(prevState: any, formData: FormData) {
   // Validate form fields
-  const validatedFields = SignupSchema.safeParse({
-    name: formData.get("name"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-  });
+  const validatedFields = SignupSchema.safeParse(Object.fromEntries(formData));
 
   // If any form fields are invalid, return early
   if (!validatedFields.success) {
@@ -59,6 +55,8 @@ export async function signup(prevState: any, formData: FormData) {
       name,
       email,
       password: hashedPassword,
+      role: "USER",
+      points: 0,
       referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
     },
   });
@@ -66,14 +64,13 @@ export async function signup(prevState: any, formData: FormData) {
   // Create session
   await createSession(user.id, user.role, user.name || "");
 
-  redirect("/");
+  revalidatePath("/");
+  revalidatePath("/", "layout");
+  redirect("/dashboard");
 }
 
 export async function login(prevState: any, formData: FormData) {
-  const validatedFields = LoginSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-  });
+  const validatedFields = LoginSchema.safeParse(Object.fromEntries(formData));
 
   if (!validatedFields.success) {
     return {
@@ -87,37 +84,28 @@ export async function login(prevState: any, formData: FormData) {
     where: { email },
   });
 
-  if (!user) {
+  if (!user || !(await bcrypt.compare(password, user.password))) {
     return {
-      errors: {
-        email: ["Invalid credentials."], // Generic error for security
-      },
-      message: "Invalid credentials.",
-    };
-  }
-
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-
-  if (!isPasswordValid) {
-    return {
-      errors: {
-        email: ["Invalid credentials."],
-      },
-      message: "Invalid credentials.",
+      message: "Invalid email or password",
     };
   }
 
   await createSession(user.id, user.role, user.name || "");
 
+  revalidatePath("/");
+  revalidatePath("/", "layout");
+  
   if (user.role === "ADMIN") {
     redirect("/admin/dashboard");
   } else {
-    redirect("/");
+    redirect("/dashboard");
   }
 }
 
 export async function logout() {
   await deleteSession();
+  revalidatePath("/");
+  revalidatePath("/", "layout");
   redirect("/auth/login");
 }
 

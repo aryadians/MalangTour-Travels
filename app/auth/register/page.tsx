@@ -2,7 +2,7 @@
 
 import React, { useActionState, useEffect } from "react";
 import Link from "next/link";
-import { register } from "../actions";
+import { signup } from "@/actions/auth";
 import toast from "react-hot-toast";
 
 const initialState = {
@@ -11,7 +11,7 @@ const initialState = {
 };
 
 export default function RegisterPage() {
-  const [state, formAction, isPending] = useActionState(register, initialState);
+  const [state, formAction, isPending] = useActionState(signup, initialState);
 
   useEffect(() => {
     if (state.message) {
