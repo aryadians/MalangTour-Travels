@@ -11,7 +11,6 @@ import {
 import { useTravel } from "@/context/TravelContext";
 import Testimonials from "@/components/Testimonials";
 import Partners from "@/components/Partners";
-import AIChatbotCard from "@/components/AIChatbotCard";
 
 export default function Home() {
   const { destinations, formatPrice, t } = useTravel();
@@ -296,9 +295,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
-      {/* 7. AI CHATBOT CARD */}
-      <AIChatbotCard />
 
       <Testimonials />
       <Partners />

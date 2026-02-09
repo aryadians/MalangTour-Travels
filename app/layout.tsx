@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 import { TravelProvider } from "@/context/TravelContext";
 import { Toaster } from "react-hot-toast";
 import LayoutTransition from "@/components/LayoutTransition";
+import AIChatbotCard from "@/components/AIChatbotCard";
 
 export default async function RootLayout({
   children,
@@ -50,6 +51,7 @@ export default async function RootLayout({
             </LayoutTransition>
           </main>
           <Footer />
+          <AIChatbotCard />
           <Toaster position="top-center" reverseOrder={false} />
         </TravelProvider>
       </body>
