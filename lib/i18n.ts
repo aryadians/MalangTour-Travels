@@ -1,0 +1,40 @@
+export const translations = {
+  ID: {
+    heroTitle: "REDEFINISI",
+    heroSubtitle: "Perjalanan berkualitas tinggi melalui lanskap paling megah di Jawa Timur.",
+    planTrip: "Rencanakan Perjalanan",
+    consultExpert: "Konsultasi Ahli",
+    ourSpecialities: "Spesialisasi Kami",
+    login: "Masuk",
+    signup: "Daftar",
+    packages: "Paket Wisata",
+    offers: "Promo",
+    about: "Tentang Kami",
+    help: "Bantuan",
+    destinations: "Destinasi",
+    bookNow: "Pesan Sekarang",
+    startingFrom: "Mulai dari",
+    latestStories: "Cerita Terbaru",
+    points: "Poin",
+  },
+  EN: {
+    heroTitle: "REDEFINE",
+    heroSubtitle: "High-fidelity journeys through the most majestic landscapes of East Java.",
+    planTrip: "Plan Your Trip",
+    consultExpert: "Consult Expert",
+    ourSpecialities: "Our Specialities",
+    login: "Login",
+    signup: "Sign Up",
+    packages: "Packages",
+    offers: "Offers",
+    about: "About",
+    help: "Help",
+    destinations: "Destinations",
+    bookNow: "Book Now",
+    startingFrom: "Starting from",
+    latestStories: "Latest Stories",
+    points: "Points",
+  }
+};
+
+export type Language = keyof typeof translations;

@@ -14,11 +14,9 @@ interface NavbarProps {
 }
 
 export default function Navbar({ user: sessionUser }: NavbarProps) {
-  const { user, setUser, language, setLanguage, currency, setCurrency } =
-    useTravel();
+  const { user, setUser, language, setLanguage, t } = useTravel();
 
   const handleLogout = async () => {
-    // 1. Clear Client State
     setUser({
       name: "",
       points: 0,
@@ -27,7 +25,6 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
       email: "",
       role: "USER",
     });
-    // 2. Call Server Action
     await logout();
   };
 
@@ -50,11 +47,11 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
   const profileRef = useRef<HTMLDivElement>(null);
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Packages", href: "/packages" },
-    { name: "Offers", href: "/offers", badge: "Hot" },
-    { name: "About", href: "/about" },
-    { name: "Help", href: "/help" },
+    { name: t("destinations"), href: "/destinations" },
+    { name: t("packages"), href: "/packages" },
+    { name: t("offers"), href: "/offers", badge: "Hot" },
+    { name: t("about"), href: "/about" },
+    { name: t("help"), href: "/help" },
   ];
 
   useEffect(() => {
@@ -109,7 +106,7 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -127,6 +124,22 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
           </div>
 
           <div className="hidden md:flex items-center gap-4">
+            {/* Language Switcher */}
+            <div className={`flex bg-black/10 dark:bg-white/5 p-1 rounded-lg border border-white/10 ${isTransparent ? 'text-white' : 'text-slate-600'}`}>
+              <button 
+                onClick={() => setLanguage("ID")}
+                className={`px-2 py-1 text-[10px] font-black rounded-md transition-all ${language === 'ID' ? 'bg-emerald-500 text-white shadow-sm' : 'opacity-50'}`}
+              >
+                ID
+              </button>
+              <button 
+                onClick={() => setLanguage("EN")}
+                className={`px-2 py-1 text-[10px] font-black rounded-md transition-all ${language === 'EN' ? 'bg-emerald-500 text-white shadow-sm' : 'opacity-50'}`}
+              >
+                EN
+              </button>
+            </div>
+
             {activeUser ? (
               <div className="relative" ref={profileRef}>
                 <button
@@ -166,7 +179,7 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
                         {activeUser.email}
                       </p>
                       <div className="mt-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md inline-block">
-                        {user.points} Travel Points
+                        {user.points} {t("points")}
                       </div>
                     </div>
                     {activeUser.role?.toUpperCase() === "ADMIN" ? (
@@ -208,12 +221,12 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
                     : "bg-emerald-500 border-emerald-500 text-white hover:bg-emerald-600 shadow-md shadow-emerald-500/20"
                 }`}
               >
-                Login
+                {t("login")}
               </Link>
             )}
 
             <button
-              className={`md:hidden relative z-50 p-2 ${
+              className={`lg:hidden relative z-50 p-2 ${
                 isTransparent ? "text-white" : "text-gray-900 dark:text-white"
               }`}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -227,47 +240,23 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
       </div>
 
       <div
-        className={`fixed inset-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl z-40 flex flex-col items-center justify-center gap-8 transition-all duration-300 md:hidden ${
+        className={`fixed inset-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl z-40 flex flex-col items-center justify-center gap-8 transition-all duration-300 lg:hidden ${
           isMobileMenuOpen
             ? "opacity-100 visible"
             : "opacity-0 invisible pointer-events-none"
         }`}
       >
-        <Link
-          href="/"
-          className="text-gray-900 dark:text-white text-xl font-bold"
-          onClick={() => setIsMobileMenuOpen(false)}
-        >
-          Home
-        </Link>
-        <Link
-          href="/packages"
-          className="text-gray-900 dark:text-white text-xl font-bold"
-          onClick={() => setIsMobileMenuOpen(false)}
-        >
-          Packages
-        </Link>
-        <Link
-          href="/offers"
-          className="text-gray-900 dark:text-white text-xl font-bold"
-          onClick={() => setIsMobileMenuOpen(false)}
-        >
-          Offers
-        </Link>
-        <Link
-          href="/about"
-          className="text-gray-900 dark:text-white text-xl font-bold"
-          onClick={() => setIsMobileMenuOpen(false)}
-        >
-          About
-        </Link>
-        <Link
-          href="/help"
-          className="text-gray-900 dark:text-white text-xl font-bold"
-          onClick={() => setIsMobileMenuOpen(false)}
-        >
-          Help
-        </Link>
+        {navLinks.map((link) => (
+          <Link
+            key={link.name}
+            href={link.href}
+            className="text-gray-900 dark:text-white text-xl font-bold"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            {link.name}
+          </Link>
+        ))}
+        
         {activeUser ? (
           <>
             {activeUser.role?.toUpperCase() === "ADMIN" ? (
@@ -300,7 +289,7 @@ export default function Navbar({ user: sessionUser }: NavbarProps) {
             className="px-8 py-3 rounded-full bg-emerald-500 text-white text-lg font-bold shadow-lg shadow-emerald-500/20"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            Login
+            {t("login")}
           </Link>
         )}
       </div>

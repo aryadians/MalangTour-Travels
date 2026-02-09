@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useTravel } from "@/context/TravelContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { generateItinerary } from "@/actions/ai";
+import { generateItinerary, savePlan } from "@/actions/ai";
 import toast from "react-hot-toast";
 
 export default function PlannerPage() {
@@ -21,6 +21,7 @@ export default function PlannerPage() {
   const [budget, setBudget] = useState(2000000);
   const [aiPlan, setAiPlan] = useState<any>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Manual logic
   const toggleDestination = (id: number | string) => {
@@ -56,6 +57,25 @@ export default function PlannerPage() {
       toast.error(result.error || "Failed to generate plan");
     }
     setIsAiLoading(false);
+  };
+
+  const handleSavePlan = async () => {
+    if (!aiPlan) return;
+    setIsSaving(true);
+    try {
+      const result = await savePlan(aiPlan, preferences);
+      if (result.success) {
+        const url = `${window.location.origin}/plan/share/${result.id}`;
+        await navigator.clipboard.writeText(url);
+        toast.success("Plan saved! Shareable link copied to clipboard.");
+      } else {
+        toast.error(result.error || "Failed to save itinerary.");
+      }
+    } catch (err) {
+      toast.error("Could not copy link, but plan was saved.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -248,8 +268,20 @@ export default function PlannerPage() {
                       <div className="absolute top-0 right-0 p-10 opacity-10">
                         <span className="material-symbols-outlined text-[12rem]">auto_awesome</span>
                       </div>
-                      <h2 className="text-4xl font-black tracking-tight relative z-10">{aiPlan.title}</h2>
-                      <p className="text-emerald-100 font-medium mt-4 relative z-10 text-lg">{aiPlan.summary}</p>
+                      <div className="flex justify-between items-start relative z-10">
+                        <div>
+                          <h2 className="text-4xl font-black tracking-tight">{aiPlan.title}</h2>
+                          <p className="text-emerald-100 font-medium mt-4 text-lg max-w-xl">{aiPlan.summary}</p>
+                        </div>
+                        <button 
+                          onClick={handleSavePlan}
+                          disabled={isSaving}
+                          className="flex items-center gap-2 px-6 py-3 bg-white text-emerald-600 rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-all shadow-xl disabled:opacity-50"
+                        >
+                          <span className="material-symbols-outlined text-sm">{isSaving ? 'sync' : 'share'}</span>
+                          {isSaving ? 'Saving...' : 'Save & Share'}
+                        </button>
+                      </div>
                       <div className="mt-8 flex items-center gap-4 relative z-10">
                         <div className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-xl text-xs font-black uppercase">Estimated IDR {aiPlan.estimatedTotal.toLocaleString()}</div>
                       </div>

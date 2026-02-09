@@ -13,7 +13,7 @@ import Testimonials from "@/components/Testimonials";
 import Partners from "@/components/Partners";
 
 export default function Home() {
-  const { destinations, formatPrice } = useTravel();
+  const { destinations, formatPrice, t } = useTravel();
   const [activeCategory, setActiveCategory] = useState("All");
   
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -98,14 +98,14 @@ export default function Home() {
             </motion.div>
 
             <h1 className="text-6xl md:text-[9rem] font-black text-white tracking-tighter mb-8 leading-[0.8] drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)] uppercase">
-              REDEFINE <br />
+              {t("heroTitle")} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-300 italic font-serif pr-4 text-7xl md:text-[10rem]">
                 Travel.
               </span>
             </h1>
 
             <p className="text-white/70 text-lg md:text-2xl font-medium max-w-2xl mx-auto tracking-wide mb-4 leading-relaxed drop-shadow-lg">
-              High-fidelity journeys through the most majestic landscapes of East Java.
+              {t("heroSubtitle")}
             </p>
           </motion.div>
         </div>
@@ -137,7 +137,7 @@ export default function Home() {
       {/* 3. QUICK ACCESS PREMIUM CARDS */}
       <section className="pt-48 md:pt-64 pb-24 container mx-auto px-6 relative z-10">
         <div className="flex flex-col items-center text-center mb-16">
-           <span className="text-emerald-500 font-black text-[10px] uppercase tracking-[0.4em] mb-4">Our Specialities</span>
+           <span className="text-emerald-500 font-black text-[10px] uppercase tracking-[0.4em] mb-4">{t("ourSpecialities")}</span>
            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight text-center">Full-Service Luxury.</h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
@@ -249,7 +249,7 @@ export default function Home() {
                         <div className="mt-8 pt-6 border-t border-white/5 flex flex-col gap-4">
                            <div className="flex items-center justify-between">
                               <div className="text-left">
-                                 <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1 text-left">Starting from</p>
+                                 <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1 text-left">{t("startingFrom")}</p>
                                  <p className="text-2xl font-black text-white text-left">{formatPrice(dest.price)}</p>
                               </div>
                               <div className="w-12 h-12 rounded-full bg-emerald-500 text-slate-900 flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-4 transition-all duration-500">
@@ -257,7 +257,7 @@ export default function Home() {
                               </div>
                            </div>
                            <button className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95">
-                             Book Now
+                             {t("bookNow")}
                            </button>
                         </div>
                       </div>
@@ -275,7 +275,7 @@ export default function Home() {
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
           <div className="max-w-xl text-left">
             <span className="text-emerald-500 font-black text-xs tracking-[0.2em] uppercase mb-4 block text-left">Travel Insights</span>
-            <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter text-left">Experts Guidance.</h2>
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter text-left">{t("latestStories")}</h2>
           </div>
           <Link href="/blog" className="text-slate-400 font-black text-[10px] uppercase tracking-widest hover:text-emerald-500 transition-colors border-b border-slate-200 dark:border-slate-800 pb-2">Read All Guides</Link>
         </div>
@@ -308,10 +308,10 @@ export default function Home() {
             <h2 className="text-7xl md:text-[12rem] font-black tracking-tighter leading-[0.8] mb-20 uppercase text-center">UNFOLD YOUR <br /> <span className="text-white/10 italic font-serif">Destiny.</span></h2>
             <div className="flex flex-col sm:flex-row justify-center gap-8 items-center">
                <Link href="/destinations" className="px-16 py-8 bg-emerald-500 text-slate-950 rounded-full font-black uppercase tracking-[0.3em] text-sm hover:bg-white transition-all hover:scale-105 shadow-2xl shadow-emerald-500/40">
-                  Plan Your Trip
+                  {t("planTrip")}
                </Link>
                <Link href="/help" className="px-16 py-8 border-2 border-white/10 text-white rounded-full font-black uppercase tracking-[0.3em] text-sm hover:bg-white/5 transition-all">
-                  Consult Expert
+                  {t("consultExpert")}
                </Link>
             </div>
          </div>
