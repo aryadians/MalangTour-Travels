@@ -1,45 +1,76 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
+import { revalidatePath } from "next/cache";
 
-export async function validateVoucher(code: string, subtotal: number) {
+export async function getAllVouchers() {
+  const session = await getSession();
+  if (!session || session.role !== "ADMIN") throw new Error("Unauthorized");
+
   try {
-    const voucher = await prisma.voucher.findUnique({
-      where: { code: code.toUpperCase(), isActive: true }
+    const vouchers = await prisma.voucher.findMany({
+      orderBy: { createdAt: "desc" },
     });
-
-    if (!voucher) {
-      return { success: false, message: "Invalid or inactive voucher code." };
-    }
-
-    if (new Date() > voucher.expiryDate) {
-      return { success: false, message: "Voucher has expired." };
-    }
-
-    if (subtotal < voucher.minPurchase) {
-      return { 
-        success: false, 
-        message: `Minimum purchase of Rp ${voucher.minPurchase.toLocaleString()} required.` 
-      };
-    }
-
-    let discountAmount = 0;
-    if (voucher.type === "PERCENTAGE") {
-      discountAmount = (subtotal * voucher.discount) / 100;
-      if (voucher.maxDiscount && discountAmount > voucher.maxDiscount) {
-        discountAmount = voucher.maxDiscount;
-      }
-    } else {
-      discountAmount = voucher.discount;
-    }
-
-    return { 
-      success: true, 
-      discountAmount, 
-      code: voucher.code,
-      message: "Voucher applied successfully!" 
-    };
+    return { success: true, vouchers };
   } catch (error) {
-    return { success: false, message: "Error validating voucher." };
+    return { success: false, error: "Failed to fetch vouchers" };
+  }
+}
+
+export async function createVoucher(formData: FormData) {
+  const session = await getSession();
+  if (!session || session.role !== "ADMIN") return { success: false, error: "Unauthorized" };
+
+  const code = formData.get("code") as string;
+  const discount = parseFloat(formData.get("discount") as string);
+  const type = formData.get("type") as string;
+  const expiryDate = new Date(formData.get("expiryDate") as string);
+  const minPurchase = parseFloat(formData.get("minPurchase") as string || "0");
+
+  try {
+    await prisma.voucher.create({
+      data: {
+        code,
+        discount,
+        type,
+        expiryDate,
+        minPurchase,
+        isActive: true
+      }
+    });
+    revalidatePath("/admin/vouchers");
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: "Code already exists or invalid data" };
+  }
+}
+
+export async function toggleVoucherStatus(id: string, currentStatus: boolean) {
+  const session = await getSession();
+  if (!session || session.role !== "ADMIN") return { success: false, error: "Unauthorized" };
+
+  try {
+    await prisma.voucher.update({
+      where: { id },
+      data: { isActive: !currentStatus }
+    });
+    revalidatePath("/admin/vouchers");
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: "Failed to update voucher" };
+  }
+}
+
+export async function deleteVoucher(id: string) {
+  const session = await getSession();
+  if (!session || session.role !== "ADMIN") return { success: false, error: "Unauthorized" };
+
+  try {
+    await prisma.voucher.delete({ where: { id } });
+    revalidatePath("/admin/vouchers");
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: "Failed to delete voucher" };
   }
 }

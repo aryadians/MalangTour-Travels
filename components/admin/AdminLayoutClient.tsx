@@ -45,8 +45,9 @@ export default function AdminLayoutClient({
     { name: "Overview", icon: "dashboard", href: "/admin/dashboard" },
     { name: "Destinations", icon: "map", href: "/admin/destinations" },
     { name: "Bookings", icon: "book_online", href: "/admin/bookings" },
+    { name: "Reviews", icon: "reviews", href: "/admin/reviews" },
+    { name: "Vouchers", icon: "confirmation_number", href: "/admin/vouchers" },
     { name: "Users", icon: "group", href: "/admin/users" },
-    // { name: "Settings", icon: "settings", href: "/admin/settings" },
   ];
 
   return (
