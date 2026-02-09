@@ -8,18 +8,34 @@ import { logout } from "@/actions/auth";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import DashboardSidebar from "@/components/DashboardSidebar";
+import { getUserBookings } from "@/actions/booking";
 
 export default function ProfilePage() {
-  const { user, setUser } = useTravel();
+  const { user, setUser, wishlist, destinations } = useTravel();
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
+  const [bookings, setBookings] = useState<any[]>([]);
 
   useEffect(() => {
     setIsMounted(true);
     if (!user?.isLoggedIn) {
       router.push("/auth/login");
+    } else {
+      getUserBookings().then(res => {
+        if (res.success) setBookings(res.bookings || []);
+      });
     }
   }, [user, router]);
+
+  const wishlistItems = destinations.filter(d => wishlist.includes(d.id));
+
+  const getTier = (points: number) => {
+    if (points >= 5000) return { name: "Platinum", color: "bg-purple-100 text-purple-700" };
+    if (points >= 1000) return { name: "Gold", color: "bg-yellow-100 text-yellow-700" };
+    return { name: "Silver", color: "bg-slate-100 text-slate-700" };
+  };
+
+  const tier = getTier(user?.points || 0);
 
   if (!isMounted || !user || !user.isLoggedIn) {
     return null;
@@ -140,13 +156,83 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-slate-500 font-medium">Total Adventures</span>
-                  <span className="text-sm font-bold text-slate-900 dark:text-white">12 Trips</span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">{bookings.length} Trips</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-slate-500 font-medium">Member Tier</span>
-                  <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-black rounded uppercase">Silver</span>
+                  <span className={`px-2 py-0.5 text-[10px] font-black rounded uppercase ${tier.color}`}>{tier.name}</span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Booking History */}
+          <div className="space-y-6">
+            <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-3">
+              <span className="material-symbols-outlined text-emerald-500">history</span>
+              Booking History
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {bookings.length === 0 ? (
+                <div className="col-span-2 p-10 bg-white dark:bg-slate-900 rounded-[2rem] text-center text-slate-400 font-medium border border-dashed border-slate-200 dark:border-slate-800">
+                  You haven't booked any adventures yet.
+                </div>
+              ) : (
+                bookings.map((b) => (
+                  <Link href={`/bookings/${b.id}/ticket`} key={b.id}>
+                    <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                          b.status === 'CONFIRMED' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'
+                        }`}>
+                          {b.status}
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(b.date).toLocaleDateString()}</span>
+                      </div>
+                      <h4 className="font-black text-slate-900 dark:text-white uppercase group-hover:text-emerald-500 transition-colors">{b.destination.name}</h4>
+                      <p className="text-xs text-slate-400 font-medium mt-1">{b.pax} Travelers • IDR {b.totalPrice.toLocaleString()}</p>
+                      {b.status === 'CONFIRMED' && (
+                        <div className="mt-4 flex items-center gap-2 text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                          <span className="material-symbols-outlined text-sm">confirmation_number</span>
+                          View E-Ticket
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Wishlist */}
+          <div className="space-y-6">
+            <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-3">
+              <span className="material-symbols-outlined text-pink-500">favorite</span>
+              Saved Adventures
+            </h2>
+            <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+              {wishlistItems.length === 0 ? (
+                <div className="w-full p-10 bg-white dark:bg-slate-900 rounded-[2rem] text-center text-slate-400 font-medium border border-dashed border-slate-200 dark:border-slate-800">
+                  Your wishlist is empty.
+                </div>
+              ) : (
+                wishlistItems.map((item) => (
+                  <Link href={`/destinations/${item.slug}`} key={item.id} className="min-w-[280px]">
+                    <div className="bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm hover:scale-[1.02] transition-all">
+                      <div className="h-32 relative">
+                        <img src={item.image} className="w-full h-full object-cover" />
+                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-slate-900">
+                          IDR {item.price.toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="p-5">
+                        <h4 className="font-black text-slate-900 dark:text-white text-sm truncate uppercase">{item.name}</h4>
+                        <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mt-1">{item.category}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              )}
             </div>
           </div>
 

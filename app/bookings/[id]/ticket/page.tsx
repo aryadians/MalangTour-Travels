@@ -1,222 +1,127 @@
 "use client";
 
-import React, { use, useState, useEffect } from "react";
-import { getUserBookingById } from "@/actions/booking";
-import { notFound } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { getBookingById } from "@/actions/booking";
+import { motion } from "framer-motion";
 import Link from "next/link";
 
-interface PageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default function TicketPage({ params }: PageProps) {
-  const resolvedParams = use(params);
-  const id = resolvedParams.id;
-
+export default function TicketPage() {
+  const { id } = useParams();
+  const router = useRouter();
   const [booking, setBooking] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchBooking() {
-      try {
-        setLoading(true);
-        const result = await getUserBookingById(id);
-        if (result.success && result.booking) {
-          setBooking(result.booking);
+    if (id) {
+      getBookingById(id as string).then(res => {
+        if (res.success && res.booking) {
+          setBooking(res.booking);
         } else {
-          setError(result.error || "Booking not found");
+          router.push("/profile");
         }
-      } catch (err) {
-        setError("Failed to load booking details");
-      } finally {
-        setLoading(false);
-      }
+        setIsLoading(false);
+      });
     }
-    fetchBooking();
-  }, [id]);
+  }, [id, router]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-slate-950">
-        <div className="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-slate-400 font-bold text-[10px] tracking-widest uppercase">Securing your pass...</p>
-      </div>
-    );
-  }
-
-  if (error || !booking) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-slate-950 p-6 text-center">
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Oops!</h1>
-        <p className="text-slate-500 mb-6">{error || "We couldn't find your ticket."}</p>
-        <Link href="/bookings" className="px-6 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg">
-          Back to Wallet
-        </Link>
-      </div>
-    );
-  }
+  if (isLoading) return <div className="h-screen flex items-center justify-center">Loading Ticket...</div>;
+  if (!booking) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center pt-32 pb-20 px-4">
-      
-      {/* 1. SCREEN UI - HEADER */}
-      <div className="max-w-[850px] w-full no-print mb-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-xl">
-          <div>
-            <Link href="/bookings" className="inline-flex items-center gap-2 text-emerald-600 font-bold text-xs uppercase tracking-widest mb-3 hover:gap-3 transition-all">
-              <span className="material-symbols-outlined text-sm">arrow_back</span>
-              Back to Wallet
-            </Link>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Digital Boarding Pass</h1>
-            <p className="text-slate-500 text-sm">Authorized ticket for your journey to {booking.destination.name}.</p>
-          </div>
-          <button 
-            onClick={() => window.print()}
-            className="bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 shadow-xl hover:scale-105 active:scale-95 transition-all"
-          >
-            <span className="material-symbols-outlined text-lg">print</span>
-            Print Ticket
-          </button>
-        </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-12 flex flex-col items-center">
+      <div className="max-w-xl w-full no-print mb-8 flex justify-between items-center">
+        <Link href="/profile" className="flex items-center gap-2 text-slate-500 hover:text-emerald-500 font-bold text-sm transition-colors">
+          <span className="material-symbols-outlined">arrow_back</span>
+          Back to Profile
+        </Link>
+        <button 
+          onClick={() => window.print()}
+          className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-2 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2"
+        >
+          <span className="material-symbols-outlined text-sm">print</span>
+          Print Ticket
+        </button>
       </div>
 
-      {/* 2. THE TICKET CARD */}
-      <div 
-        id="printable-ticket" 
-        className="bg-white text-black border-2 border-slate-200 rounded-[2.5rem] shadow-2xl overflow-hidden w-full max-w-[850px] flex flex-col md:flex-row relative print:border-black print:rounded-none"
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-white dark:bg-slate-900 w-full max-w-xl rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800"
       >
-        {/* Main Section */}
-        <div className="flex-[2.5] p-10 md:p-14 flex flex-col justify-between border-b md:border-b-0 md:border-r-2 border-dashed border-slate-300 print:border-black">
+        {/* Header */}
+        <div className="bg-emerald-500 p-8 text-white flex justify-between items-center">
           <div>
-            <div className="flex justify-between items-start mb-12">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center text-white">
-                  <span className="material-symbols-outlined text-3xl">landscape</span>
-                </div>
-                <div>
-                  <h2 className="text-2xl font-black uppercase tracking-tighter leading-none">Malang Travel</h2>
-                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-1 print:text-black">Premium Exploration</p>
-                </div>
-              </div>
-              <div className="px-4 py-1.5 border-2 border-black rounded-lg text-[10px] font-black uppercase">
-                {booking.status}
-              </div>
+            <h1 className="text-2xl font-black uppercase tracking-tight">E-Ticket</h1>
+            <p className="text-emerald-100 text-xs font-bold uppercase tracking-widest mt-1">Malang Premium Tours</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Order ID</p>
+            <p className="font-mono text-sm font-black">{booking.id.substring(0, 8).toUpperCase()}</p>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-10 space-y-8">
+          <div className="flex justify-between gap-8">
+            <div className="flex-1">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Destination</label>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white leading-tight">{booking.destination.name}</h2>
+              <p className="text-sm text-slate-500 font-medium mt-1">{booking.destination.location}</p>
             </div>
-
-            <div className="space-y-8 mb-10 text-left">
-              <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] print:text-black">Destination</p>
-                <h3 className="text-4xl font-black tracking-tighter leading-tight">{booking.destination.name}</h3>
-              </div>
-
-              <div className="grid grid-cols-2 gap-8">
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] print:text-black">Travel Date</p>
-                  <p className="font-bold text-lg">
-                    {new Date(booking.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] print:text-black">Passenger Count</p>
-                  <p className="font-bold text-lg">{booking.pax} Persons</p>
-                </div>
-              </div>
-
-              <div className="pt-6 border-t border-slate-100 print:border-black">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 print:text-black">Trip Description</p>
-                <p className="text-xs font-medium text-slate-600 leading-relaxed italic print:text-black">
-                  {booking.destination.description}
-                </p>
+            <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center p-2">
+              {/* Dummy QR Code */}
+              <div className="grid grid-cols-4 gap-1 opacity-20">
+                {[...Array(16)].map((_, i) => (
+                  <div key={i} className={`w-3 h-3 bg-slate-900 dark:bg-white ${Math.random() > 0.5 ? 'opacity-100' : 'opacity-0'}`}></div>
+                ))}
               </div>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-dashed border-slate-200 flex items-center gap-4 print:border-black">
-             <span className="material-symbols-outlined">verified_user</span>
-             <p className="text-[9px] font-bold uppercase tracking-widest text-left">Authorized Ticket - Present upon arrival at meeting point.</p>
+          <div className="grid grid-cols-2 gap-8 py-8 border-y border-dashed border-slate-200 dark:border-slate-800">
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Traveler Name</label>
+              <p className="font-bold text-slate-900 dark:text-white">{booking.user.name}</p>
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Departure Date</label>
+              <p className="font-bold text-slate-900 dark:text-white">{new Date(booking.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Guests</label>
+              <p className="font-bold text-slate-900 dark:text-white">{booking.pax} Person(s)</p>
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Total Paid</label>
+              <p className="font-bold text-emerald-600">IDR {booking.totalPrice.toLocaleString()}</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Important Notes</h4>
+            <ul className="text-xs text-slate-500 space-y-2 font-medium">
+              <li className="flex gap-2">
+                <span className="text-emerald-500 font-black">•</span>
+                Please arrive at the pickup point 15 minutes before departure.
+              </li>
+              <li className="flex gap-2">
+                <span className="text-emerald-500 font-black">•</span>
+                Show this digital or printed ticket to our guide.
+              </li>
+              <li className="flex gap-2">
+                <span className="text-emerald-500 font-black">•</span>
+                Tickets are non-refundable but can be rescheduled 48h prior.
+              </li>
+            </ul>
           </div>
         </div>
 
-        {/* Stub Section */}
-        <div className="flex-1 bg-slate-50 p-10 md:p-14 flex flex-col items-center justify-center text-center print:bg-white">
-          <div className="w-full mb-10">
-             <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 print:text-black">Scan to Verify</p>
-             <div className="bg-white p-4 rounded-2xl shadow-xl inline-block border-2 border-black">
-                <svg viewBox="0 0 100 100" className="w-32 h-32">
-                  <path fill="#000000" d="M0,0h35v35h-35V0z M5,5v25h25v-25H5z M12,12h11v11h-11V12z" />
-                  <path fill="#000000" d="M65,0h35v35h-35V0z M70,5v25h25v-25H70z M77,12h11v11h-11V12z" />
-                  <path fill="#000000" d="M0,65h35v35h-35V65z M5,70v25h25v-25H5z M12,77h11v11h-11V77z" />
-                  <path fill="#000000" d="M45,5h10v10h-10V5z M45,25h10v10h-10V25z M45,45h10v10h-10V45z M45,65h10v10h-10V65z M45,85h10v10h-10V85z" />
-                  <path fill="#000000" d="M65,45h10v10h-10V45z M85,45h10v10h-10V45z M75,55h10v10h-10V55z M65,65h10v10h-10V65z M85,65h10v10h-10V65z M75,75h10v10h-10V75z M65,85h10v10h-10V85z M85,85h10v10h-10V85z" />
-                </svg>
-             </div>
-          </div>
-
-          <div className="space-y-1">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] print:text-black">Booking ID</p>
-            <p className="font-mono font-black text-sm uppercase tracking-widest">#{booking.id.slice(0,12)}</p>
-          </div>
-
-          <div className="mt-12 pt-10 border-t border-slate-200 w-full print:border-black">
-             <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] print:text-black">Passenger</p>
-             <p className="text-sm font-black truncate uppercase mt-1 leading-tight">{booking.user.name}</p>
-          </div>
+        {/* Footer */}
+        <div className="p-8 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-center">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Enjoy Your Premium Adventure</p>
         </div>
-      </div>
-
-      {/* 3. PRINT STYLES */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media screen {
-          .no-print { display: flex; }
-        }
-        
-        @media print {
-          @page {
-            size: landscape;
-            margin: 0;
-          }
-          
-          body * {
-            visibility: hidden;
-          }
-          
-          #printable-ticket, #printable-ticket * {
-            visibility: visible;
-          }
-          
-          #printable-ticket {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 100% !important;
-            height: 100% !important;
-            display: flex !important;
-            flex-direction: row !important;
-            border: 2px solid black !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            box-shadow: none !important;
-            border-radius: 0 !important;
-          }
-
-          .no-print {
-            display: none !important;
-          }
-
-          * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            color: black !important;
-          }
-          
-          svg {
-            display: block !important;
-            width: 50mm !important;
-            height: 50mm !important;
-          }
-        }
-      `}} />
+      </motion.div>
     </div>
   );
 }
