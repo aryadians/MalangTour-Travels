@@ -67,12 +67,21 @@ export default function PlannerPage() {
       if (result.success) {
         const url = `${window.location.origin}/plan/share/${result.id}`;
         await navigator.clipboard.writeText(url);
+<<<<<<< HEAD
         toast.success("Link copied!");
       } else {
         toast.error("Failed to save.");
       }
     } catch (err) {
       toast.error("Error occurred.");
+=======
+        toast.success("Plan saved! Shareable link copied to clipboard.");
+      } else {
+        toast.error(result.error || "Failed to save itinerary.");
+      }
+    } catch (err) {
+      toast.error("Could not copy link, but plan was saved.");
+>>>>>>> e37202ce95eaf86b5caf490c1442ee4afa4ffe96
     } finally {
       setIsSaving(false);
     }
@@ -279,7 +288,11 @@ export default function PlannerPage() {
                           className="flex items-center gap-2 px-6 py-3 bg-white text-emerald-600 rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-all shadow-xl disabled:opacity-50"
                         >
                           <span className="material-symbols-outlined text-sm">{isSaving ? 'sync' : 'share'}</span>
+<<<<<<< HEAD
                           {isSaving ? 'Saving...' : t("saveShare")}
+=======
+                          {isSaving ? 'Saving...' : 'Save & Share'}
+>>>>>>> e37202ce95eaf86b5caf490c1442ee4afa4ffe96
                         </button>
                       </div>
                       <div className="mt-8 flex items-center gap-4 relative z-10">
