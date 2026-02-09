@@ -4,11 +4,21 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
+import { verifyPayment } from "../actions";
 
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
-  // In a real app, we might fetch booking details using an ID from params
-  // const bookingId = searchParams.get("bookingId");
+  const bookingId = searchParams.get("bookingId");
+  const status = searchParams.get("status");
+  const [isVerifying, setIsVerifying] = useState(true);
+
+  useEffect(() => {
+    if (bookingId && status === 'success') {
+      verifyPayment(bookingId).then(() => setIsVerifying(false));
+    } else {
+      setIsVerifying(false);
+    }
+  }, [bookingId, status]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#10221c] flex items-center justify-center p-4">
@@ -96,6 +106,14 @@ export default function CheckoutSuccessPage() {
           </motion.div>
 
           <div className="space-y-3">
+            {bookingId && (
+              <Link
+                href={`/bookings/${bookingId}/ticket`}
+                className="block w-full py-4 rounded-xl bg-emerald-500 text-white font-black uppercase tracking-widest text-xs hover:shadow-lg hover:shadow-emerald-500/30 transition-all active:scale-95"
+              >
+                View E-Ticket
+              </Link>
+            )}
             <Link
               href="/dashboard"
               className="block w-full py-4 rounded-xl bg-gray-900 dark:bg-emerald-600 text-white font-bold hover:shadow-lg hover:shadow-emerald-500/30 transition-all active:scale-95"

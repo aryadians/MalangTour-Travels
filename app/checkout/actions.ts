@@ -8,6 +8,8 @@ import { redirect } from "next/navigation";
 import { sendTicketEmail } from "@/lib/services/mail";
 import { revalidatePath } from "next/cache";
 
+import { createTransactionToken } from "@/lib/services/midtrans";
+
 const bookingSchema = z.object({
   destinationId: z.coerce.number(),
   date: z.string(),
@@ -33,80 +35,88 @@ export async function createBooking(prevState: any, formData: FormData) {
 
   const { destinationId, date, pax, totalPrice, usedPoints, voucherCode } = result.data;
 
-  let bookingId: string | null = null;
+  // Generate a temporary Order ID
+  const orderId = `TRV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
   try {
-    // Fetch details for email
-    const [destination, user] = await Promise.all([
-      prisma.destination.findUnique({ where: { id: destinationId } }),
-      prisma.user.findUnique({ where: { id: session.userId as string } }),
-    ]);
+    const user = await prisma.user.findUnique({ where: { id: session.userId as string } });
+    if (!user) return { message: "User not found" };
 
-    if (!destination || !user) {
-      return { message: "Data not found" };
-    }
+    // 1. Get Midtrans Token
+    const snapToken = await createTransactionToken(orderId, totalPrice, {
+      firstName: user.name || "Guest",
+      email: user.email,
+    });
 
-    // Create Booking and Update User Points in a transaction
-    const booking = await prisma.$transaction(async (tx) => {
-      const b = await tx.booking.create({
-        data: {
-          userId: session.userId as string,
-          destinationId,
-          date: new Date(date),
-          pax,
-          totalPrice,
-          status: "CONFIRMED",
-        },
+    // 2. Return the token to the client so they can open the payment popup
+    // We do NOT create the booking in DB yet. We wait for payment success.
+    // Ideally, we create a "PENDING_PAYMENT" booking record here.
+    
+    // For this flow, let's create a PENDING booking
+    await prisma.booking.create({
+      data: {
+        id: orderId, // Use consistent ID
+        userId: session.userId as string,
+        destinationId,
+        date: new Date(date),
+        pax,
+        totalPrice,
+        status: "PENDING_PAYMENT", // New status
+      },
+    });
+
+    return { success: true, snapToken, orderId };
+
+  } catch (error) {
+    console.error("Payment init error:", error);
+    return { message: "Failed to initialize payment" };
+  }
+}
+
+export async function verifyPayment(orderId: string) {
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { id: orderId },
+      include: { destination: true, user: true }
+    });
+
+    if (!booking) return { success: false, error: "Booking not found" };
+    if (booking.status === "CONFIRMED") return { success: true, booking };
+
+    // Update to CONFIRMED and award points
+    const updatedBooking = await prisma.$transaction(async (tx) => {
+      const b = await tx.booking.update({
+        where: { id: orderId },
+        data: { status: "CONFIRMED" }
       });
 
-      // Deduct used points and Add new points (1% of total price)
-      const pointsToAdd = Math.floor(totalPrice / 100);
+      // Award points: 1% of total price
+      const pointsToAdd = Math.floor(b.totalPrice / 100);
       await tx.user.update({
-        where: { id: session.userId as string },
+        where: { id: b.userId },
         data: {
           points: {
-            decrement: usedPoints || 0,
             increment: pointsToAdd,
           }
         }
       });
 
-      // Update voucher usage if applied
-      if (voucherCode) {
-        await tx.voucher.update({
-          where: { code: voucherCode.toUpperCase() },
-          data: { usageCount: { increment: 1 } }
-        }).catch(() => {}); // Ignore if voucher logic fails
-      }
-
       return b;
     });
 
-    bookingId = booking.id;
-
-    // Send E-Ticket Email (Async, non-blocking)
-    if (user.email) {
-      sendTicketEmail(user.email, {
+    // Send Email
+    if (booking.user.email) {
+      sendTicketEmail(booking.user.email, {
         bookingId: booking.id,
-        destinationName: destination.name,
-        date: new Date(date).toDateString(),
-        pax,
-        totalPrice,
-      }).catch((err) => console.error("Email failed:", err));
+        destinationName: booking.destination.name,
+        date: new Date(booking.date).toDateString(),
+        pax: booking.pax,
+        totalPrice: booking.totalPrice,
+      }).catch(err => console.error("Email fail", err));
     }
 
-    revalidatePath("/dashboard");
-    revalidatePath("/bookings");
+    return { success: true, booking: updatedBooking };
   } catch (error) {
-    if ((error as any).digest?.startsWith("NEXT_REDIRECT")) {
-      throw error;
-    }
-    console.error("Booking error:", error);
-    return { message: "Failed to create booking" };
-  }
-
-  // Redirect to success page
-  if (bookingId) {
-    redirect(`/checkout/success?bookingId=${bookingId}`);
+    return { success: false, error: "Verification failed" };
   }
 }

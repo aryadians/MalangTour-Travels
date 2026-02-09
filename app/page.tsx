@@ -11,6 +11,7 @@ import {
 import { useTravel } from "@/context/TravelContext";
 import Testimonials from "@/components/Testimonials";
 import Partners from "@/components/Partners";
+import MapComponent from "@/components/MapComponent";
 
 export default function Home() {
   const { destinations, formatPrice, t } = useTravel();
@@ -267,6 +268,17 @@ export default function Home() {
               ))}
             </AnimatePresence>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Interactive Map Section */}
+      <section className="py-24 px-6 bg-slate-50 dark:bg-slate-900/50">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter">Explore the Region.</h2>
+            <p className="text-slate-500 font-medium max-w-xl mx-auto uppercase tracking-widest text-[10px]">Find your next adventure geographically curated for premium comfort.</p>
+          </div>
+          <MapComponent destinations={destinations as any} />
         </div>
       </section>
 

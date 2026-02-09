@@ -35,9 +35,42 @@ export default function CheckoutClient({
   
   const images = JSON.parse((destination.images as string) || "[]");
 
-  const [state, formAction, isPending] = useActionState(createBooking, {
-    errors: {},
-  });
+  const [state, formAction, isPending] = useActionState(async (prevState: any, formData: FormData) => {
+    const result = await createBooking(prevState, formData);
+    
+    if (result?.snapToken) {
+      // @ts-ignore
+      window.snap.pay(result.snapToken, {
+        onSuccess: function(result: any){
+          // Redirect to success page manually
+          window.location.href = `/checkout/success?bookingId=${result.order_id}&status=success`;
+        },
+        onPending: function(result: any){
+          toast("Waiting for payment...");
+        },
+        onError: function(result: any){
+          toast.error("Payment failed!");
+        },
+        onClose: function(){
+          toast("You closed the popup without finishing the payment");
+        }
+      });
+      return { success: false, message: "Opening Payment Gateway..." }; 
+    }
+    
+    return result;
+  }, { errors: {} });
+
+  // Add Midtrans Script
+  React.useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
+    script.setAttribute("data-client-key", process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || "SB-Mid-client-YOUR_CLIENT_KEY_HERE");
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const handleApplyCoupon = async (e: React.MouseEvent) => {
     e.preventDefault();
