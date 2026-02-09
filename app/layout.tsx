@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     "Experience the majestic Bromo sunrise, the colorful villages, and the crystal clear southern beaches.",
 };
 
-import { TravelProvider } from "@/context/TravelContext";
+import { TravelProvider } from "@/context/TravelProvider";
 import { Toaster } from "react-hot-toast";
 import LayoutTransition from "@/components/LayoutTransition";
 import AIChatbotCard from "@/components/AIChatbotCard";

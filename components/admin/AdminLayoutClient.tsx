@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth";
+import { getDashboardStats } from "@/actions/admin";
+import toast from "react-hot-toast";
 
 export default function AdminLayoutClient({
   children,
@@ -13,6 +15,31 @@ export default function AdminLayoutClient({
 }) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  React.useEffect(() => {
+    async function fetchStats() {
+      const result = await getDashboardStats();
+      if (result.success) {
+        setPendingCount(result.stats.activeBookings);
+      }
+    }
+    fetchStats();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleNotificationClick = () => {
+    if (pendingCount > 0) {
+      toast(`You have ${pendingCount} pending bookings to review!`, {
+        icon: '🔔',
+        duration: 4000,
+      });
+    } else {
+      toast("No new notifications", { icon: '📭' });
+    }
+  };
 
   const menuItems = [
     { name: "Overview", icon: "dashboard", href: "/admin/dashboard" },
@@ -87,9 +114,16 @@ export default function AdminLayoutClient({
           </button>
 
           <div className="flex items-center gap-4">
-            <button className="relative p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+            <button 
+              onClick={handleNotificationClick}
+              className="relative p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all active:scale-90"
+            >
               <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+              {pendingCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white dark:border-gray-800">
+                  {pendingCount}
+                </span>
+              )}
             </button>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-sm">

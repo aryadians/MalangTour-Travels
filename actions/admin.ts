@@ -88,15 +88,40 @@ export async function getDashboardStats() {
       }
     });
 
-    // 6. Simple Revenue Analytics (Last 6 Months)
-    const analytics = [
-      { month: "Jan", revenue: 4500000 },
-      { month: "Feb", revenue: 7200000 },
-      { month: "Mar", revenue: 3100000 },
-      { month: "Apr", revenue: 8900000 },
-      { month: "May", revenue: 12500000 },
-      { month: "Jun", revenue: revenueData._sum.totalPrice || 0 },
-    ];
+    // 6. Real Revenue Analytics (Last 6 Months)
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const now = new Date();
+    const last6Months = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+      const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+
+      const monthRevenue = await prisma.booking.aggregate({
+        where: {
+          status: "CONFIRMED",
+          createdAt: { gte: startOfMonth, lte: endOfMonth }
+        },
+        _sum: { totalPrice: true }
+      });
+
+      last6Months.push({
+        month: months[d.getMonth()],
+        revenue: monthRevenue._sum.totalPrice || 0
+      });
+    }
+
+    // 7. Top Performing Destinations
+    const topDestinations = await prisma.destination.findMany({
+      take: 3,
+      select: {
+        name: true,
+        _count: { select: { bookings: true } },
+        price: true
+      },
+      orderBy: { bookings: { _count: "desc" } }
+    });
 
     return {
       success: true,
@@ -107,7 +132,8 @@ export async function getDashboardStats() {
         avgRating: avgRatingData._avg.rating || 0
       },
       recentBookings,
-      analytics
+      analytics: last6Months,
+      topDestinations
     };
   } catch (error) {
     console.error("Failed to fetch admin stats:", error);

@@ -65,6 +65,30 @@ export default function AdminDashboard() {
   // Calculate max revenue for chart scaling
   const maxRevenue = Math.max(...data?.analytics.map((a: any) => a.revenue) || [100]);
 
+  const handleExport = () => {
+    if (!data?.recentBookings) return;
+    
+    const headers = ["Guest", "Destination", "Revenue", "Status", "Date"];
+    const rows = data.recentBookings.map((b: any) => [
+      b.user.name,
+      b.destination.name,
+      b.totalPrice,
+      b.status,
+      new Date(b.createdAt).toLocaleDateString()
+    ]);
+    
+    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `malang_tour_report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Report exported successfully!");
+  };
+
   return (
     <div className="space-y-8 pb-20">
       {/* Header */}
@@ -77,7 +101,10 @@ export default function AdminDashboard() {
             Real-time analytics from your premium tour database.
           </p>
         </div>
-        <button className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-xl transition-all flex items-center gap-2">
+        <button 
+          onClick={handleExport}
+          className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-xl transition-all flex items-center gap-2"
+        >
           <span className="material-symbols-outlined text-sm">download</span>
           Export
         </button>
@@ -144,8 +171,28 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Quick Actions (1/3) */}
+        {/* Quick Actions & Top Destinations */}
         <div className="space-y-6">
+          {/* New Top Destinations Card */}
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm">
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Popular Tours</h3>
+            <div className="space-y-4">
+              {data?.topDestinations.map((dest: any, i: number) => (
+                <div key={i} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 font-bold text-xs">
+                      #{i+1}
+                    </div>
+                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300 truncate w-32">{dest.name}</span>
+                  </div>
+                  <span className="text-[10px] font-black text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-md">
+                    {dest._count.bookings} Bookings
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <Link
             href="/admin/destinations"
             className="block bg-emerald-500 hover:bg-emerald-600 transition-all p-8 rounded-[2.5rem] text-white shadow-xl shadow-emerald-500/20 group"

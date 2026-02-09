@@ -141,37 +141,20 @@ export default function AdminBookingsPage() {
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-center gap-2">
-                        {booking.status === "PENDING" && (
-                          <>
-                            <button
-                              onClick={() =>
-                                handleStatusChange(booking.id, "CONFIRMED")
-                              }
-                              className="p-2 rounded-lg bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition-colors tooltip"
-                              title="Approve"
-                            >
-                              <span className="material-symbols-outlined text-sm font-bold">
-                                check
-                              </span>
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleStatusChange(booking.id, "CANCELLED")
-                              }
-                              className="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors tooltip"
-                              title="Reject"
-                            >
-                              <span className="material-symbols-outlined text-sm font-bold">
-                                close
-                              </span>
-                            </button>
-                          </>
-                        )}
-                        {booking.status !== "PENDING" && (
-                          <span className="text-xs text-gray-400 italic">
-                            No actions
-                          </span>
-                        )}
+                        <select
+                          value={booking.status}
+                          onChange={(e) =>
+                            handleStatusChange(
+                              booking.id,
+                              e.target.value as any,
+                            )
+                          }
+                          className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                        >
+                          <option value="PENDING">Pending</option>
+                          <option value="CONFIRMED">Confirmed</option>
+                          <option value="CANCELLED">Cancelled</option>
+                        </select>
                       </div>
                     </td>
                   </tr>

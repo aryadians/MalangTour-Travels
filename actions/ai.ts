@@ -1,18 +1,27 @@
 "use server";
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function generalChat(message: string) {
-  if (!process.env.GEMINI_API_KEY) {
-    return { success: false, error: "AI Service not configured." };
+  const { GoogleGenerativeAI } = await import("@google/generative-ai");
+  console.log("Chat request received. message:", message);
+  
+  let apiKey = process.env.GEMINI_API_KEY;
+  if (apiKey) {
+    apiKey = apiKey.trim().replace(/^["']|["']$/g, '');
+  }
+
+  if (!apiKey || apiKey.includes("ISI_DENGAN") || apiKey === "your-api-key-here") {
+    console.error("Gemini API Key is missing or invalid");
+    return { success: false, error: "API Key not set or still contains placeholder. Please check your .env file." };
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const genAI = new GoogleGenerativeAI(apiKey);
+    
     const prompt = `
       You are a friendly and helpful travel assistant for "Malang Premium Tours". 
       Answer the following user question about traveling in Malang, East Java: "${message}".
@@ -20,11 +29,59 @@ export async function generalChat(message: string) {
       If you don't know about a specific hidden spot, suggest visiting Mount Bromo or Tumpak Sewu.
     `;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return { success: true, text: response.text() };
-  } catch (error) {
-    return { success: false, error: "Failed to connect to AI assistant." };
+    // Try models in order of preference - prioritizing Pro models as requested
+    const modelsToTry = [
+      "gemini-1.5-pro",
+      "gemini-1.5-pro-latest",
+      "gemini-1.5-flash", 
+      "gemini-2.0-flash-exp",
+      "gemini-pro"
+    ];
+    let lastError = null;
+
+    console.log(`Using API Key starting with: ${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}`);
+
+    for (const modelName of modelsToTry) {
+      try {
+        console.log(`Attempting AI generation with model: ${modelName}`);
+        const model = genAI.getGenerativeModel({ model: modelName });
+        
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        
+        if (text) {
+          console.log(`Success with model: ${modelName}`);
+          return { success: true, text: text };
+        }
+      } catch (error: any) {
+        lastError = error;
+        console.error(`Model ${modelName} failed. Error:`, error.message);
+        
+        // If it's a 404, we definitely want to try the next model
+        if (error.message?.includes("404") || error.message?.includes("not found")) {
+          continue;
+        }
+        // For other errors (like 429 quota or 401/403 auth), we might want to break,
+        // but for now we'll try all models in the list.
+        continue;
+      }
+    }
+
+    // If we reach here, all models failed
+    const finalErrorMessage = lastError?.message || "Unknown AI error";
+    console.error("All AI models failed. Final error:", finalErrorMessage);
+    
+    return { 
+      success: false, 
+      error: `AI Error: ${finalErrorMessage}. Please check if your API Key is valid and supports Gemini 1.5 in Google AI Studio.`
+    };
+  } catch (error: any) {
+    console.error("Critical AI Assistant Error:", error);
+    return { 
+      success: false, 
+      error: `Critical Error: ${error.message || "Connection failed"}.` 
+    };
   }
 }
 
@@ -65,8 +122,16 @@ export async function getSavedPlan(id: string) {
 }
 
 export async function generateItinerary(preferences: string, budget: number, days: number) {
-  if (!process.env.GEMINI_API_KEY) {
-    return { success: false, error: "AI Service not configured (Missing API Key)." };
+  const { GoogleGenerativeAI } = await import("@google/generative-ai");
+  console.log("Generating itinerary with AI...");
+  let apiKey = process.env.GEMINI_API_KEY;
+  if (apiKey) {
+    apiKey = apiKey.trim().replace(/^["']|["']$/g, '');
+  }
+  
+  if (!apiKey || apiKey.includes("ISI_DENGAN") || apiKey === "your-api-key-here") {
+    console.error("Gemini API Key is missing or invalid for itinerary generation");
+    return { success: false, error: "AI Service not configured (Missing or invalid API Key)." };
   }
 
   try {
@@ -74,8 +139,7 @@ export async function generateItinerary(preferences: string, budget: number, day
       select: { name: true, category: true, price: true, description: true }
     });
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
+    const genAI = new GoogleGenerativeAI(apiKey);
     const prompt = `
       You are a premium travel expert for Malang, East Java. 
       Create a ${days}-day itinerary for a user with these preferences: "${preferences}" and a budget of Rp ${budget.toLocaleString()}.
@@ -95,16 +159,61 @@ export async function generateItinerary(preferences: string, budget: number, day
            ],
            "summary": "Short summary of why this fits the user"
          }
-      4. Output ONLY the JSON.
+      4. Output ONLY the JSON. No other text or markdown formatting outside the JSON.
     `;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text().replace(/```json/g, "").replace(/```/g, "").trim();
+    const modelsToTry = [
+      "gemini-1.5-pro",
+      "gemini-1.5-pro-latest",
+      "gemini-1.5-flash", 
+      "gemini-2.0-flash-exp",
+      "gemini-pro"
+    ];
+    let lastError = null;
+    let text = "";
+
+    console.log(`Generating itinerary using API Key starting with: ${apiKey.substring(0, 4)}...`);
+
+    for (const modelName of modelsToTry) {
+      try {
+        console.log(`Trying model for itinerary: ${modelName}`);
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        text = response.text();
+        if (text) {
+          console.log(`Itinerary success with model: ${modelName}`);
+          break;
+        }
+      } catch (error: any) {
+        lastError = error;
+        console.warn(`Itinerary model ${modelName} failed:`, error.message);
+        continue;
+      }
+    }
+
+    if (!text) {
+      return { 
+        success: false, 
+        error: `Failed to generate AI plan: ${lastError?.message || "All models failed"}` 
+      };
+    }
     
-    return { success: true, data: JSON.parse(text) };
-  } catch (error) {
+    // Attempt to extract JSON if it's wrapped in markdown
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      text = jsonMatch[0];
+    }
+    
+    try {
+      const parsedData = JSON.parse(text);
+      return { success: true, data: parsedData };
+    } catch (parseError: any) {
+      console.error("Failed to parse AI response as JSON:", text);
+      throw new Error(`Invalid response format from AI: ${parseError.message}`);
+    }
+  } catch (error: any) {
     console.error("AI Planning Error:", error);
-    return { success: false, error: "Failed to generate AI plan. Please try again." };
+    return { success: false, error: `Failed to generate AI plan: ${error.message || "Unknown error"}` };
   }
 }

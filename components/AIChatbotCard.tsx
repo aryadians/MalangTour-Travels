@@ -20,6 +20,7 @@ export default function AIChatbotCard() {
   }, [messages, isOpen]);
 
   const handleSend = async () => {
+    console.log("handleSend called with input:", input);
     if (!input.trim() || isLoading) return;
 
     const userMsg = input;
@@ -27,13 +28,21 @@ export default function AIChatbotCard() {
     setMessages(prev => [...prev, { role: "user", text: userMsg }]);
     setIsLoading(true);
 
-    const result = await generalChat(userMsg);
-    if (result.success) {
-      setMessages(prev => [...prev, { role: "ai", text: result.text || "" }]);
-    } else {
-      setMessages(prev => [...prev, { role: "ai", text: result.error || "Sorry, I'm having trouble connecting. Please try again." }]);
+    try {
+      console.log("Calling generalChat server action...");
+      const result = await generalChat(userMsg);
+      console.log("generalChat result:", result);
+      if (result.success) {
+        setMessages(prev => [...prev, { role: "ai", text: result.text || "" }]);
+      } else {
+        setMessages(prev => [...prev, { role: "ai", text: result.error || "Sorry, I'm having trouble connecting. Please try again." }]);
+      }
+    } catch (error) {
+      console.error("Chatbot Error:", error);
+      setMessages(prev => [...prev, { role: "ai", text: "Error: Could not reach the AI server." }]);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
